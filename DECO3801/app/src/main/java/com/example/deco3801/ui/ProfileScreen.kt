@@ -16,14 +16,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun FavouritesScreen() {
+fun ProfileScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Favourites Screen",
+            text = "Profile Screen",
             style = MaterialTheme.typography.headlineLarge
         )
     }
@@ -31,6 +31,6 @@ fun FavouritesScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun FavouritesScreenPreview() {
-    FavouritesScreen()
+fun ProfileScreenPreview() {
+    ProfileScreen()
 }

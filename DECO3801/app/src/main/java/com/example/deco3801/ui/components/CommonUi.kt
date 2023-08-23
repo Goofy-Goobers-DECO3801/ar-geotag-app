@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
@@ -81,15 +82,9 @@ fun NavBar(navController: NavHostController) {
             isSelected = false
         )
         NavButton(
-            text = "Favorites",
-            Icons.Default.Favorite,
-            { navController.navigate(ScreenNames.Favourites.name) },
-            isSelected = false
-        )
-        NavButton(
-            text = "Settings",
-            Icons.Default.Settings,
-            { navController.navigate(ScreenNames.Settings.name) },
+            text = "Profile",
+            Icons.Default.AccountCircle,
+            { navController.navigate(ScreenNames.Profile.name) },
             isSelected = false
         )
     }

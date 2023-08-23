@@ -19,8 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ui.CreateScreen
-import com.example.deco3801.ui.FavouritesScreen
-import com.example.deco3801.ui.SettingsScreen
+import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
 import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.theme.MyColors
@@ -28,8 +27,7 @@ import com.example.deco3801.ui.theme.MyColors
 enum class ScreenNames() {
     Home,
     Create,
-    Favourites,
-    Settings
+    Profile
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,11 +85,8 @@ fun AppFunctionality(
             composable(route = ScreenNames.Create.name) {
                 CreateScreen()
             }
-            composable(route = ScreenNames.Favourites.name) {
-                FavouritesScreen()
-            }
-            composable(route = ScreenNames.Settings.name) {
-                SettingsScreen()
+            composable(route = ScreenNames.Profile.name) {
+                ProfileScreen()
             }
         }
     }
