@@ -35,22 +35,30 @@ fun ProfileScreen() {
         modifier = Modifier.fillMaxSize().padding(30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.pfp),
-            contentDescription = "profile",
-            modifier = Modifier.size(62.dp)
-        )
-        Text(
-            text = "Full Name",
-            style = MaterialTheme.typography.titleLarge
-        )
-        Text(
-            text = "@Username",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "Edit Profile")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.pfp),
+                contentDescription = "profile",
+                modifier = Modifier.size(92.dp)
+            )
+            Column {
+                Text(
+                    text = "Full Name",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = "@Username",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(onClick = { /*TODO*/ }) {
+                    Text(text = "Edit Profile")
+                }
+            }
         }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
