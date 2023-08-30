@@ -31,21 +31,37 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.MyColors
 
 @Composable
 fun NavButton (text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
+    val backgroundColor = if (isSelected) {
+        MyColors.Orange
+    } else {
+        Color.White
+    }
+
+    val contentColor = if (isSelected) {
+        Color.White
+    } else {
+        MyColors.Orange
+    }
+
     Button(
         onClick = visitPage,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MyColors.Orange
+            containerColor = backgroundColor,
+            contentColor = contentColor
         ),
         modifier = Modifier
             .padding(
@@ -63,6 +79,8 @@ fun NavButton (text: String, icon: ImageVector, visitPage: () -> Unit, isSelecte
 //@Preview
 @Composable
 fun NavBar(navController: NavHostController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,19 +91,19 @@ fun NavBar(navController: NavHostController) {
             text = "Home",
             Icons.Default.Home,
             { navController.navigate(ScreenNames.Home.name) },
-            isSelected = true
+            isSelected = currentRoute == ScreenNames.Home.name
         )
         NavButton(
             text = "Create",
             Icons.Default.Create,
             { navController.navigate(ScreenNames.Create.name) },
-            isSelected = false
+            isSelected = currentRoute == ScreenNames.Create.name
         )
         NavButton(
             text = "Profile",
             Icons.Default.AccountCircle,
             { navController.navigate(ScreenNames.Profile.name) },
-            isSelected = false
+            isSelected = currentRoute == ScreenNames.Profile.name
         )
     }
 }
