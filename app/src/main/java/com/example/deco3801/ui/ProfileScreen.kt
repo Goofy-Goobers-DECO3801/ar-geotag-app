@@ -8,8 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,12 +28,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 
+
 @Composable
 fun ProfileScreen() {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxSize().padding(30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = R.drawable.pfp),
@@ -60,6 +65,9 @@ fun ProfileScreen() {
                 text = "13 following"
             )
         }
+        ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
+            21, R.drawable.default_img)
+
     }
 }
 
@@ -82,24 +90,48 @@ fun ArtworkTile(
     Image(
         painter = painterResource(id = img),
         contentDescription = "post",
-        modifier = Modifier.size(62.dp)
+        modifier = Modifier.size(130.dp)
     )
     Text(
         text = artworkTitle,
         style = MaterialTheme.typography.titleMedium
     )
     Text(
-        text = "Created on $date"
+        text = "Created on $date",
+        style = MaterialTheme.typography.bodySmall
     )
-    Text(
-        text = location
-    )
-    Text(
-        text = "" + likes + "likes"
-    )
-    Text(
-        text = "" + reviews + "reviews"
-    )
+    Row () {
+        Icon(
+            imageVector = Icons.Filled.LocationOn,
+            contentDescription = "location",
+            Modifier.size(16.dp)
+        )
+        Text(
+            text = location,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+    Row () {
+        Icon(
+            imageVector = Icons.Default.FavoriteBorder,
+            contentDescription = "heart",
+            Modifier.size(16.dp)
+        )
+        Text(
+            text = "$likes likes",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Icon(
+            imageVector = Icons.Filled.FavoriteBorder,
+            contentDescription = "heart",
+            Modifier.size(16.dp)
+        )
+        Text(
+            text = "$reviews reviews",
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+
 
 
 
