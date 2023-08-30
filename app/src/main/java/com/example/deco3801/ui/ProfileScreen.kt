@@ -76,7 +76,7 @@ fun ArtworkTile(
     location: String,
     likes: Int,
     reviews: Int,
-    img: Drawable
+    img: Int
     ) {
 
     Image(
