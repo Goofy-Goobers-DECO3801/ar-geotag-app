@@ -1,21 +1,19 @@
 package com.example.deco3801
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -24,17 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ui.CreateScreen
-import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
+import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.util.RequestPermissions
 
-enum class ScreenNames() {
+enum class ScreenNames {
     Home,
     Create,
     Profile
@@ -52,7 +52,7 @@ fun TopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
@@ -82,6 +82,16 @@ fun TopBar(
 fun AppFunctionality(
     navController: NavHostController = rememberNavController()
 ) {
+    // Location Permissions
+    RequestPermissions(
+        permissions = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ),
+        title = "Location Permissions",
+        description = "This app functions best when we can use your precise location.\n" +
+                "You can opt out of this at anytime."
+    )
     Scaffold(
         topBar = {
             TopBar(
