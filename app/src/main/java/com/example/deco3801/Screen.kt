@@ -34,12 +34,6 @@ import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.theme.MyColors
 import com.example.deco3801.util.RequestPermissions
 
-enum class ScreenNames {
-    Home,
-    Create,
-    Profile
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
@@ -120,4 +114,3 @@ fun AppFunctionality(
             }
         }
     }
-}
