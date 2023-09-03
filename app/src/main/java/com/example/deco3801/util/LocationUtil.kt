@@ -3,11 +3,13 @@ package com.example.deco3801.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.tasks.await
 
 object LocationUtil {
-    fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
+    suspend fun getCurrentLocation(context: Context): Location? {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (ActivityCompat.checkSelfPermission(
                 context,
@@ -17,19 +19,8 @@ object LocationUtil {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            return
+            return null
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    val lat = location.latitude
-                    val long = location.longitude
-                    callback(lat, long)
-                }
-            }
-            .addOnFailureListener { exception ->
-                // Handle location retrieval failure
-                exception.printStackTrace()
-            }
+        return fusedLocationClient.lastLocation.await()
     }
 }

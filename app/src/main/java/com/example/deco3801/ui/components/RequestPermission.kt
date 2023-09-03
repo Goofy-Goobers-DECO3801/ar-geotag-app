@@ -1,4 +1,4 @@
-package com.example.deco3801.util
+package com.example.deco3801.ui.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

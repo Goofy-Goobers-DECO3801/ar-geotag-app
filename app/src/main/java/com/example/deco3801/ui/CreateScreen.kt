@@ -1,6 +1,6 @@
 package com.example.deco3801.ui
 
-import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -11,59 +11,44 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.deco3801.model.Art
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.MyColors
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.example.deco3801.viewmodel.CreateViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen() {
+fun CreateScreen(
+    navController: NavHostController,
+    viewModel: CreateViewModel = hiltViewModel(),
+) {
     val textModifier: Modifier = Modifier
     val textFieldModifier: Modifier = Modifier.fillMaxWidth()
     val spacerModifier: Modifier = Modifier.height(10.dp)
+    val context = LocalContext.current
 
-    var art by remember { mutableStateOf(Art()) }
-
-    getCurrentLocation(LocalContext.current) { lat, lng ->
-        art = art.copy(location = GeoPoint(lat, lng))
+    val uiState = viewModel.uiState
+    LaunchedEffect(Unit) {
+        viewModel.onLocationChange(getCurrentLocation(context))
     }
-
-    var file by remember { mutableStateOf<Uri?>(null) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            file = it
-        }
+        uri?.let(viewModel::onFileChange)
     }
-
-    var showAlert by remember { mutableStateOf(false) }
-    var alertTitle by remember { mutableStateOf("") }
-    var alertDescription by remember { mutableStateOf("") }
-
-    val isNameValid = art.title.isNotEmpty()
-    val isDescriptionValid = art.description.isNotEmpty()
-    val isLocationValid = art.location != null
-    val isFileValid = file != null
-    val isAllFieldsValid = isNameValid && isDescriptionValid && isLocationValid && isFileValid
 
     Column(
         modifier = Modifier
@@ -89,8 +74,8 @@ fun CreateScreen() {
             style = MaterialTheme.typography.titleMedium
         )
         TextField(
-            value = art.title,
-            onValueChange = { newTitle -> art = art.copy(title = newTitle) },
+            value = uiState.title,
+            onValueChange = viewModel::onTitleChange,
             modifier = textFieldModifier,
         )
         Spacer(modifier = spacerModifier)
@@ -103,7 +88,7 @@ fun CreateScreen() {
         Button(
             onClick = {
                 // Open the file selection dialog
-                launcher.launch("*/*") // You can specify MIME types if needed
+                launcher.launch("*/*")// You can specify MIME types if needed
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -111,9 +96,9 @@ fun CreateScreen() {
         }
         Spacer(modifier = spacerModifier)
         // Display the selected file path
-        file?.let { filePath ->
+        uiState.uri?.let {
             Text(
-                text = "Selected File: $filePath",
+                text = "Selected File: ${File(it.path!!).name}",
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = spacerModifier)
@@ -124,8 +109,8 @@ fun CreateScreen() {
             style = MaterialTheme.typography.titleMedium
         )
         TextField(
-            value = art.description,
-            onValueChange = { newDescription -> art = art.copy(description = newDescription) },
+            value = uiState.description,
+            onValueChange = viewModel::onDescriptionChange,
             modifier = textFieldModifier.height(130.dp)
         )
         Spacer(modifier = spacerModifier)
@@ -140,7 +125,7 @@ fun CreateScreen() {
         }
         Spacer(modifier = spacerModifier)
         // Display the selected location
-        art.location?.let {
+        uiState.location?.let {
             Text(
                 text = "Location: $it", /* TODO: Make this a map? */
                 style = MaterialTheme.typography.bodySmall
@@ -155,58 +140,20 @@ fun CreateScreen() {
         ) {
             Button(
                 onClick = {
-                    if (!isAllFieldsValid) {
-                        return@Button
-                    }
+                    viewModel.onPostArtwork(
+                        onSuccess = {
+                            Toast.makeText(context, "Artwork Posted!", Toast.LENGTH_SHORT).show()
+                            navController.navigate(ScreenNames.Home.name)
+                        },
+                        onFailure = {
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+                    )
 
-                    val db = FirebaseFirestore.getInstance()
-                    val storage = Firebase.storage.reference
-                    val user = Firebase.auth.currentUser
-                    val uid = user?.uid ?: "TODO"
-                    art.storageRef = "$uid/${file!!.lastPathSegment}"
-                    storage.child(art.storageRef).putFile(file!!)
-                        .addOnSuccessListener {
-                            db.collection("art").add(art)
-                                .addOnSuccessListener {
-                                    art = Art() // Clear art
-                                    file = null
-                                    showAlert = true
-                                    alertTitle = "Upload Successful"
-                                    alertDescription =
-                                        "Your artwork has been successfully uploaded."
-                                }
-                                .addOnFailureListener {
-                                    showAlert = true
-                                    alertTitle = "Upload Failed"
-                                    alertDescription = it.toString()
-                                }
-                        }
-                        .addOnFailureListener {
-                            showAlert = true
-                            alertTitle = "Upload Failed"
-                            alertDescription = it.toString()
-                        }
                 },
-                enabled = isAllFieldsValid
+                enabled = viewModel.isValid()
             ) {
                 Text(text = "Post Artwork")
-            }
-            // Show an alert dialog if showAlert is true
-            if (showAlert) {
-                AlertDialog(
-                    onDismissRequest = { showAlert = false },
-                    title = {
-                        Text(text = alertTitle)
-                    },
-                    text = {
-                        Text(text = alertDescription)
-                    },
-                    confirmButton = {
-                        Button(onClick = { showAlert = false }) {
-                            Text(text = "OK")
-                        }
-                    }
-                )
             }
         }
     }
@@ -215,5 +162,5 @@ fun CreateScreen() {
 @Preview(showBackground = true)
 @Composable
 fun CreateScreenPreview() {
-    CreateScreen()
+    CreateScreen(navController = rememberNavController())
 }

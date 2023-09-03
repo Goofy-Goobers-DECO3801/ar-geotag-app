@@ -1,5 +1,6 @@
-package com.example.deco3801
+package com.example.deco3801.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,43 +11,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.R
+import com.example.deco3801.ScreenNames
+import com.example.deco3801.ui.components.EmailField
+import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.viewmodel.AuthViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
+fun LoginScreen(
+    navController: NavHostController,
+    viewModel: AuthViewModel = hiltViewModel(),
+) {
+    val uiState = viewModel.uiState
+    val context = LocalContext.current
 
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MyColors.Orange),
@@ -59,42 +52,43 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.size(150.dp)
         )
 
-        TextField(
+        EmailField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 30.dp,
+                .padding(
+                    start = 30.dp,
                     end = 30.dp,
                     top = 30.dp,
-                    bottom = 10.dp),
-            value = username,
-            onValueChange = {newUsername -> username = newUsername},
-            label = { Text("Username or email") }
+                    bottom = 10.dp
+                ),
+            value = uiState.email,
+            onValueChange = viewModel::onEmailChange,
         )
-
-        TextField(
+        PasswordField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 30.dp,
+                .padding(
+                    start = 30.dp,
                     end = 30.dp,
                     top = 10.dp,
-                    bottom = 20.dp),
-            value = password,
-            onValueChange = {newPassword -> password = newPassword},
-            label = { Text("Password") },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(
-                    onClick = { isPasswordVisible = !isPasswordVisible }
-                ) {
-                    val icon = if (isPasswordVisible) Icons.Default.Check else Icons.Default.Lock
-                    Icon(imageVector = icon, contentDescription = null)
-                }
-            }
+                    bottom = 20.dp
+                ),
+            value = uiState.password,
+            onValueChange = viewModel::onPasswordChange
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { navController.navigate(ScreenNames.Screen.name) }) {
+        Button(
+            onClick = {
+                viewModel.onLoginClicked(
+                    onSuccess = { navController.navigate(ScreenNames.Screen.name) },
+                    onFailure = {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            },
+        ) {
             Text("Sign In", fontSize = 23.sp)
         }
 
