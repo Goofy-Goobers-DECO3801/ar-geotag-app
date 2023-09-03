@@ -1,17 +1,14 @@
-package com.example.deco3801.model.service
+package com.example.deco3801.data.repository
 
 import android.util.Log
-import com.example.deco3801.model.User
+import com.example.deco3801.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
+@Singleton
 class UserRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth

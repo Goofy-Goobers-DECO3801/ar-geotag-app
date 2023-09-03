@@ -1,4 +1,4 @@
-package com.example.deco3801.model
+package com.example.deco3801.data.model
 
 data class User(
     var id: String = "",

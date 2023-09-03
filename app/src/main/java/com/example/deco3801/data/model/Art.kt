@@ -1,14 +1,7 @@
-package com.example.deco3801.model
+package com.example.deco3801.data.model
 
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
-
-data class Geotag(
-    var latitude: Double,
-    var longitude: Double,
-    var altitude: Double,
-    var geoHash: String,
-)
 
 data class Art(
     var title: String = "",
@@ -18,4 +11,3 @@ data class Art(
     var userId: String = "",
     var storagePath: String = "",
 )
-

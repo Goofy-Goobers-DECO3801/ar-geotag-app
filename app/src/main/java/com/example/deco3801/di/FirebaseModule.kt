@@ -1,4 +1,4 @@
-package com.example.deco3801.model.service.module
+package com.example.deco3801.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
