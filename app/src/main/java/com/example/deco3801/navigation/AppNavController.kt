@@ -10,13 +10,6 @@ import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
-object MainDestinations {
-    const val HOME_ROUTE = "home"
-    const val EXPLORE_ROUTE = "explore"
-    const val FAVOURITES = "favourites"
-    const val PROFILE = "profile"
-}
-
 @Composable
 fun rememberAppNavController(
     navController: NavHostController = rememberNavController()
