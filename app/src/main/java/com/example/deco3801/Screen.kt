@@ -28,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
+import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
@@ -80,6 +82,7 @@ fun TopBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
+    ArtDisplayViewModel: ArtDisplayViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     Scaffold(
@@ -103,7 +106,8 @@ fun AppFunctionality(
                 HomeScreen()
             }
             composable(route = ScreenNames.Create.name) {
-                CreateScreen()
+                ArtDisplayScreen(0, ArtDisplayViewModel)
+//                CreateScreen()
             }
             composable(route = ScreenNames.Profile.name) {
                 ProfileScreen()
