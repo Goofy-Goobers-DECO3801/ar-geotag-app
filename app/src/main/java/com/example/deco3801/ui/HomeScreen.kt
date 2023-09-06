@@ -1,36 +1,40 @@
 package com.example.deco3801.ui
 
-import com.example.deco3801.ui.components.NavBar
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import androidx.compose.foundation.layout.fillMaxSize
 
 @Composable
 fun HomeScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Home Screen",
-            style = MaterialTheme.typography.headlineLarge
-        )
-    }
+    AndroidView(
+            factory = { context ->
+                val mapView = MapView(context).apply {
+                    // Configure the map settings here
+                    onCreate(Bundle()) // Make sure to call onCreate
+                    getMapAsync { googleMap ->
+                        // Perform map-related operations here
+                        // For example, add markers, listen for map events, etc.
+                        val markerOptions = MarkerOptions()
+                                .position(LatLng(52.8449, -0.5330))
+                                .title("Marker Title")
+                        googleMap.addMarker(markerOptions)
+                    }
+                }
+                mapView
+            },
+            modifier = Modifier.fillMaxSize()
+    )
 }
 
-@Preview(showBackground = true)
+// Replace YourLatitude and YourLongitude with actual values
+
 @Composable
 fun HomeScreenPreview() {
+    // You can create a preview of your HomeScreen here
     HomeScreen()
 }
