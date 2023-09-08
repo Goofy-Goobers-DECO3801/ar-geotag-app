@@ -6,13 +6,18 @@ import com.example.deco3801.ui.components.NavBar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,19 +36,21 @@ import com.example.deco3801.R
 
 @Composable
 fun ProfileScreen() {
+    val spacerModifier : Modifier = Modifier.height(12.dp)
     Column(
         modifier = Modifier.fillMaxSize().padding(30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.Start
         ) {
             Image(
                 painter = painterResource(id = R.drawable.pfp),
                 contentDescription = "profile",
                 modifier = Modifier.size(92.dp)
             )
+            Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
                     text = "Full Name",
@@ -58,7 +65,7 @@ fun ProfileScreen() {
                 }
             }
         }
-
+        Spacer(modifier = spacerModifier)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -73,8 +80,28 @@ fun ProfileScreen() {
                 text = "13 following"
             )
         }
-        ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
-            21, R.drawable.default_img)
+        Spacer(modifier = spacerModifier)
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
+                21, R.drawable.default_img)
+            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 63,
+                12, R.drawable.default_img)
+        }
+        Spacer(modifier = spacerModifier)
+        Spacer(modifier = spacerModifier)
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
+                21, R.drawable.default_img)
+            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 63,
+                12, R.drawable.default_img)
+        }
+
 
     }
 }
@@ -94,50 +121,55 @@ fun ArtworkTile(
     reviews: Int,
     img: Int
     ) {
+    Column () {
+        Image(
+            painter = painterResource(id = img),
+            contentDescription = "post",
+            modifier = Modifier.size(130.dp)
+        )
+        Text(
+            text = artworkTitle,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = "Created $date",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Row () {
+            Icon(
+                imageVector = Icons.Filled.LocationOn,
+                contentDescription = "location",
+                Modifier.size(16.dp)
+            )
+            Text(
+                text = location,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        Row () {
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = "heart",
+                Modifier.size(16.dp)
+            )
+            Text(
+                text = "$likes likes",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer (modifier = Modifier.width(3.dp))
+            Icon(
+                imageVector = Icons.Outlined.CheckCircle,
+                contentDescription = "heart",
+                Modifier.size(16.dp)
+            )
 
-    Image(
-        painter = painterResource(id = img),
-        contentDescription = "post",
-        modifier = Modifier.size(130.dp)
-    )
-    Text(
-        text = artworkTitle,
-        style = MaterialTheme.typography.titleMedium
-    )
-    Text(
-        text = "Created on $date",
-        style = MaterialTheme.typography.bodySmall
-    )
-    Row () {
-        Icon(
-            imageVector = Icons.Filled.LocationOn,
-            contentDescription = "location",
-            Modifier.size(16.dp)
-        )
-        Text(
-            text = location,
-            style = MaterialTheme.typography.bodySmall
-        )
+            Text(
+                text = "$reviews reviews",
+                style = MaterialTheme.typography.bodySmall
+            )
     }
-    Row () {
-        Icon(
-            imageVector = Icons.Default.FavoriteBorder,
-            contentDescription = "heart",
-            Modifier.size(16.dp)
-        )
-        Text(
-            text = "$likes likes",
-            style = MaterialTheme.typography.bodySmall
-        )
-        Icon(
-            imageVector = Icons.Filled.FavoriteBorder,
-            contentDescription = "heart",
-            Modifier.size(16.dp)
-        )
-        Text(
-            text = "$reviews reviews",
-            style = MaterialTheme.typography.bodySmall
-        )
+
+
     }
 
 
