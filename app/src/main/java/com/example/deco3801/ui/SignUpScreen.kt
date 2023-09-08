@@ -98,7 +98,9 @@ fun SignUpScreen(
 
         Button(onClick = {
             viewModel.onSignUpClicked(
-                onSuccess = { navController.navigate(ScreenNames.Screen.name) },
+                onSuccess = {
+                    navController.navigate(ScreenNames.Screen.name)
+                },
                 onFail = {
                     Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                 }

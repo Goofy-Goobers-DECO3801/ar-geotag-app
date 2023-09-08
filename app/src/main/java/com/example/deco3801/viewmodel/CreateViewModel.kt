@@ -55,7 +55,7 @@ class CreateViewModel @Inject constructor(
         uiState = CreateUiState()
         viewModelScope.launch {
             try {
-                artRepo.create(tmp.title, tmp.description, tmp.location!!, tmp.uri!!)
+                artRepo.createArt(tmp.title, tmp.description, tmp.location!!, tmp.uri!!)
                 onSuccess()
             } catch (e: Exception) {
                 onFailure(e.message ?: "Upload Failed.")

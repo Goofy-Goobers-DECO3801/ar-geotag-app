@@ -6,10 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.deco3801.data.repository.UserRepository
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 data class AuthUiState(
@@ -21,7 +19,6 @@ data class AuthUiState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val auth: FirebaseAuth,
     private val userRepo: UserRepository,
 ) : ViewModel() {
     var uiState by mutableStateOf(AuthUiState())
@@ -54,7 +51,7 @@ class AuthViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                auth.signInWithEmailAndPassword(email, password).await()
+                userRepo.loginUser(email, password)
                 onSuccess()
             } catch (e: Exception) {
                 onFailure(e.message ?: "Login Failed.")
@@ -69,7 +66,7 @@ class AuthViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                userRepo.create(username, email, password)
+                userRepo.createUser(username, email, password)
                 onSuccess()
             } catch (e: Exception) {
                 onFail(e.message ?: "Signup Failed!")

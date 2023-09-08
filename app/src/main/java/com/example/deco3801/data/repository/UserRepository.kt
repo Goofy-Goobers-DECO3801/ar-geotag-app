@@ -2,6 +2,7 @@ package com.example.deco3801.data.repository
 
 import android.util.Log
 import com.example.deco3801.data.model.User
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -14,10 +15,11 @@ class UserRepository @Inject constructor(
     private val auth: FirebaseAuth
 ) {
 
-    suspend fun create(username: String, email: String, password: String): User {
+    suspend fun createUser(username: String, email: String, password: String): User {
         val authUser = auth.createUserWithEmailAndPassword(email, password).await().user!!
         val id = authUser.uid
         val user = User(id = id, username = username, email = email)
+        Log.d(USER_COLLECTION, user.toString())
         // Ensure that the username is unique if its not delete the authUser
         val userRef = db.collection(USER_COLLECTION).document(id)
         val indexRef = db.collection(INDEX_COLLECTION).document("$USERNAME_INDEX/${username}")
@@ -30,15 +32,17 @@ class UserRepository @Inject constructor(
             authUser.delete()
             throw Exception("Username is already taken!", e)
         }
-
-        Log.d(USER_COLLECTION, user.toString())
         return user
     }
 
+    suspend fun loginUser(email: String, password: String): AuthResult? {
+        return auth.signInWithEmailAndPassword(email, password).await()
+    }
+
     companion object {
-        private const val USER_COLLECTION = "User"
-        private const val INDEX_COLLECTION = "Index"
-        private const val USERNAME_INDEX = "User/username"
+        private const val USER_COLLECTION = "user"
+        private const val INDEX_COLLECTION = "index"
+        private const val USERNAME_INDEX = "user/username"
     }
 }
 

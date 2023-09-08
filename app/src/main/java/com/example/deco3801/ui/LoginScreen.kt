@@ -82,7 +82,9 @@ fun LoginScreen(
         Button(
             onClick = {
                 viewModel.onLoginClicked(
-                    onSuccess = { navController.navigate(ScreenNames.Screen.name) },
+                    onSuccess = {
+                        navController.navigate(ScreenNames.Screen.name)
+                    },
                     onFailure = {
                         Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                     }

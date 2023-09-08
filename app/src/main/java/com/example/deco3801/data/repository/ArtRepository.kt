@@ -4,7 +4,7 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import com.example.deco3801.data.model.Art
-import com.example.deco3801.data.model.toGeotag
+import com.example.deco3801.util.toGeotag
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -19,7 +19,7 @@ class ArtRepository @Inject constructor(
     private val storage: FirebaseStorage,
     private val user: FirebaseUser?
 ) {
-    suspend fun create(title: String, description: String, location: Location, uri: Uri): Art {
+    suspend fun createArt(title: String, description: String, location: Location, uri: Uri): Art {
         if (user == null) {
             throw Exception("User is not logged in.")
         }
@@ -41,6 +41,6 @@ class ArtRepository @Inject constructor(
     }
 
     companion object {
-        private const val ART_COLLECTION = "Art"
+        private const val ART_COLLECTION = "art"
     }
 }
