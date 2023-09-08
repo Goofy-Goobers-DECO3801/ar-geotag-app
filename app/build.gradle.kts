@@ -84,7 +84,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.firebase:geofire-android-common:3.2.0")
+    implementation("com.github.imperiumlabs:GeoFirestore-Android:v1.5.0")
 
     // Hilt Dependency Injection
     implementation("com.google.dagger:hilt-android:2.48")
