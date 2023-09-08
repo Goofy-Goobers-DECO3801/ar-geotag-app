@@ -1,6 +1,8 @@
 package com.example.deco3801.ui
 
-import com.example.deco3801.ui.components.NavBar
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,27 +17,38 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.util.LocationUtil.getCurrentLocation
+import com.example.deco3801.viewmodel.CreateViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen() {
-    val textModifier : Modifier = Modifier
-    val textFieldModifier : Modifier = Modifier.fillMaxWidth()
-    val spacerModifier : Modifier = Modifier.height(10.dp)
+fun CreateScreen(
+    navController: NavHostController,
+    viewModel: CreateViewModel = hiltViewModel(),
+) {
+    val textModifier: Modifier = Modifier
+    val textFieldModifier: Modifier = Modifier.fillMaxWidth()
+    val spacerModifier: Modifier = Modifier.height(10.dp)
+    val context = LocalContext.current
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    val uiState = viewModel.uiState
+    LaunchedEffect(Unit) {
+        viewModel.onLocationChange(getCurrentLocation(context))
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let(viewModel::onFileChange)
+    }
 
     Column(
         modifier = Modifier
@@ -61,9 +74,9 @@ fun CreateScreen() {
             style = MaterialTheme.typography.titleMedium
         )
         TextField(
-            value = title,
-            onValueChange = {newTitle -> title = newTitle},
-            modifier = textFieldModifier
+            value = uiState.title,
+            onValueChange = viewModel::onTitleChange,
+            modifier = textFieldModifier,
         )
         Spacer(modifier = spacerModifier)
 
@@ -72,19 +85,32 @@ fun CreateScreen() {
             text = "Upload Artwork",
             style = MaterialTheme.typography.titleMedium
         )
-        Button(onClick = { /*TODO*/ }) {
+        Button(
+            onClick = {
+                // Open the file selection dialog
+                launcher.launch("*/*")// You can specify MIME types if needed
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Upload from files")
         }
         Spacer(modifier = spacerModifier)
-
+        // Display the selected file path
+        uiState.uri?.let {
+            Text(
+                text = "Selected File: ${File(it.path!!).name}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = spacerModifier)
+        }
 
         Text(
             text = "Artwork Description",
             style = MaterialTheme.typography.titleMedium
         )
         TextField(
-            value = description,
-            onValueChange = {newDescription -> description = newDescription},
+            value = uiState.description,
+            onValueChange = viewModel::onDescriptionChange,
             modifier = textFieldModifier.height(130.dp)
         )
         Spacer(modifier = spacerModifier)
@@ -94,16 +120,39 @@ fun CreateScreen() {
             text = "Select Location",
             style = MaterialTheme.typography.titleMedium
         )
-        Button(onClick = { /*TODO*/ }) {
+        Button(onClick = { /* TODO */ }) {
             Text(text = "Select Location")
         }
         Spacer(modifier = spacerModifier)
+        // Display the selected location
+        uiState.location?.let {
+            Text(
+                text = "Location: $it", /* TODO: Make this a map? */
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = spacerModifier)
+        }
 
 
-        Row(modifier = Modifier.fillMaxWidth(),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
-        ){
-            Button(onClick = { /*TODO*/ }){
+        ) {
+            Button(
+                onClick = {
+                    viewModel.onPostArtwork(
+                        onSuccess = {
+                            Toast.makeText(context, "Artwork Posted!", Toast.LENGTH_SHORT).show()
+                            navController.navigate(ScreenNames.Home.name)
+                        },
+                        onFailure = {
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+
+                },
+                enabled = viewModel.isValid()
+            ) {
                 Text(text = "Post Artwork")
             }
         }
@@ -113,5 +162,5 @@ fun CreateScreen() {
 @Preview(showBackground = true)
 @Composable
 fun CreateScreenPreview() {
-    CreateScreen()
+    CreateScreen(navController = rememberNavController())
 }

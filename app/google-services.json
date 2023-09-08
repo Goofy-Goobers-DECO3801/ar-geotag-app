@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "364103767910",
+    "project_id": "goofy-goobers",
+    "storage_bucket": "goofy-goobers.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364103767910:android:dd7a6b493a5b228280daa7",
+        "android_client_info": {
+          "package_name": "com.example.deco3801"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364103767910-h1r93cito6lqvnemdr83dso5otidnfum.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_6L2bAjY7bhkW2abM1hSptPGuU7EiNOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364103767910-h1r93cito6lqvnemdr83dso5otidnfum.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
