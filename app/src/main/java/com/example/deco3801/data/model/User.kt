@@ -1,7 +1,10 @@
 package com.example.deco3801.data.model
 
+import com.google.firebase.firestore.DocumentId
+
 data class User(
-    var id: String = "",
+    @DocumentId
+    val id: String = "",
     var username: String = "",
     var email: String = "",
     @field:JvmField

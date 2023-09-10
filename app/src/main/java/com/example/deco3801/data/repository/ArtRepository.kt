@@ -4,11 +4,14 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import com.example.deco3801.data.model.Art
-import com.example.deco3801.util.toGeotag
+import com.example.deco3801.util.toGeoLocation
+import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import org.imperiumlabs.geofirestore.core.GeoHash
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,7 +31,9 @@ class ArtRepository @Inject constructor(
         val art = Art(
             title = title,
             description = description,
-            geotag = location.toGeotag(),
+            location = location.toGeoPoint(),
+            altitude = location.altitude,
+            geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
             storagePath = "$uid/${System.currentTimeMillis()}-${File(uri.path!!).name}"
         )
@@ -38,6 +43,10 @@ class ArtRepository @Inject constructor(
         storage.reference.child(art.storagePath).putFile(uri).await()
         db.collection(ART_COLLECTION).add(art).await()
         return art
+    }
+
+    fun getCollectionRef(): CollectionReference {
+        return db.collection(ART_COLLECTION)
     }
 
     companion object {
