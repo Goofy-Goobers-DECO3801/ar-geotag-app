@@ -27,6 +27,7 @@ fun GetUserLocation(
     val context = LocalContext.current
     val currentOnChange by rememberUpdatedState(newValue = onChange)
 
+    // Check for permissions
     if (ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -41,16 +42,22 @@ fun GetUserLocation(
     DisposableEffect(Unit) {
         // The Fused Location Provider provides access to location APIs.
         val locationProvider = LocationServices.getFusedLocationProviderClient(context)
+
         val locationCallback: LocationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
+                // Run the callback with the user's new location
                 currentOnChange(result.lastLocation)
                 Log.d(LOCATION_TAG, "${result.lastLocation}")
             }
         }
+
+        // Create a location request for precise location every 3 seconds
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             TimeUnit.SECONDS.toMillis(3)
         ).build()
+
+        // Send the location request while we are in the composition
         locationProvider.requestLocationUpdates(
             locationRequest,
             locationCallback,
@@ -58,7 +65,7 @@ fun GetUserLocation(
         )
 
         onDispose {
-            //Removes all location updates for the given callback.
+            // Removes all location updates for the given callback.
             locationProvider.removeLocationUpdates(locationCallback)
         }
     }

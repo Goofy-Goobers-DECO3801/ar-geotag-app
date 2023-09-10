@@ -44,7 +44,6 @@ fun HomeScreen(
         return
     }
 
-    //    val brisbane = LatLng(-27.4705, 153.0260)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!.toLatLng(), 10f)
     }

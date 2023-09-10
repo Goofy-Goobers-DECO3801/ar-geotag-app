@@ -63,6 +63,7 @@ class HomeViewModel @Inject constructor(
                 // the same spot and we only see one marker.
                 // art.location = GeoPoint(art.location!!.latitude + offset, art.location!!.longitude)
                 // offset += offset
+                // TODO: Client-side filtering
                 _uiState.value.art.add(art)
                 Log.d("GEOQUERY", "ENTER $art")
             }
@@ -74,11 +75,11 @@ class HomeViewModel @Inject constructor(
             }
 
             override fun onDocumentMoved(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
-                // ...
+                // Ignore
             }
 
             override fun onDocumentChanged(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
-                // ...
+                // TODO: Client-side filtering
             }
 
             override fun onGeoQueryReady() {
@@ -86,7 +87,7 @@ class HomeViewModel @Inject constructor(
             }
 
             override fun onGeoQueryError(exception: Exception) {
-                // ...
+                // TODO: Handle error
             }
         })
     }
