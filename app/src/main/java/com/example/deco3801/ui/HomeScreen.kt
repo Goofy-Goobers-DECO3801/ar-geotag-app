@@ -1,20 +1,17 @@
 package com.example.deco3801.ui
 
 import android.Manifest
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.RequestPermissions
-import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -25,7 +22,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun HomeScreen(
-    context: Context = LocalContext.current,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     // Location Permissions
@@ -37,19 +33,13 @@ fun HomeScreen(
         title = "Location Permissions",
         description = "This app functions best when we can use your precise location.\n" +
                 "You can opt out of this at anytime."
-    )
+    ) {
+        GetUserLocation(onChange = viewModel::onLocationChange)
+    }
 
     val uiState by viewModel.uiState.collectAsState()
 
-    /*
-    TODO: Need a way to constantly get the users location.
-     Should probably look into using a foreground service.
-     This fails the first time since its run before the permissions are accepted.
-     */
-    LaunchedEffect(Unit) {
-        viewModel.onLocationChange(LocationUtil.getCurrentLocation(context))
-    }
-
+    // TODO: What do we display if we cannot get the users location?
     if (uiState.currentLocation == null) {
         return
     }
