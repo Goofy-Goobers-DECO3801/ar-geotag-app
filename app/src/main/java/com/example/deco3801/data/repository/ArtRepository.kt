@@ -9,7 +9,6 @@ import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import org.imperiumlabs.geofirestore.core.GeoHash

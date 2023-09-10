@@ -18,8 +18,10 @@ class UserRepository @Inject constructor(
     suspend fun createUser(username: String, email: String, password: String): User {
         val authUser = auth.createUserWithEmailAndPassword(email, password).await().user!!
         val id = authUser.uid
-        val user = User(id = id, username = username, email = email)
+        val user = User(username = username, email = email)
+
         Log.d(USER_COLLECTION, user.toString())
+
         // Ensure that the username is unique if its not delete the authUser
         val userRef = db.collection(USER_COLLECTION).document(id)
         val indexRef = db.collection(INDEX_COLLECTION).document("$USERNAME_INDEX/${username}")
