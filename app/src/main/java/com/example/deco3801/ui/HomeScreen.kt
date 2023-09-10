@@ -13,6 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.util.toLatLng
+import com.example.deco3801.util.toRadius
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -45,7 +46,12 @@ fun HomeScreen(
     }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!.toLatLng(), 10f)
+        position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 10f)
+    }
+
+    if (cameraPositionState.isMoving) {
+        viewModel.onLocationChange(cameraPositionState.position.target)
+        viewModel.onDistanceChange(cameraPositionState.position.toRadius())
     }
 
     DisposableEffect(Unit) {

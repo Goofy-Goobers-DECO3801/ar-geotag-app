@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.util.toGeoPoint
+import com.example.deco3801.util.toLatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
@@ -19,7 +21,7 @@ import javax.inject.Inject
 
 data class HomeUiState(
     val art: MutableList<Art> = mutableListOf(),
-    val currentLocation: Location? = null,
+    val currentLocation: LatLng? = null,
     val distanceInKm: Double = 10.0,
     val ready: Boolean = false,
 )
@@ -34,8 +36,14 @@ class HomeViewModel @Inject constructor(
     private var geoQuery: GeoQuery? = null
 
     fun onLocationChange(newValue: Location?) {
+        if (newValue != null) {
+            return onLocationChange(newValue.toLatLng())
+        }
+    }
+
+    fun onLocationChange(newValue: LatLng) {
         _uiState.value = _uiState.value.copy(currentLocation = newValue)
-        geoQuery?.center = newValue?.toGeoPoint()
+        geoQuery?.center = newValue.toGeoPoint()
     }
 
     fun onDistanceChange(newValue: Double) {
