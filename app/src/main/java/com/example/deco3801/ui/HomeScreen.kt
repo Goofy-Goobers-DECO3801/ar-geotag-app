@@ -65,7 +65,7 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState
     ) {
-        for (art in uiState.art) {
+        for (art in uiState.art.values) {
             if (art.location == null) {
                 continue
             }
