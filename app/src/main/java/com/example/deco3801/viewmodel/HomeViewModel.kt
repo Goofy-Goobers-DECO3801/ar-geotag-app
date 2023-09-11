@@ -14,13 +14,14 @@ import com.google.firebase.firestore.ktx.toObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import org.imperiumlabs.geofirestore.GeoFirestore
 import org.imperiumlabs.geofirestore.GeoQuery
 import org.imperiumlabs.geofirestore.listeners.GeoQueryDataEventListener
 import javax.inject.Inject
 
 data class HomeUiState(
-    val art: MutableList<Art> = mutableListOf(),
+    val art: MutableMap<String, Art> = HashMap(),
     val currentLocation: LatLng? = null,
     val distanceInKm: Double = 10.0,
     val ready: Boolean = false,
@@ -72,22 +73,47 @@ class HomeViewModel @Inject constructor(
                 // art.location = GeoPoint(art.location!!.latitude + offset, art.location!!.longitude)
                 // offset += offset
                 // TODO: Client-side filtering
-                _uiState.value.art.add(art)
+                _uiState.update {
+                    val updatedArtMap = it.art.toMutableMap().apply {
+                        put(art.id, art)
+                    }
+                    it.copy(art = updatedArtMap)
+                }
                 Log.d("GEOQUERY", "ENTER $art")
             }
 
             override fun onDocumentExited(documentSnapshot: DocumentSnapshot) {
                 val art = documentSnapshot.toObject<Art>() ?: return
-                _uiState.value.art.remove(art)
+                _uiState.update {
+                    val updatedArtMap = it.art.toMutableMap().apply {
+                        remove(art.id)
+                    }
+                    it.copy(art = updatedArtMap)
+                }
                 Log.d("GEOQUERY", "EXIT $art")
             }
 
             override fun onDocumentMoved(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
-                // Ignore
+                val art = documentSnapshot.toObject<Art>() ?: return
+                _uiState.update {
+                    val updatedArtMap = it.art.toMutableMap().apply {
+                        replace(art.id, art)
+                    }
+                    it.copy(art = updatedArtMap)
+                }
+                Log.d("GEOQUERY", "MOVED $art")
             }
 
             override fun onDocumentChanged(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
                 // TODO: Client-side filtering
+                val art = documentSnapshot.toObject<Art>() ?: return
+                _uiState.update {
+                    val updatedArtMap = it.art.toMutableMap().apply {
+                        replace(art.id, art)
+                    }
+                    it.copy(art = updatedArtMap)
+                }
+                Log.d("GEOQUERY", "CHANGED $art")
             }
 
             override fun onGeoQueryReady() {
