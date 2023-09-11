@@ -11,7 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
+import com.example.deco3801.ui.LoginScreen
+import com.example.deco3801.ui.SignUpScreen
 import com.example.deco3801.ui.theme.DECO3801Theme
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint

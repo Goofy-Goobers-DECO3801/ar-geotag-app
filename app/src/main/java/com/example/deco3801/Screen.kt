@@ -30,18 +30,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
-import com.example.deco3801.ui.CreateScreen
+//import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.theme.MyColors
 
-enum class ScreenNames() {
-    Home,
-    Create,
-    Profile
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
