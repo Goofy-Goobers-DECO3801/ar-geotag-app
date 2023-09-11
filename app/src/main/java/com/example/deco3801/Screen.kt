@@ -33,6 +33,7 @@ import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
+import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.theme.MyColors
 
@@ -54,7 +55,7 @@ fun TopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
