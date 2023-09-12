@@ -7,6 +7,8 @@ import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.ui.PrivacyPolicyScreen
+import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.theme.DECO3801Theme
 
 enum class ScreenNames() {
@@ -15,7 +17,9 @@ enum class ScreenNames() {
     Screen,
     Home,
     Create,
-    Profile
+    Profile,
+    TermsAndConditions,
+    PrivacyPolicy
 }
 
 class MainActivity : ComponentActivity() {

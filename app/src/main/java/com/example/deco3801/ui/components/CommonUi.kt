@@ -107,3 +107,28 @@ fun NavBar(navController: NavHostController) {
         )
     }
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBackBar(
+    navigateUp: () -> Unit
+) {
+    TopAppBar(title = { /*TODO*/ },
+        navigationIcon = {
+            IconButton(
+                onClick = navigateUp
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back button",
+                    tint = Color.White
+                )
+            }
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            titleContentColor = Color.White,
+            containerColor = MyColors.Orange
+        )
+    )
+}
