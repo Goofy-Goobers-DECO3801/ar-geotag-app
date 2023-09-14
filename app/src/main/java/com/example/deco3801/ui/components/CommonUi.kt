@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
@@ -25,25 +27,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ScreenNames
-import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.ui.theme.UnchangingAppColors
 
 @Composable
 fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
     val backgroundColor = if (isSelected) {
-        MyColors.Orange
-    } else {
         Color.White
+    } else {
+        UnchangingAppColors.main_theme
     }
 
     val contentColor = if (isSelected) {
-        Color.White
+        UnchangingAppColors.main_theme
     } else {
-        MyColors.Orange
+        Color.White
     }
 
     Button(
@@ -54,11 +59,15 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
         ),
         modifier = Modifier
             .padding(
-                top = 10.dp,
-                bottom = 10.dp
-            )
+                top = 7.dp,
+                bottom = 7.dp
+            ),
+        shape = RoundedCornerShape(5.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.width(70.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Icon(imageVector = icon, contentDescription = text)
             Text(text = text, style = MaterialTheme.typography.labelSmall)
         }
@@ -73,7 +82,7 @@ fun NavBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = MyColors.Grey),
+            .background(UnchangingAppColors.darker_main_theme),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         NavButton(
@@ -97,6 +106,12 @@ fun NavBar(navController: NavHostController) {
     }
 }
 
+@Preview
+@Composable
+fun PreviewNavBar() {
+    NavBar(navController = rememberNavController())
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,7 +132,7 @@ fun TopBackBar(
         },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             titleContentColor = Color.White,
-            containerColor = MyColors.Orange
+            containerColor = UnchangingAppColors.main_theme
         )
     )
 }

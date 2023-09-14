@@ -26,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ScreenNames
-import com.example.deco3801.ui.theme.MyColors
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
 import java.io.File
@@ -63,7 +62,7 @@ fun CreateScreen(
             text = "Upload an Artwork",
             modifier = textModifier,
             style = MaterialTheme.typography.titleLarge,
-            color = MyColors.DarkOrange
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = spacerModifier)
 

@@ -28,7 +28,7 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.EmailField
 import com.example.deco3801.ui.components.PasswordField
-import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.AuthViewModel
 
 @Composable
@@ -42,7 +42,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MyColors.Orange),
+            .background(UnchangingAppColors.main_theme),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
