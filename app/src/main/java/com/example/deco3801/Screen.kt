@@ -30,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
+import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
 import com.example.deco3801.ui.components.NavBar
@@ -100,11 +101,13 @@ fun AppFunctionality(
                 HomeScreen()
             }
             composable(route = ScreenNames.Create.name) {
-                ArtDisplayScreen(0, ArtDisplayViewModel)
-//                CreateScreen()
+                CreateScreen(navController)
             }
             composable(route = ScreenNames.Profile.name) {
                 ProfileScreen()
+            }
+            composable(route = ScreenNames.ARscreen.name) {
+                ArtDisplayScreen(0, ArtDisplayViewModel)
             }
         }
     }
