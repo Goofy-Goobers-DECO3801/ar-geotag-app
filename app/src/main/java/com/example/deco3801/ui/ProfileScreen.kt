@@ -1,8 +1,6 @@
 package com.example.deco3801.ui
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
-import com.example.deco3801.ui.components.NavBar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,25 +11,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
+import com.example.deco3801.ui.data.DataSource
+import com.example.deco3801.ui.model.ProfilePost
 
 
 @Composable
@@ -80,27 +82,9 @@ fun ProfileScreen() {
                 text = "13 following"
             )
         }
-        Spacer(modifier = spacerModifier)
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
-                21, R.drawable.default_img)
-            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 63,
-                12, R.drawable.default_img)
-        }
-        Spacer(modifier = spacerModifier)
-        Spacer(modifier = spacerModifier)
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 78,
-                21, R.drawable.default_img)
-            ArtworkTile("Artwork Title", "30/08/2023","St Lucia, 4067", 63,
-                12, R.drawable.default_img)
-        }
+        ProfileGrid (
+            modifier = Modifier.padding(8.dp)
+        )
 
 
     }
@@ -114,68 +98,81 @@ fun ProfileScreenPreview() {
 
 @Composable
 fun ArtworkTile(
-    artworkTitle: String,
-    date: String,
-    location: String,
-    likes: Int,
-    reviews: Int,
-    img: Int
+    profilePost : ProfilePost, modifier: Modifier = Modifier
     ) {
-    Column () {
-        Image(
-            painter = painterResource(id = img),
-            contentDescription = "post",
-            modifier = Modifier.size(130.dp)
-        )
-        Text(
-            text = artworkTitle,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = "Created $date",
-            style = MaterialTheme.typography.bodySmall
-        )
-        Row () {
-            Icon(
-                imageVector = Icons.Filled.LocationOn,
-                contentDescription = "location",
-                Modifier.size(16.dp)
+    val spacerModifier : Modifier = Modifier.height(10.dp)
+    Card {
+        Column () {
+            Spacer(modifier = spacerModifier)
+            Row (
+                horizontalArrangement = Arrangement.Center
+
+            ) {
+                Image(
+                    painter = painterResource(id = profilePost.imagePreview),
+                    contentDescription = "post",
+                    modifier = Modifier.size(130.dp)
+                )
+            }
+            Text(
+                text = stringResource(id = profilePost.artworkTitle),
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = location,
+                text = "Created " + stringResource(id = profilePost.date),
                 style = MaterialTheme.typography.bodySmall
             )
+            Row () {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = "location",
+                    Modifier.size(16.dp)
+                )
+                Text(
+                    text = stringResource(id = profilePost.location),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Row () {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = "heart",
+                    Modifier.size(16.dp)
+                )
+                Text(
+                    text = profilePost.likes.toString() + " likes",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer (modifier = Modifier.width(3.dp))
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircle,
+                    contentDescription = "heart",
+                    Modifier.size(16.dp)
+                )
+
+                Text(
+                    text = profilePost.reviews.toString() + " reviews",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(modifier = spacerModifier)
         }
-        Row () {
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = "heart",
-                Modifier.size(16.dp)
-            )
-            Text(
-                text = "$likes likes",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer (modifier = Modifier.width(3.dp))
-            Icon(
-                imageVector = Icons.Outlined.CheckCircle,
-                contentDescription = "heart",
-                Modifier.size(16.dp)
-            )
-
-            Text(
-                text = "$reviews reviews",
-                style = MaterialTheme.typography.bodySmall
-            )
     }
-
-
-    }
-
-
-
-
-
 }
+
+@Composable
+fun ProfileGrid (modifier: Modifier = Modifier) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
+    ) {
+        items(DataSource.profiles) { topic ->
+            ArtworkTile(topic)
+        }
+    }
+}
+
 
 

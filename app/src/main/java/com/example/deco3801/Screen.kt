@@ -65,7 +65,7 @@ fun TopBar(
             containerColor = MyColors.Orange
         ),
         navigationIcon = {
-            if (canNavigateBack) {
+             if (canNavigateBack) {
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
