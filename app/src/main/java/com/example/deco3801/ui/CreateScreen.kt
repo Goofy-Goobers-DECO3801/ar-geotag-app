@@ -32,7 +32,7 @@ import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
-import java.io.File
+import com.example.deco3801.viewmodel.getFileName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,9 @@ fun CreateScreen(
         viewModel.onLocationChange(getCurrentLocation(context))
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let(viewModel::onFileChange)
+        uri?.let {
+            viewModel.onFileChange(it, it.getFileName(context))
+        }
     }
 
     Scaffold(

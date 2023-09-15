@@ -12,7 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import org.imperiumlabs.geofirestore.core.GeoHash
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +21,13 @@ class ArtRepository @Inject constructor(
     private val storage: FirebaseStorage,
     private val user: FirebaseUser?
 ) {
-    suspend fun createArt(title: String, description: String, location: Location, uri: Uri): Art {
+    suspend fun createArt(
+        title: String,
+        description: String,
+        location: Location,
+        uri: Uri,
+        filename: String,
+    ): Art {
         if (user == null) {
             throw Exception("User is not logged in.")
         }
@@ -35,7 +40,7 @@ class ArtRepository @Inject constructor(
             altitude = location.altitude,
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
-            storagePath = "$uid/${System.currentTimeMillis()}-${File(uri.path!!).name}"
+            storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
         )
 
         Log.d(ART_COLLECTION, art.toString())
