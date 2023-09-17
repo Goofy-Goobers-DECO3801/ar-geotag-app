@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -105,8 +104,8 @@ fun ArtworkTile(
         Column () {
             Spacer(modifier = spacerModifier)
             Row (
-                horizontalArrangement = Arrangement.Center
-
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Image(
                     painter = painterResource(id = profilePost.imagePreview),
@@ -116,17 +115,21 @@ fun ArtworkTile(
             }
             Text(
                 text = stringResource(id = profilePost.artworkTitle),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 6.dp)
             )
             Text(
                 text = "Created " + stringResource(id = profilePost.date),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 6.dp)
             )
             Row () {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "location",
-                    Modifier.size(16.dp)
+                    Modifier
+                        .padding(start = 6.dp)
+                        .size(16.dp)
                 )
                 Text(
                     text = stringResource(id = profilePost.location),
@@ -137,7 +140,9 @@ fun ArtworkTile(
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
-                    Modifier.size(16.dp)
+                    Modifier
+                        .padding(start = 6.dp)
+                        .size(16.dp)
                 )
                 Text(
                     text = profilePost.likes.toString() + " likes",
