@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CenterFocusWeak
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,9 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.deco3801.R
 import com.example.deco3801.ui.components.TopBackBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
 
@@ -38,7 +42,10 @@ fun ArtworkNavScreen(
     artworkTitle: String,
     username: String,
     dateCreated: String,
-    distance: Int
+    distance: Int,
+    description: String,
+    numLikes: Int,
+    numReviews: Int
 ) {
     Scaffold (
         topBar = { TopBackBar(navigateUp) }
@@ -60,6 +67,13 @@ fun ArtworkNavScreen(
             }
             item {
                 ArtworkInteract(distance = distance)
+            }
+            item {
+                ArtworkDescription(
+                    description = description,
+                    numLikes = numLikes,
+                    numReviews = numReviews
+                )
             }
         }
     }
@@ -131,28 +145,34 @@ fun ArtworkInteract(distance: Int) {
             .background(UnchangingAppColors.main_theme),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = if (distance == 0) {
-                "You have arrived"
-            } else {
-                "$distance m"
-            },
-            style = MaterialTheme.typography.headlineLarge,
-            color = Color.White,
-            modifier = Modifier.padding(top = 15.dp, bottom = 5.dp)
-        )
-        Button(
-            onClick = { /*TODO*/ },
-            modifier = Modifier.padding(bottom = 15.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.CenterFocusWeak,
-                contentDescription = "AR"
-            )
-            Spacer(Modifier.width(5.dp))
+        if (distance == 0) {
             Text(
-                text = "View in AR",
-                style = MaterialTheme.typography.titleMedium
+                text = "You have arrived",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 15.dp, bottom = 10.dp)
+            )
+            Button(
+                onClick = { /*TODO*/ },
+                modifier = Modifier.padding(bottom = 20.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.CenterFocusWeak,
+                    contentDescription = "AR"
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = "View in AR",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else {
+            Text(text = "$distance m",
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White,
+                modifier = Modifier.padding(15.dp)
             )
         }
     }
@@ -164,7 +184,29 @@ fun ArtworkDescription(
     numLikes: Int,
     numReviews: Int
 ) {
-
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+    ) {
+        Row() {
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = "heart"
+            )
+            Spacer(Modifier.width(10.dp))
+            Text("$numLikes likes")
+            Spacer(Modifier.width(10.dp))
+            Icon(
+                imageVector = Icons.Outlined.Message,
+                contentDescription = "reviews"
+            )
+            Spacer(Modifier.width(10.dp))
+            Text("$numReviews reviews")
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(description)
+    }
 }
 
 @Preview
@@ -175,6 +217,9 @@ fun PreviewArtworkNavScreen() {
         "Artwork Title",
         "Username",
         "11/09/2001",
-        152
+        0,
+        stringResource(id = R.string.placeholder),
+        13,
+        5
     )
 }
