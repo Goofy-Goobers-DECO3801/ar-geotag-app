@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,11 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.deco3801.ui.theme.MyColors
+import com.example.deco3801.ui.components.PasswordField
 import java.lang.Boolean.TRUE
 
 @Composable
 fun SettingsScreen(modifier : Modifier = Modifier) {
+    val textFieldModifier: Modifier = Modifier.fillMaxWidth()
     LazyColumn(
         modifier = Modifier
             .padding(16.dp)
@@ -43,60 +46,8 @@ fun SettingsScreen(modifier : Modifier = Modifier) {
                 text = "Settings",
                 modifier = textModifier,
                 style = MaterialTheme.typography.titleLarge,
-                color = MyColors.DarkOrange
+                color = MaterialTheme.colorScheme.onBackground
             )
-        }
-        item {
-            Spacer(modifier = spacerModifier)
-        }
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                    .padding(16.dp)
-                    .clickable {
-                        /*TODO*/
-                    }
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "Review the Privacy Policy")
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        }
-        item { Spacer(modifier = spacerModifier) }
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                    .padding(16.dp)
-                    .clickable {
-                        /*TODO*/
-                    }
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "Review the Terms & Conditions of Use")
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
         }
         item{
             Spacer(modifier = spacerModifier)
@@ -133,7 +84,60 @@ fun SettingsScreen(modifier : Modifier = Modifier) {
             ) {
                 Column() {
                     Text(text = "Change Password")
-                    //TextField(value = "Enter New Password", onValueChange = viewModel::onPasswordChange)
+                    //TODO TextField(value = "Enter New Password", onValueChange = viewModel::onPasswordChange)
+                    //PasswordField(value = "Enter a New Password", onValueChange = {})
+                }
+            }
+        }
+        item {
+            Spacer(modifier = spacerModifier)
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                    .padding(16.dp)
+                    .clickable {
+                        /*TODO*/
+                    }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Review the Privacy Policy")
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+        item { Spacer(modifier = spacerModifier) }
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                    .padding(16.dp)
+                    .clickable {
+                        /*TODO*/
+                    }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Review the Terms & Conditions of Use")
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
@@ -36,56 +37,64 @@ import com.example.deco3801.ui.model.ProfilePost
 
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(modifier: Modifier = Modifier.padding(8.dp)) {
     val spacerModifier : Modifier = Modifier.height(12.dp)
-    Column(
-        modifier = Modifier.fillMaxSize().padding(30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.pfp),
-                contentDescription = "profile",
-                modifier = Modifier.size(92.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = "Full Name",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = "@Username",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Edit Profile")
+        item( span = { GridItemSpan(2) } ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.pfp),
+                        contentDescription = "profile",
+                        modifier = Modifier.size(92.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Full Name",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = "@Username",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Edit Profile")
+                        }
+                    }
                 }
-            }
-        }
-        Spacer(modifier = spacerModifier)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Text(
-                text = "5 posts"
-            )
-            Text(
-                text = "12 followers"
-            )
-            Text(
-                text = "13 following"
-            )
-        }
-        ProfileGrid (
-            modifier = Modifier.padding(8.dp)
-        )
+                Spacer(modifier = spacerModifier)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
+                        text = "5 posts"
+                    )
+                    Text(
+                        text = "12 followers"
+                    )
+                    Text(
+                        text = "13 following"
+                    )
+                }
 
-
+        }
+    }
+    items(DataSource.profiles) { topic ->
+        ArtworkTile(topic)
+    }
     }
 }
 
@@ -99,10 +108,10 @@ fun ProfileScreenPreview() {
 fun ArtworkTile(
     profilePost : ProfilePost, modifier: Modifier = Modifier
     ) {
-    val spacerModifier : Modifier = Modifier.height(10.dp)
+    val spacerModifier : Modifier = Modifier.height(8.dp)
     Card {
         Column () {
-            Spacer(modifier = spacerModifier)
+            Spacer(modifier = Modifier.height(14.dp))
             Row (
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -110,25 +119,26 @@ fun ArtworkTile(
                 Image(
                     painter = painterResource(id = profilePost.imagePreview),
                     contentDescription = "post",
-                    modifier = Modifier.size(130.dp)
+                    modifier = Modifier.size(146.dp)
                 )
             }
+            Spacer(modifier = spacerModifier)
             Text(
                 text = stringResource(id = profilePost.artworkTitle),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 6.dp)
+                modifier = Modifier.padding(start = 16.dp)
             )
             Text(
                 text = "Created " + stringResource(id = profilePost.date),
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 6.dp)
+                modifier = Modifier.padding(start = 16.dp)
             )
             Row () {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "location",
                     Modifier
-                        .padding(start = 6.dp)
+                        .padding(start = 16.dp)
                         .size(16.dp)
                 )
                 Text(
@@ -141,7 +151,7 @@ fun ArtworkTile(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
                     Modifier
-                        .padding(start = 6.dp)
+                        .padding(start = 16.dp)
                         .size(16.dp)
                 )
                 Text(
@@ -160,7 +170,7 @@ fun ArtworkTile(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Spacer(modifier = spacerModifier)
+            Spacer(modifier = Modifier.height(14.dp))
         }
     }
 }
