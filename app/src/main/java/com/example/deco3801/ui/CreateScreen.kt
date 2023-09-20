@@ -172,6 +172,7 @@ fun CreateScreen(
                 ) {
                     Text(text = "Post Artwork")
                 }
+                Spacer(Modifier.height(30.dp))
             }
         }
     }

@@ -65,7 +65,7 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
         shape = RoundedCornerShape(5.dp)
     ) {
         Column(
-            modifier = Modifier.width(70.dp),
+            modifier = Modifier.width(60.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(imageVector = icon, contentDescription = text)
@@ -74,7 +74,6 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
     }
 }
 
-//@Preview
 @Composable
 fun NavBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -82,7 +81,7 @@ fun NavBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(UnchangingAppColors.darker_main_theme),
+            .background(UnchangingAppColors.main_theme),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         NavButton(

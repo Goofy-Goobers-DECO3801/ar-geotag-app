@@ -13,12 +13,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.deco3801.R
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.util.toRadius
 import com.example.deco3801.viewmodel.HomeViewModel
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -87,6 +90,8 @@ fun HomeScreen(
                 state = MarkerState(position = art.location!!.toLatLng()),
                 title = art.title,
                 snippet = art.description,
+                icon =BitmapDescriptorFactory.fromResource(R.drawable.map_marker)
+
             )
         }
     }
