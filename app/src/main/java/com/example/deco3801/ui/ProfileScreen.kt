@@ -20,8 +20,10 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,61 +34,75 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.deco3801.R
+import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.data.DataSource
 import com.example.deco3801.ui.model.ProfilePost
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen() {
-    val spacerModifier : Modifier = Modifier.height(12.dp)
-    Column(
-        modifier = Modifier.fillMaxSize().padding(30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.pfp),
-                contentDescription = "profile",
-                modifier = Modifier.size(92.dp)
+    Scaffold(
+        topBar = {
+            TopBar(
+                canNavigateBack = false,
+                showSettings = true,
+                navigateUp = {}
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = "Full Name",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = "@Username",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Edit Profile")
+        }
+    ) { innerPadding ->
+        val spacerModifier : Modifier = Modifier.height(12.dp)
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.pfp),
+                        contentDescription = "profile",
+                        modifier = Modifier.size(92.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Full Name",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = "@Username",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Edit Profile")
+                        }
+                    }
                 }
+                Spacer(modifier = spacerModifier)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
+                        text = "5 posts"
+                    )
+                    Text(
+                        text = "12 followers"
+                    )
+                    Text(
+                        text = "13 following"
+                    )
+                }
+                ProfileGrid (
+                    modifier = Modifier.padding(8.dp)
+                )
+
+
             }
         }
-        Spacer(modifier = spacerModifier)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Text(
-                text = "5 posts"
-            )
-            Text(
-                text = "12 followers"
-            )
-            Text(
-                text = "13 following"
-            )
-        }
-        ProfileGrid (
-            modifier = Modifier.padding(8.dp)
-        )
-
-
     }
 }
 

@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.deco3801.R
-import com.example.deco3801.ui.components.TopBackBar
+import com.example.deco3801.ui.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +31,13 @@ fun TandCScreen (
     navigateUp: () -> Unit
 ) {
     Scaffold (
-        topBar = { TopBackBar(navigateUp) }
+        topBar = {
+            TopBar(
+                canNavigateBack = false,
+                showSettings = false,
+                navigateUp = navigateUp
+            )
+        }
     ){ innerPadding ->
         LazyColumn(
             modifier = Modifier

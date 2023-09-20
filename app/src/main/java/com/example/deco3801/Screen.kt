@@ -34,45 +34,8 @@ import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
 import com.example.deco3801.ui.components.NavBar
-import com.example.deco3801.ui.theme.UnchangingAppColors
+import com.example.deco3801.ui.components.TopBar
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TopAppBar(
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            titleContentColor = Color.White,
-            containerColor = UnchangingAppColors.main_theme
-        ),
-        navigationIcon = {
-             if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "ArrowBack"
-                    )
-                }
-            }
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,12 +44,6 @@ fun AppFunctionality(
     navController: NavHostController = rememberNavController()
 ) {
     Scaffold(
-        topBar = {
-            TopBar(
-                canNavigateBack = false,
-                navigateUp = { /* TODO: implement back navigation */ }
-            )
-        },
         bottomBar = {
             NavBar(navController)
         }
