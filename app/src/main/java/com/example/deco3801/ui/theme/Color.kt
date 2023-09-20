@@ -2,13 +2,9 @@ package com.example.deco3801.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val MyOrange = Color(0xFFDD6841)
-val VeryLightOrange = Color(0xFFf0e3d0)
-
-object MyColors {
-    val Orange = Color(0xFFDD6841)
-    val DarkOrange = Color(0xFF5D1800)
-    val Grey = Color(0xFFf0e3d0)
+object UnchangingAppColors {
+    val main_theme = Color(0xFFDD6841)
+    val darker_main_theme = Color(0xFFA33E1A)
 }
 
 val md_theme_light_primary = Color(0xFFA33E1A)
@@ -58,7 +54,7 @@ val md_theme_dark_error = Color(0xFFFFB4AB)
 val md_theme_dark_errorContainer = Color(0xFF93000A)
 val md_theme_dark_onError = Color(0xFF690005)
 val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
-val md_theme_dark_background = Color(0xFF201A18)
+val md_theme_dark_background = Color(0xFF2B2B2B)
 val md_theme_dark_onBackground = Color(0xFFEDE0DC)
 val md_theme_dark_surface = Color(0xFF201A18)
 val md_theme_dark_onSurface = Color(0xFFEDE0DC)

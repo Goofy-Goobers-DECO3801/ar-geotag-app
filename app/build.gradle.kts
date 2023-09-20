@@ -70,6 +70,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.maps.android:maps-compose:2.14.0")
+    implementation("androidx.compose.material:material-icons-extended")
     // AR dependencies
     implementation("com.google.ar:core:1.39.0")
     implementation("io.github.sceneview:arsceneview:0.10.2")
