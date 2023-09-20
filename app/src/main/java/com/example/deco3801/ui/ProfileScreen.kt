@@ -33,7 +33,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
+import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.data.DataSource
 import com.example.deco3801.ui.model.ProfilePost
@@ -41,7 +44,7 @@ import com.example.deco3801.ui.model.ProfilePost
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier.padding(8.dp)) {
+fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifier.padding(8.dp)) {
     val spacerModifier : Modifier = Modifier.height(12.dp)
 
     Scaffold(
@@ -49,7 +52,7 @@ fun ProfileScreen(modifier: Modifier = Modifier.padding(8.dp)) {
             TopBar(
                 canNavigateBack = false,
                 showSettings = true,
-                navigateUp = {}
+                navigateUp = {navController.navigate(ScreenNames.Settings.name)}
             )
         }
     ) { innerPadding ->
@@ -115,10 +118,9 @@ fun ProfileScreen(modifier: Modifier = Modifier.padding(8.dp)) {
     }
 }
 
-
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+    ProfileScreen(navController = rememberNavController())
 }
 
 @Composable

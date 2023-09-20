@@ -75,7 +75,8 @@ fun TopBar(
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBackIos,
-                        contentDescription = "ArrowBack"
+                        contentDescription = "ArrowBack",
+                        tint = Color.White
                     )
                 }
             }

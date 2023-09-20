@@ -33,6 +33,9 @@ import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
+import com.example.deco3801.ui.PrivacyPolicyScreen
+import com.example.deco3801.ui.SettingsScreen
+import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
 import com.example.deco3801.ui.components.TopBar
 
@@ -61,10 +64,19 @@ fun AppFunctionality(
                 CreateScreen(navController)
             }
             composable(route = ScreenNames.Profile.name) {
-                ProfileScreen()
+                ProfileScreen(navController)
             }
             composable(route = ScreenNames.ARscreen.name) {
                 ArtDisplayScreen(0, ArtDisplayViewModel)
+            }
+            composable(route = ScreenNames.Settings.name) {
+                SettingsScreen(navController)
+            }
+            composable(route = ScreenNames.TermsAndConditions.name) {
+                TandCScreen(navController)
+            }
+            composable(route = ScreenNames.PrivacyPolicy.name) {
+                PrivacyPolicyScreen(navController)
             }
         }
     }

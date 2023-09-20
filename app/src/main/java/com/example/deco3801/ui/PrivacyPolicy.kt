@@ -21,20 +21,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
+import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrivacyPolicyScreen (
-    navigateUp: () -> Unit
-) {
+fun PrivacyPolicyScreen (navController: NavHostController) {
     Scaffold (
         topBar = {
             TopBar(
-                canNavigateBack = false,
+                canNavigateBack = true,
                 showSettings = false,
-                navigateUp = navigateUp
+                navigateUp = {navController.navigate(ScreenNames.Settings.name)}
             )
         }
     ){ innerPadding ->
@@ -125,5 +126,5 @@ fun PrivacyPolicyDialog(
 @Preview
 @Composable
 fun PreviewPrivacyPolicyScreen() {
-    TandCScreen({})
+    TandCScreen(navController = rememberNavController())
 }
