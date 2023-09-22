@@ -37,7 +37,7 @@ import com.example.deco3801.ui.model.ProfilePost
 
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier.padding(8.dp)) {
+fun ProfileScreen(modifier: Modifier = Modifier.padding(12.dp)) {
     val spacerModifier : Modifier = Modifier.height(12.dp)
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
