@@ -1,18 +1,23 @@
 package com.example.deco3801.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,13 +34,67 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.UnchangingAppColors
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(
+    canNavigateBack: Boolean,
+    showSettings: Boolean,
+    navigateUp: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (!canNavigateBack) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            titleContentColor = Color.White,
+            containerColor = UnchangingAppColors.main_theme
+        ),
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBackIos,
+                        contentDescription = "ArrowBack",
+                        tint = Color.White
+                    )
+                }
+            }
+        },
+        actions = {
+            if (showSettings) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Settings",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
+        }
+    )
+}
 
 @Composable
 fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
@@ -109,29 +168,4 @@ fun NavBar(navController: NavHostController) {
 @Composable
 fun PreviewNavBar() {
     NavBar(navController = rememberNavController())
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBackBar(
-    navigateUp: () -> Unit
-) {
-    TopAppBar(title = { /*TODO*/ },
-        navigationIcon = {
-            IconButton(
-                onClick = navigateUp
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back button",
-                    tint = Color.White
-                )
-            }
-        },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            titleContentColor = Color.White,
-            containerColor = UnchangingAppColors.main_theme
-        )
-    )
 }
