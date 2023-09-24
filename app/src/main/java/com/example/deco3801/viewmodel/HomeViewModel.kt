@@ -2,9 +2,9 @@ package com.example.deco3801.viewmodel
 
 import android.location.Location
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.repository.ArtRepository
+import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.util.toGeoPoint
 import com.example.deco3801.util.toLatLng
 import com.google.android.gms.maps.model.LatLng
@@ -31,7 +31,7 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val artRepo: ArtRepository,
-) : ViewModel() {
+) : AppViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
     private var geoQuery: GeoQuery? = null
@@ -121,7 +121,7 @@ class HomeViewModel @Inject constructor(
             }
 
             override fun onGeoQueryError(exception: Exception) {
-                // TODO: Handle error
+               SnackbarManager.showError(exception)
             }
         })
     }

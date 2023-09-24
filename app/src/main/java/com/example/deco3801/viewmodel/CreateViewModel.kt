@@ -7,11 +7,10 @@ import android.provider.OpenableColumns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.repository.ArtRepository
+import com.example.deco3801.ui.components.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -46,7 +45,7 @@ fun Uri.getFileName(context: Context): String {
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     private val artRepo: ArtRepository,
-) : ViewModel() {
+) : AppViewModel() {
     var uiState by mutableStateOf(CreateUiState())
         private set
 
@@ -73,28 +72,24 @@ class CreateViewModel @Inject constructor(
                 && uiState.uri != null
     }
 
-    fun onPostArtwork(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    fun onPostArtwork(open: (String) -> Unit) {
         if (!isValid()) {
-            onFailure("Input is invalid.")
+            SnackbarManager.showError("Input is invalid.")
             return
         }
         val tmp = uiState
         uiState = CreateUiState()
 
-        viewModelScope.launch {
-            try {
-                artRepo.createArt(
-                    tmp.title,
-                    tmp.description,
-                    tmp.location!!,
-                    tmp.uri!!,
-                    tmp.filename,
-                )
-                onSuccess()
-            } catch (e: Exception) {
-                onFailure(e.message ?: "Upload Failed.")
-                uiState = tmp
-            }
+        launchCatching(onFailure = { uiState = tmp }) {
+            artRepo.createArt(
+                tmp.title,
+                tmp.description,
+                tmp.location!!,
+                tmp.uri!!,
+                tmp.filename,
+            )
+            SnackbarManager.showMessage("Artwork Posted!")
+            open(ScreenNames.Home.name)
         }
     }
 }
