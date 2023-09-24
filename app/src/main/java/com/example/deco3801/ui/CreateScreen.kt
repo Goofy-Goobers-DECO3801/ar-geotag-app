@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +61,7 @@ fun CreateScreen(
                 showSettings = false,
                 navigateUp = {}
             )
-        }
+        },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
@@ -102,7 +101,9 @@ fun CreateScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 10.dp)
                     ){
                         Button(
                             onClick = {
@@ -116,7 +117,8 @@ fun CreateScreen(
                         Button(
                             onClick = {
                                 navController.navigate(ScreenNames.ARscreen.name)
-                            }
+                            },
+                            enabled = uiState.uri != null
                         ) {
                             Text(text = "Preview in AR")
                         }
@@ -126,7 +128,7 @@ fun CreateScreen(
                     // Display the selected file path
                     uiState.uri?.let {
                         Text(
-                            text = "Selected File: ${File(it.path!!).name}",
+                            text = "Selected File: ${uiState.filename}",
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(modifier = spacerModifier)
@@ -172,15 +174,10 @@ fun CreateScreen(
                         Button(
                             onClick = {
                                 viewModel.onPostArtwork(
-                                    onSuccess = {
-                                        Toast.makeText(context, "Artwork Posted!", Toast.LENGTH_SHORT).show()
-                                        navController.navigate(ScreenNames.Home.name)
-                                    },
-                                    onFailure = {
-                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                    open = {
+                                        navController.navigate(it)
                                     }
                                 )
-
                             },
                             enabled = viewModel.isValid()
                         ) {

@@ -4,6 +4,7 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import com.example.deco3801.data.model.Art
+import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseUser
@@ -28,11 +29,19 @@ class ArtRepository @Inject constructor(
         uri: Uri,
         filename: String,
     ): Art {
+
         if (user == null) {
             throw Exception("User is not logged in.")
         }
-
         val uid = user.uid
+
+        val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+        val storageRef = storage.reference.child(storagePath)
+        storageRef.putFile(uri).addOnProgressListener {
+            val progress = it.bytesTransferred.toFloat() / it.totalByteCount
+            ProgressbarState.updateProgressbar(progress)
+        }.await()
+
         val art = Art(
             title = title,
             description = description,
@@ -40,13 +49,15 @@ class ArtRepository @Inject constructor(
             altitude = location.altitude,
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
-            storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+            storageUrl = storageRef.downloadUrl.await().toString(),
         )
 
         Log.d(ART_COLLECTION, art.toString())
 
-        storage.reference.child(art.storagePath).putFile(uri).await()
-        db.collection(ART_COLLECTION).add(art).await()
+        db.collection(ART_COLLECTION).add(art).addOnFailureListener {
+            storageRef.delete()
+            throw it
+        }.await()
         return art
     }
 

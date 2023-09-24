@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -34,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ScreenNames
-import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.components.TopBar
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.lang.Boolean.TRUE
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +165,10 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
                             .fillMaxWidth()
                             .padding(12.dp)
                     ) {
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = {
+                            Firebase.auth.signOut()
+                            navController.navigate(ScreenNames.Login.name)
+                        }) {
                             Text(text = "Sign Out")
                         }
                     }

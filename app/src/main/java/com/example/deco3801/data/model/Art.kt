@@ -22,7 +22,7 @@ data class Art(
     @ServerTimestamp
     var timestamp: Date? = null,
     var userId: String = "",
-    var storagePath: String = "",
+    var storageUrl: String = "",
     var likeCount: Double = 0.0,
     var reviewCount: Double = 0.0,
 )

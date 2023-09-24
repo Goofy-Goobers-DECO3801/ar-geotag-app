@@ -1,81 +1,89 @@
 package com.example.deco3801
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.CreateScreen
-import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.HomeScreen
+import com.example.deco3801.ui.LoginScreen
 import com.example.deco3801.ui.PrivacyPolicyScreen
+import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.SettingsScreen
+import com.example.deco3801.ui.SignUpScreen
 import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
-import com.example.deco3801.ui.components.TopBar
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
     ArtDisplayViewModel: ArtDisplayViewModel,
-    navController: NavHostController = rememberNavController()
+    appState: AppState = rememberAppState(),
 ) {
-    Scaffold(
-        bottomBar = {
-            NavBar(navController)
-        }
-    ) { innerPadding ->
+    val startDestination = if (Firebase.auth.currentUser == null) {
+        ScreenNames.Login.name
+    } else {
+        ScreenNames.Home.name
+    }
+    val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
+    val current = navBackStackEntry?.destination?.route
 
+    Scaffold(
+        snackbarHost = { SnackbarHost(appState.snackbarHostState) },
+        bottomBar = {
+            if (current != null && current !in listOf(
+                    ScreenNames.Login.name,
+                    ScreenNames.SignUp.name
+                )
+            ) {
+                NavBar(appState.navController)
+            }
+        },
+    ) { innerPadding ->
         NavHost(
-            navController = navController,
-            startDestination = ScreenNames.Home.name,
+            navController = appState.navController,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+
+            composable(ScreenNames.Login.name) {
+                LoginScreen(appState.navController)
+            }
+            composable(ScreenNames.SignUp.name) {
+                SignUpScreen(appState.navController)
+            }
             composable(route = ScreenNames.Home.name) {
                 HomeScreen()
             }
             composable(route = ScreenNames.Create.name) {
-                CreateScreen(navController)
+                CreateScreen(appState.navController)
             }
             composable(route = ScreenNames.Profile.name) {
-                ProfileScreen(navController)
+                ProfileScreen(appState.navController)
             }
             composable(route = ScreenNames.ARscreen.name) {
                 ArtDisplayScreen(0, ArtDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
-                SettingsScreen(navController)
+                SettingsScreen(appState.navController)
             }
             composable(route = ScreenNames.TermsAndConditions.name) {
-                TandCScreen(navController)
+                TandCScreen(appState.navController)
             }
             composable(route = ScreenNames.PrivacyPolicy.name) {
-                PrivacyPolicyScreen(navController)
+                PrivacyPolicyScreen(appState.navController)
             }
         }
     }
+}

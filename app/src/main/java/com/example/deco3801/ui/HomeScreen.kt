@@ -17,9 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.deco3801.R
+import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
@@ -51,6 +51,12 @@ fun HomeScreen(
 
         val context = LocalContext.current
 
+        DisposableEffect(Unit) {
+            ProgressbarState.showIndeterminateProgressbar()
+            onDispose {
+                ProgressbarState.resetProgressbar()
+            }
+        }
         // Location Permissions
         RequestPermissions(
             permissions = listOf(
@@ -97,6 +103,9 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
                 properties = mapProperties,
+                onMapLoaded = {
+                    ProgressbarState.resetProgressbar()
+                }
             ) {
                 for (art in uiState.art.values) {
                     if (art.location == null) {
