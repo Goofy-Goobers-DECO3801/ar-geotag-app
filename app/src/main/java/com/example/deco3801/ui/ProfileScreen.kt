@@ -174,7 +174,7 @@ fun ProfileScreen(
                             Text(
                                 text = "${art.count()} posts"
                             )
-                            ClickableText( // TODO FOLLOWERS
+                            ClickableText(
                                 text = AnnotatedString("${user.followerCount} followers"),
                                 onClick = {
                                     viewModel.onFollowers()
@@ -279,8 +279,6 @@ fun FollowersDialog(
 
                             }
                         }
-
-
                     }
                 }
             }
