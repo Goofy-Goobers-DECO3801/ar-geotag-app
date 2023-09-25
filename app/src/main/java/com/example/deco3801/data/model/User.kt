@@ -12,4 +12,6 @@ data class User(
     var isPrivate: Boolean = false,
     var pictureUri: String = "",
     var bio: String = "",
+    var followerCount: Int = 0,
+    var followingCount: Int = 0,
 )
