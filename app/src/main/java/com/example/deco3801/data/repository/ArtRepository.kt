@@ -10,21 +10,17 @@ import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import org.imperiumlabs.geofirestore.core.GeoHash
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val user: FirebaseUser?
-): Repository<Art>(Art::class.java) {
+) : Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
         description: String,

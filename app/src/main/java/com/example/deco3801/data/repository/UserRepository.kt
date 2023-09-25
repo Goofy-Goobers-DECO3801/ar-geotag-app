@@ -1,26 +1,22 @@
 package com.example.deco3801.data.repository
 
 import android.util.Log
-import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class UserRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth
-):Repository<User>(User::class.java) {
+) : Repository<User>(User::class.java) {
     suspend fun createUser(username: String, email: String, password: String): User {
         val authUser = auth.createUserWithEmailAndPassword(email, password).await().user!!
         val id = authUser.uid
@@ -44,6 +40,18 @@ class UserRepository @Inject constructor(
             throw Exception("Username is already taken!", e)
         }
         return user
+    }
+
+    suspend fun getUser(userId: String): User? {
+        return getCollectionRef().document(userId).get().await().toObject()
+    }
+
+    suspend fun getUsers(userIds: List<String>): List<User> {
+        if (userIds.isEmpty()) {
+            return emptyList()
+        }
+
+        return getCollectionRef().whereIn(FieldPath.documentId(), userIds).get().await().toObjects()
     }
 
     suspend fun loginUser(email: String, password: String): AuthResult? {
