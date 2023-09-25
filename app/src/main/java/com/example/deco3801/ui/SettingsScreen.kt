@@ -46,7 +46,7 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
             TopBar(
                 canNavigateBack = true,
                 showSettings = false,
-                navigateUp = {navController.navigate(ScreenNames.Profile.name)}
+                navigateUp = { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") }
             )
         }
     ) { innerPadding ->

@@ -7,8 +7,9 @@ data class User(
     val id: String = "",
     var username: String = "",
     var email: String = "",
+    var fullname: String = "",
     @field:JvmField
     var isPrivate: Boolean = false,
-    var pictureRef: String? = null,
+    var pictureUri: String = "",
     var bio: String = "",
 )

@@ -10,6 +10,9 @@ import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import org.imperiumlabs.geofirestore.core.GeoHash
@@ -21,7 +24,7 @@ class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val user: FirebaseUser?
-) {
+): Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
         description: String,
@@ -49,7 +52,8 @@ class ArtRepository @Inject constructor(
             altitude = location.altitude,
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
-            storageUrl = storageRef.downloadUrl.await().toString(),
+            username = user.displayName!!,
+            storageUri = storageRef.downloadUrl.await().toString(),
         )
 
         Log.d(ART_COLLECTION, art.toString())
@@ -61,7 +65,14 @@ class ArtRepository @Inject constructor(
         return art
     }
 
-    fun getCollectionRef(): CollectionReference {
+    fun attachListenerByUserId(userId: String, callback: (List<Art>) -> Unit) {
+        attachListenerWithQuery(callback) { query ->
+            query.whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+        }
+    }
+
+    override fun getCollectionRef(): CollectionReference {
         return db.collection(ART_COLLECTION)
     }
 

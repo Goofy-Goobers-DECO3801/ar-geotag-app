@@ -42,6 +42,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.UnchangingAppColors
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,8 +172,8 @@ fun NavBar(navController: NavHostController) {
             NavButton(
                 text = "Profile",
                 Icons.Default.AccountCircle,
-                { navController.navigate(ScreenNames.Profile.name) },
-                isSelected = currentRoute == ScreenNames.Profile.name
+                { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") },
+                isSelected = currentRoute == "${ScreenNames.Profile.name}/${Firebase.auth.uid}"
             )
         }
     }
