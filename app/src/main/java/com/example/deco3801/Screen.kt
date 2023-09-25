@@ -69,8 +69,12 @@ fun AppFunctionality(
             composable(route = ScreenNames.Create.name) {
                 CreateScreen(appState.navController)
             }
-            composable(route = ScreenNames.Profile.name) {
-                ProfileScreen(appState.navController)
+            composable(route = "${ScreenNames.Profile.name}/{uid}") {
+                val uId = it.arguments?.getString("uid")
+                uId?.let { id ->
+                    ProfileScreen(id, appState.navController)
+                }
+
             }
             composable(route = ScreenNames.ARscreen.name) {
                 ArtDisplayScreen(0, ArtDisplayViewModel)
