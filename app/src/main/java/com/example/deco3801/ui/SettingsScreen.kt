@@ -23,23 +23,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ScreenNames
+import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.components.TopBar
+import com.example.deco3801.viewmodel.SettingsViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import java.lang.Boolean.TRUE
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modifier) {
-    val textFieldModifier: Modifier = Modifier.fillMaxWidth()
+fun SettingsScreen(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -55,7 +63,6 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
                 modifier = Modifier
                     .padding(16.dp)
             ) {
-                val isPrivate = TRUE //TODO viewModel.isPrivateAccountState
                 val textModifier: Modifier = Modifier
                 val spacerModifier: Modifier = Modifier.height(10.dp)
                 item {
@@ -66,7 +73,7 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
-                item{
+                item {
                     Spacer(modifier = spacerModifier)
                 }
                 item {
@@ -83,8 +90,8 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
                         ) {
                             Text(text = "Private Account")
                             Switch(
-                                checked = isPrivate,
-                                onCheckedChange = null
+                                checked = uiState.isPrivate,
+                                onCheckedChange = viewModel::onPrivate
                             )
                         }
                     }
@@ -99,10 +106,24 @@ fun SettingsScreen(navController: NavHostController, modifier : Modifier = Modif
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                             .padding(16.dp)
                     ) {
-                        Column() {
+                        Column {
                             Text(text = "Change Password")
-                            //TODO TextField(value = "Enter New Password", onValueChange = viewModel::onPasswordChange)
-                            //PasswordField(value = "Enter a New Password", onValueChange = {})
+                            PasswordField(
+                                value = uiState.oldPassword,
+                                label = "Old Password",
+                                onValueChange = viewModel::onOldPasswordChange
+                            )
+                            PasswordField(
+                                value = uiState.newPassword,
+                                label = "New Password",
+                                onValueChange = viewModel::onNewPasswordChange
+                            )
+                            Button(
+                                onClick = viewModel::updatePassword,
+                                enabled = viewModel.updatePasswordEnabled()
+                            ) {
+                                Text("Confirm")
+                            }
                         }
                     }
                 }
