@@ -3,14 +3,17 @@ package com.example.deco3801.data.repository
 import android.util.Log
 import com.example.deco3801.data.model.User
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.tasks.await
+import java.io.Serializable
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
@@ -42,7 +45,23 @@ class UserRepository @Inject constructor(
         return user
     }
 
+    suspend fun updatePassword(oldPassword: String, newPassword: String) {
+        val user = auth.currentUser!!
+        user.reauthenticate(EmailAuthProvider.getCredential(user.email!!, oldPassword)).await()
+        user.updatePassword(newPassword).await()
+    }
+
+    suspend fun updateIsPrivate(isPrivate: Boolean) {
+        updateUser(auth.uid!!, hashMapOf("isPrivate" to isPrivate))
+    }
+
+    private suspend fun updateUser(userId: String, fields: HashMap<String, Serializable?>) {
+        getCollectionRef().document(userId)
+            .set(fields, SetOptions.mergeFields(fields.keys.toList())).await()
+    }
+
     suspend fun getUser(userId: String): User? {
+
         return getCollectionRef().document(userId).get().await().toObject()
     }
 
