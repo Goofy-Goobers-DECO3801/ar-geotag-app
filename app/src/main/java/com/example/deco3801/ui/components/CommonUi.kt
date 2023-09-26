@@ -176,7 +176,12 @@ fun NavBar(navController: NavHostController) {
                 text = "Profile",
                 Icons.Default.AccountCircle,
                 { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") },
-                isSelected = currentRoute == "${ScreenNames.Profile.name}/${Firebase.auth.uid}"
+                isSelected = if (currentRoute == "${ScreenNames.Profile.name}/{uid}") {
+                    val uId = navBackStackEntry?.arguments?.getString("uid")
+                    uId == Firebase.auth.uid
+                } else {
+                    false
+                }
             )
         }
     }
