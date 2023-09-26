@@ -30,6 +30,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -179,14 +181,16 @@ fun ProfileScreen(
                                 onClick = {
                                     viewModel.onFollowers()
                                     followDialogState = FollowDialogState.FOLLOWERS
-                                }
+                                },
+                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
                             )
                             ClickableText(
                                 text = AnnotatedString("${user.followingCount} following"),
                                 onClick = {
                                     viewModel.onFollowing()
                                     followDialogState = FollowDialogState.FOLLOWING
-                                }
+                                },
+                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
                             )
                         }
 
