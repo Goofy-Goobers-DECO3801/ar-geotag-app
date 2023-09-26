@@ -2,11 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
     <!-- Limits app visibility in the Google Play Store to ARCore supported devices
          (https://developers.google.com/ar/devices). -->
-    <uses-feature android:name="android.hardware.camera.ar" android:required="true"/>
-    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.ar"
+        android:required="true" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -45,5 +49,4 @@
             android:name=".MainActivity"
             android:foregroundServiceType="location" />
     </application>
-
 </manifest>
