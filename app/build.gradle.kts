@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -85,6 +86,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("com.google.accompanist:accompanist-permissions:0.25.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Saving objects as key-value pairs to app storage.
+    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
     // Async Images for Compose
     implementation("io.coil-kt:coil:2.4.0")

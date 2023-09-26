@@ -50,7 +50,8 @@ import com.google.firebase.ktx.Firebase
 fun TopBar(
     canNavigateBack: Boolean,
     showSettings: Boolean,
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    showArtFilter: Boolean = false,
 ) {
     TopAppBar(
         title = {
@@ -92,6 +93,8 @@ fun TopBar(
                         modifier = Modifier.size(36.dp)
                     )
                 }
+            } else if (showArtFilter) {
+                ArtFilterMenu()
             }
         }
     )

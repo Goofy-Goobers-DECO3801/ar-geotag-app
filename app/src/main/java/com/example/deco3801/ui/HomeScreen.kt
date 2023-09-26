@@ -44,7 +44,8 @@ fun HomeScreen(
             TopBar(
                 canNavigateBack = false,
                 showSettings = false,
-                navigateUp = {}
+                navigateUp = {},
+                showArtFilter = true
             )
         }
     ) { innerPadding ->
@@ -74,6 +75,8 @@ fun HomeScreen(
         }
 
         val uiState by viewModel.uiState.collectAsState()
+        val art by viewModel.activeArt.collectAsState()
+
 
         // TODO: What do we display if we cannot get the users location?
         if (uiState.currentLocation == null) {
@@ -107,16 +110,16 @@ fun HomeScreen(
                     ProgressbarState.resetProgressbar()
                 }
             ) {
-                for (art in uiState.art.values) {
-                    if (art.location == null) {
-                        continue
+                art.values.forEach {
+                    if (it.location == null) {
+                        return@forEach
                     }
                     Log.d("MARKER", art.toString())
                     Marker(
-                        state = MarkerState(position = art.location!!.toLatLng()),
-                        title = art.title,
-                        snippet = art.description,
-                        icon =BitmapDescriptorFactory.fromResource(R.drawable.map_marker)
+                        state = MarkerState(position = it.location!!.toLatLng()),
+                        title = it.title,
+                        snippet = it.description,
+                        icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker)
 
                     )
                 }
