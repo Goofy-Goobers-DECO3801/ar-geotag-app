@@ -1,7 +1,9 @@
 package com.example.deco3801.data.model
 
 import com.google.firebase.firestore.DocumentId
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class User(
     @DocumentId
     val id: String = "",
