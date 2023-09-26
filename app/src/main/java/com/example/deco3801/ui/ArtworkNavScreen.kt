@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.deco3801.R
-import com.example.deco3801.ui.components.TopBackBar
+import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +48,11 @@ fun ArtworkNavScreen(
     numReviews: Int
 ) {
     Scaffold (
-        topBar = { TopBackBar(navigateUp) }
+        topBar = { TopBar(
+            canNavigateBack = true,
+            showSettings = false,
+            navigateUp = navigateUp
+        ) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
