@@ -157,7 +157,7 @@ fun ProfileScreen(
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 if (isCurrentUser) {
-                                    Button(onClick = { /*TODO*/ }) {
+                                    Button(onClick = { navController.navigate(ScreenNames.EditProfile.name) }) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
@@ -173,8 +173,15 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
+                            Text(text = user.bio)
+                        }
+                        Spacer(modifier = spacerModifier)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
                             Text(
-                                text = "${art.count()} posts"
+                                text = "${art.count()} posts",
                             )
                             ClickableText(
                                 text = AnnotatedString("${user.followerCount} followers"),
