@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
@@ -27,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,6 +49,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
+import com.example.deco3801.ui.components.BioField
+import com.example.deco3801.ui.components.NameField
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.EditProfileViewModel
 import com.google.firebase.auth.ktx.auth
@@ -135,9 +140,16 @@ fun EditProfileScreen(
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                         .padding(16.dp)
                 ) {
-                    Column {
+                    Column () {
                         Text(text = "Change Username")
-                        /*TODO backend integration to enter new username*/
+                        Spacer(modifier = spacerModifier)
+                        NameField(
+                            modifier = modifier.fillMaxWidth(),
+                            value = user.username,
+                            label = "Username",
+                            onValueChange = {} /*TODO*/
+
+                        )
                     }
                 }
             }
@@ -150,20 +162,38 @@ fun EditProfileScreen(
                         .fillMaxWidth()
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                         .padding(16.dp)
-                        .clickable {
-                            /*TODO*/
-                        }
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Recently visited artworks")
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                    Column {
+                        Text(text = "Change Display Name")
+                        Spacer(modifier = spacerModifier)
+                        NameField(
+                            modifier = modifier.fillMaxWidth(),
+                            value = user.fullname,
+                            label = "Full Name",
+                            onValueChange = {} /*TODO*/
+                        )
+                    }
+                }
+            }
+            item {
+                Spacer(modifier = spacerModifier)
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Text(text = "Edit Bio")
+                        Spacer(modifier = spacerModifier)
+                        BioField(
+                            modifier = modifier.fillMaxWidth(),
+                            value = user.bio,
+                            label = "Bio",
+                            onValueChange = {} /*TODO*/
+
                         )
                     }
                 }

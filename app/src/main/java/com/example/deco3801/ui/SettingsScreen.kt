@@ -110,12 +110,14 @@ fun SettingsScreen(
                             Text(text = "Change Password")
                             Spacer(modifier = spacerModifier)
                             PasswordField(
+                                modifier = Modifier.fillMaxWidth(),
                                 value = uiState.oldPassword,
                                 label = "Old Password",
                                 onValueChange = viewModel::onOldPasswordChange
                             )
                             Spacer(modifier = spacerModifier)
                             PasswordField(
+                                modifier = Modifier.fillMaxWidth(),
                                 value = uiState.newPassword,
                                 label = "New Password",
                                 onValueChange = viewModel::onNewPasswordChange
