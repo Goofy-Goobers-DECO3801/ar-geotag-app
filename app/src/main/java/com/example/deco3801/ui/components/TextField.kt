@@ -68,3 +68,41 @@ fun EmailField(
         singleLine = true,
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NameField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Username"
+) {
+    TextField(
+        modifier = modifier,
+        value = value,
+        onValueChange = {
+            onValueChange(it.trim())
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        singleLine = true,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BioField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Bio"
+) {
+    TextField(
+        modifier = modifier,
+        value = value,
+        onValueChange = {
+            onValueChange(it.trim())
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        singleLine = false,
+    )
+}

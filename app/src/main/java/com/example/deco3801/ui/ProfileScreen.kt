@@ -174,7 +174,16 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Text(
-                                text = "${art.count()} posts"
+                                text = "${user.bio}"
+                            )
+                        }
+                        Spacer(modifier = spacerModifier)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(
+                                text = "${art.count()} posts",
                             )
                             ClickableText(
                                 text = AnnotatedString("${user.followerCount} followers"),
