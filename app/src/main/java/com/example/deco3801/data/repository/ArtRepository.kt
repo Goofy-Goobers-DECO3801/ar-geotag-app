@@ -56,7 +56,6 @@ class ArtRepository @Inject constructor(
 
         db.collection(ART_COLLECTION).add(art).addOnFailureListener {
             storageRef.delete()
-            throw it
         }.await()
         return art
     }
