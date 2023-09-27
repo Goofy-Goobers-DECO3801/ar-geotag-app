@@ -1,7 +1,9 @@
 package com.example.deco3801.data.repository
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.deco3801.data.model.User
+import com.example.deco3801.ui.components.ProgressbarState
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -11,13 +13,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.tasks.await
 import java.io.Serializable
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val storage: FirebaseStorage
 ) : Repository<User>(User::class.java) {
     suspend fun createUser(username: String, email: String, password: String): User {
         val authUser = auth.createUserWithEmailAndPassword(email, password).await().user!!
@@ -49,6 +54,28 @@ class UserRepository @Inject constructor(
 
     suspend fun updateIsPrivate(isPrivate: Boolean) {
         updateUser(auth.uid!!, hashMapOf("isPrivate" to isPrivate))
+    }
+
+    suspend fun editUser(user: User) {
+        val uid = auth.uid!!
+        val newUser = user.copy()
+        var storageRef: StorageReference? = null
+
+        if (!user.pictureUri.startsWith("https://firebasestorage")) {
+            val storagePath = "$uid/profile-picture-${System.currentTimeMillis()}"
+            storageRef = storage.reference.child(storagePath)
+            storageRef.putFile(user.pictureUri.toUri()).addOnProgressListener {
+                val progress = it.bytesTransferred.toFloat() / it.totalByteCount
+                ProgressbarState.updateProgressbar(progress)
+            }.await()
+            newUser.pictureUri = storageRef.downloadUrl.await().toString()
+        }
+
+        Log.d(USER_COLLECTION, newUser.toString())
+
+        getCollectionRef().document(uid).set(newUser, SetOptions.merge()).addOnFailureListener {
+            storageRef?.delete()
+        }.await()
     }
 
     private suspend fun updateUser(userId: String, fields: HashMap<String, Serializable?>) {
