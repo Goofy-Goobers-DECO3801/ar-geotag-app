@@ -49,9 +49,7 @@ class FollowRepository @Inject constructor(
     suspend fun followUser(user: User) {
         val follow = Follow(
             followerId = auth.uid!!,
-            followerName = auth.currentUser!!.displayName!!,
             followingId = user.id,
-            followingName = user.username
         )
         val followingRef = getCollectionRef().document(user.id)
         val me = userRepo.getCollectionRef().document(auth.uid!!)

@@ -5,7 +5,6 @@ import com.example.deco3801.data.model.User
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,9 +24,6 @@ class UserRepository @Inject constructor(
         val id = authUser.uid
         val user = User(username = username, email = email)
 
-        authUser.updateProfile(userProfileChangeRequest {
-            displayName = username
-        }).await()
         Log.d(USER_COLLECTION, user.toString())
 
         // Ensure that the username is unique if its not delete the authUser
