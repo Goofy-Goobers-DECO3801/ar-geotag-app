@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.CreateScreen
+import com.example.deco3801.ui.EditProfileScreen
 import com.example.deco3801.ui.HomeScreen
 import com.example.deco3801.ui.LoginScreen
 import com.example.deco3801.ui.PrivacyPolicyScreen
@@ -87,6 +88,9 @@ fun AppFunctionality(
             }
             composable(route = ScreenNames.PrivacyPolicy.name) {
                 PrivacyPolicyScreen(appState.navController)
+            }
+            composable(route = ScreenNames.EditProfile.name) {
+                EditProfileScreen(appState.navController)
             }
         }
     }
