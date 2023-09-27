@@ -22,7 +22,6 @@ data class Art(
     @ServerTimestamp
     var timestamp: Date? = null,
     var userId: String = "",
-    var username: String = "",
     var storageUri: String = "",
     var likeCount: Int = 0,
     var reviewCount: Int = 0,

@@ -48,7 +48,6 @@ class ArtRepository @Inject constructor(
             altitude = location.altitude,
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
-            username = user.displayName!!,
             storageUri = storageRef.downloadUrl.await().toString(),
         )
 

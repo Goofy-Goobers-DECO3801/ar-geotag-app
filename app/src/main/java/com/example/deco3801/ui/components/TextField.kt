@@ -78,11 +78,10 @@ fun NameField(
     label: String = "Username"
 ) {
     TextField(
+        label = { Text(label) },
         modifier = modifier,
         value = value,
-        onValueChange = {
-            onValueChange(it.trim())
-        },
+        onValueChange = onValueChange,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         singleLine = true,
     )
@@ -94,14 +93,13 @@ fun BioField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Bio"
+    label: String = "Bio",
 ) {
     TextField(
+        label = { Text(label) },
         modifier = modifier,
         value = value,
-        onValueChange = {
-            onValueChange(it.trim())
-        },
+        onValueChange = onValueChange,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         singleLine = false,
     )

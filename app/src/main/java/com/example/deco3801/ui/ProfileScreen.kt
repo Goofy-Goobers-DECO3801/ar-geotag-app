@@ -173,9 +173,7 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text(
-                                text = "${user.bio}"
-                            )
+                            Text(text = user.bio)
                         }
                         Spacer(modifier = spacerModifier)
                         Row(

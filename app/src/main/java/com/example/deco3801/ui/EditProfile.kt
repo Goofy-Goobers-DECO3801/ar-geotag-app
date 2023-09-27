@@ -19,16 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,11 +58,9 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
 
-    val user by viewModel.user.collectAsState()
+    val user by viewModel.newUser.collectAsState()
     val launcher = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
-        uri?.let {
-            viewModel.onUserChange(user.copy(pictureUri = it.toString()))
-        }
+        uri?.let(viewModel::onPictureChange)
     }
 
     val back = remember {
@@ -140,14 +132,14 @@ fun EditProfileScreen(
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                         .padding(16.dp)
                 ) {
-                    Column () {
+                    Column {
                         Text(text = "Change Username")
                         Spacer(modifier = spacerModifier)
                         NameField(
                             modifier = modifier.fillMaxWidth(),
                             value = user.username,
                             label = "Username",
-                            onValueChange = {} /*TODO*/
+                            onValueChange = viewModel::onUsernameChange
 
                         )
                     }
@@ -164,13 +156,13 @@ fun EditProfileScreen(
                         .padding(16.dp)
                 ) {
                     Column {
-                        Text(text = "Change Display Name")
+                        Text(text = "Change Full Name")
                         Spacer(modifier = spacerModifier)
                         NameField(
                             modifier = modifier.fillMaxWidth(),
                             value = user.fullname,
                             label = "Full Name",
-                            onValueChange = {} /*TODO*/
+                            onValueChange = viewModel::onFullnameChange
                         )
                     }
                 }
@@ -189,10 +181,9 @@ fun EditProfileScreen(
                         Text(text = "Edit Bio")
                         Spacer(modifier = spacerModifier)
                         BioField(
-                            modifier = modifier.fillMaxWidth(),
                             value = user.bio,
-                            label = "Bio",
-                            onValueChange = {} /*TODO*/
+                            onValueChange = viewModel::onBioChange,
+                            modifier = modifier.fillMaxWidth()
 
                         )
                     }
