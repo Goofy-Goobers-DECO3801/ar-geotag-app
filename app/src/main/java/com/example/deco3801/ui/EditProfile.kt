@@ -1,6 +1,8 @@
 package com.example.deco3801.ui
 
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -25,18 +28,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
+import com.example.deco3801.viewmodel.EditProfileViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -44,13 +55,26 @@ import com.google.firebase.ktx.Firebase
 @Composable
 fun EditProfileScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
+
+    val user by viewModel.user.collectAsState()
+    val launcher = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
+        uri?.let {
+            viewModel.onUserChange(user.copy(pictureUri = it.toString()))
+        }
+    }
+
+    val back = remember {
+        { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") }
+    }
+
     Scaffold(
         topBar = {
             TopBar(
                 canNavigateBack = true,
-                navigateUp = { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") }
+                navigateUp = back
             )
         }
     ) { innerPadding ->
@@ -80,15 +104,24 @@ fun EditProfileScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = modifier.fillMaxWidth()
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.pfp),
+                        AsyncImage(
+                            model = user.pictureUri.ifBlank { R.drawable.pfp },
+                            placeholder = painterResource(id = R.drawable.pfp),
                             contentDescription = "profile",
-                            modifier = Modifier.size(108.dp)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .size(108.dp)
+                                .clickable {
+                                    launcher.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+                                }
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         ClickableText(
                             text = AnnotatedString("Change profile picture"),
-                            onClick = {})
+                            onClick = {
+                                launcher.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+                            })
                     }
                 }
             }
@@ -145,7 +178,9 @@ fun EditProfileScreen(
                         .fillMaxWidth()
                         .padding(12.dp)
                 ) {
-                    Button(onClick = { /*TODO*/ }) {
+                    Button(onClick = {
+                        viewModel.onSave(back)
+                    }) {
                         Text(text = "Save Changes")
                     }
                 }
