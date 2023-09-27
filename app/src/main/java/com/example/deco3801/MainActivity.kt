@@ -17,7 +17,8 @@ enum class ScreenNames {
     TermsAndConditions,
     PrivacyPolicy,
     ARscreen,
-    Settings
+    Settings,
+    EditProfile
 }
 
 @AndroidEntryPoint

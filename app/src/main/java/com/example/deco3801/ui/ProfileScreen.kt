@@ -157,7 +157,7 @@ fun ProfileScreen(
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 if (isCurrentUser) {
-                                    Button(onClick = { /*TODO*/ }) {
+                                    Button(onClick = { navController.navigate(ScreenNames.EditProfile.name) }) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {

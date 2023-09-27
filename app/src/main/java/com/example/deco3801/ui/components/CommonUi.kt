@@ -48,9 +48,9 @@ import com.google.firebase.ktx.Firebase
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    canNavigateBack: Boolean,
-    showSettings: Boolean,
-    navigateUp: () -> Unit,
+    canNavigateBack: Boolean = false,
+    showSettings: Boolean = false,
+    navigateUp: () -> Unit = {},
     showArtFilter: Boolean = false,
 ) {
     TopAppBar(
