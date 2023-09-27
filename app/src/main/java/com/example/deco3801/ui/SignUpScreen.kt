@@ -14,7 +14,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +33,7 @@ import androidx.navigation.NavHostController
 import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.EmailField
+import com.example.deco3801.ui.components.NameField
 import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.AuthViewModel
@@ -64,7 +64,7 @@ fun SignUpScreen(
             modifier = Modifier.size(150.dp)
         )
 
-        TextField(
+        NameField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -75,8 +75,6 @@ fun SignUpScreen(
                 ),
             value = uiState.username,
             onValueChange = viewModel::onUsernameChange,
-            label = { Text("Username") },
-            singleLine = true,
         )
 
         EmailField(
@@ -124,10 +122,12 @@ fun SignUpScreen(
                 text = AnnotatedString(agreementText),
                 onClick = { offset ->
                     if (offset >= agreementText.indexOf("Terms and Conditions") &&
-                        offset < agreementText.indexOf("Terms and Conditions") + "Terms and Conditions".length) {
+                        offset < agreementText.indexOf("Terms and Conditions") + "Terms and Conditions".length
+                    ) {
                         viewTandC = true
                     } else if (offset >= agreementText.indexOf("Privacy Policy") &&
-                        offset < agreementText.indexOf("Privacy Policy") + "Privacy Policy".length) {
+                        offset < agreementText.indexOf("Privacy Policy") + "Privacy Policy".length
+                    ) {
                         viewPrivacyPolicy = true
                     }
                 },

@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
@@ -39,9 +40,17 @@ class UserRepository @Inject constructor(
                 it.set(userRef, user)
                 it.set(indexRef, hashMapOf("value" to id))
             }.await()
-        } catch (e: Exception) {
-            authUser.delete()
-            throw Exception("Username is already taken!", e)
+        } catch (e: FirebaseFirestoreException) {
+            when (e.code) {
+                FirebaseFirestoreException.Code.PERMISSION_DENIED -> throw Exception(
+                    "Username is already taken!",
+                    e
+                )
+
+                else -> {
+                    throw e
+                }
+            }
         }
         return user
     }
@@ -56,26 +65,56 @@ class UserRepository @Inject constructor(
         updateUser(auth.uid!!, hashMapOf("isPrivate" to isPrivate))
     }
 
-    suspend fun editUser(user: User) {
+    suspend fun editUser(oldUser: User, newUser: User) {
         val uid = auth.uid!!
-        val newUser = user.copy()
         var storageRef: StorageReference? = null
+        if (oldUser == newUser) {
+            return
+        }
 
-        if (!user.pictureUri.startsWith("https://firebasestorage")) {
+        val newerUser = newUser.copy()
+
+        if (oldUser.pictureUri != newerUser.pictureUri) {
             val storagePath = "$uid/profile-picture-${System.currentTimeMillis()}"
             storageRef = storage.reference.child(storagePath)
-            storageRef.putFile(user.pictureUri.toUri()).addOnProgressListener {
+            storageRef.putFile(newerUser.pictureUri.toUri()).addOnProgressListener {
                 val progress = it.bytesTransferred.toFloat() / it.totalByteCount
                 ProgressbarState.updateProgressbar(progress)
             }.await()
-            newUser.pictureUri = storageRef.downloadUrl.await().toString()
+            newerUser.pictureUri = storageRef.downloadUrl.await().toString()
         }
 
-        Log.d(USER_COLLECTION, newUser.toString())
+        Log.d(USER_COLLECTION, "NEW: $newerUser")
+        Log.d(USER_COLLECTION, "OLD: $oldUser")
 
-        getCollectionRef().document(uid).set(newUser, SetOptions.merge()).addOnFailureListener {
-            storageRef?.delete()
-        }.await()
+        // Ensure that the username is unique
+        val userRef = getCollectionRef().document(uid)
+        val indexRef = db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(newerUser.username)
+        val oldIndexRef = db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(oldUser.username)
+        try {
+            db.runBatch {
+                it.set(userRef, newerUser, SetOptions.merge())
+                if (oldUser.username != newerUser.username) {
+                    Log.d(USER_COLLECTION, "Chaning Index")
+                    it.delete(oldIndexRef)
+                    it.set(indexRef, hashMapOf("value" to uid))
+                }
+            }.addOnFailureListener {
+                storageRef?.delete()
+            }.await()
+        } catch (e: FirebaseFirestoreException) {
+            when (e.code) {
+                FirebaseFirestoreException.Code.PERMISSION_DENIED -> throw Exception(
+                    "Username is already taken!",
+                    e
+                )
+
+                else -> {
+                    throw e
+                }
+            }
+        }
+
     }
 
     private suspend fun updateUser(userId: String, fields: HashMap<String, Serializable?>) {
