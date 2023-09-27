@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,7 @@ import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
-import java.io.File
+import com.example.deco3801.viewmodel.getFileName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +49,9 @@ fun CreateScreen(
         viewModel.onLocationChange(getCurrentLocation(context))
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let(viewModel::onFileChange)
+        uri?.let {
+            viewModel.onFileChange(it, it.getFileName(context))
+        }
     }
 
     Scaffold(
@@ -60,7 +61,7 @@ fun CreateScreen(
                 showSettings = false,
                 navigateUp = {}
             )
-        }
+        },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
@@ -100,7 +101,9 @@ fun CreateScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 10.dp)
                     ){
                         Button(
                             onClick = {
@@ -114,7 +117,8 @@ fun CreateScreen(
                         Button(
                             onClick = {
                                 navController.navigate(ScreenNames.ARscreen.name)
-                            }
+                            },
+                            enabled = uiState.uri != null
                         ) {
                             Text(text = "Preview in AR")
                         }
@@ -124,7 +128,7 @@ fun CreateScreen(
                     // Display the selected file path
                     uiState.uri?.let {
                         Text(
-                            text = "Selected File: ${File(it.path!!).name}",
+                            text = "Selected File: ${uiState.filename}",
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(modifier = spacerModifier)
@@ -170,15 +174,10 @@ fun CreateScreen(
                         Button(
                             onClick = {
                                 viewModel.onPostArtwork(
-                                    onSuccess = {
-                                        Toast.makeText(context, "Artwork Posted!", Toast.LENGTH_SHORT).show()
-                                        navController.navigate(ScreenNames.Home.name)
-                                    },
-                                    onFailure = {
-                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                    open = {
+                                        navController.navigate(it)
                                     }
                                 )
-
                             },
                             enabled = viewModel.isValid()
                         ) {

@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -82,12 +81,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 viewModel.onLoginClicked(
-                    onSuccess = {
-                        navController.navigate(ScreenNames.Screen.name)
-                    },
-                    onFailure = {
-                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                    }
+                    open = { navController.navigate(it) },
                 )
             },
         ) {
