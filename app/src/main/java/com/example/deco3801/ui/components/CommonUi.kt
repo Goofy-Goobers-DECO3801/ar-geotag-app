@@ -12,27 +12,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,13 +42,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.theme.UnchangingAppColors
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
     canNavigateBack: Boolean,
     showSettings: Boolean,
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    showArtFilter: Boolean = false,
 ) {
     TopAppBar(
         title = {
@@ -85,12 +87,14 @@ fun TopBar(
             if (showSettings) {
                 IconButton(onClick = navigateUp) {
                     Icon(
-                        imageVector = Icons.Filled.Menu,
+                        imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings",
                         tint = Color.White,
                         modifier = Modifier.size(36.dp)
                     )
                 }
+            } else if (showArtFilter) {
+                ArtFilterMenu()
             }
         }
     )
@@ -137,35 +141,54 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
 fun NavBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(UnchangingAppColors.main_theme),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        NavButton(
-            text = "Home",
-            Icons.Default.Home,
-            { navController.navigate(ScreenNames.Home.name) },
-            isSelected = currentRoute == ScreenNames.Home.name
-        )
-        NavButton(
-            text = "Create",
-            Icons.Default.Create,
-            { navController.navigate(ScreenNames.Create.name) },
-            isSelected = currentRoute == ScreenNames.Create.name
-        )
-        NavButton(
-            text = "Profile",
-            Icons.Default.AccountCircle,
-            { navController.navigate(ScreenNames.Profile.name) },
-            isSelected = currentRoute == ScreenNames.Profile.name
-        )
+    val progressState by ProgressbarState.state.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (progressState.visible) {
+            if (progressState.progress < 0) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            } else {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(), progress = progressState.progress
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(UnchangingAppColors.main_theme),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            NavButton(
+                text = "Home",
+                Icons.Default.Home,
+                { navController.navigate(ScreenNames.Home.name) },
+                isSelected = currentRoute == ScreenNames.Home.name
+            )
+            NavButton(
+                text = "Create",
+                Icons.Default.Create,
+                { navController.navigate(ScreenNames.Create.name) },
+                isSelected = currentRoute == ScreenNames.Create.name
+            )
+            NavButton(
+                text = "Profile",
+                Icons.Default.AccountCircle,
+                { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") },
+                isSelected = if (currentRoute == "${ScreenNames.Profile.name}/{uid}") {
+                    val uId = navBackStackEntry?.arguments?.getString("uid")
+                    uId == Firebase.auth.uid
+                } else {
+                    false
+                }
+            )
+        }
     }
 }
 
 @Preview
 @Composable
 fun PreviewNavBar() {
-    NavBar(navController = rememberNavController())
+    NavBar(rememberNavController())
 }
