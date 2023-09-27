@@ -89,10 +89,15 @@ fun HomeScreen(
 
         val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
 
-        if (cameraPositionState.isMoving) {
-            viewModel.onLocationChange(cameraPositionState.position.target)
-            viewModel.onDistanceChange(cameraPositionState.position.toRadius())
-        }
+        /* XXX:
+        This gets run way to much and lags the map since everytime it triggers it the
+        onDocumentChanged callback gets triggered. (idk how to fix this so just hard coding our
+        geoquery to 100,000km)
+         */
+//        if (cameraPositionState.isMoving) {
+//            viewModel.onLocationChange(cameraPositionState.position.target)
+//            viewModel.onDistanceChange(cameraPositionState.position.toRadius())
+//        }
 
         DisposableEffect(Unit) {
             viewModel.listenForArt()

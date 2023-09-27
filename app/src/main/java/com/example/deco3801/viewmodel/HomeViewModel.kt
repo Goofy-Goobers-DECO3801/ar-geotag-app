@@ -37,7 +37,7 @@ import javax.inject.Inject
 
 data class HomeUiState(
     val currentLocation: LatLng? = null,
-    val distanceInKm: Double = 10.0,
+    val distanceInKm: Double = 100_000.0, // XXX
     val ready: Boolean = false,
 )
 
@@ -192,15 +192,8 @@ class HomeViewModel @Inject constructor(
         )
 
         _geoQuery?.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
-            // private var offset = 0.001
-
             override fun onDocumentEntered(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
                 val art = documentSnapshot.toObject<Art>() ?: return
-                // DEBUG: Add offset since emulator is in a fixed location so all art is added at
-                // the same spot and we only see one marker.
-                // art.location = GeoPoint(art.location!!.latitude + offset, art.location!!.longitude)
-                // offset += offset
-
                 launchCatching {
                     if (!isArtInFilter(art)) {
                         // add to inactive
@@ -237,7 +230,6 @@ class HomeViewModel @Inject constructor(
             }
 
             override fun onDocumentChanged(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
-                // TODO: Client-side filtering
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -249,7 +241,6 @@ class HomeViewModel @Inject constructor(
                         _activeArt.value.toMutableMap().apply { replace(art.id, art) }
                     Log.d("GEOQUERY", "CHANGED $art")
                 }
-
             }
 
             override fun onGeoQueryReady() {
