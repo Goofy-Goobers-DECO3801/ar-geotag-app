@@ -108,16 +108,19 @@ fun SettingsScreen(
                     ) {
                         Column {
                             Text(text = "Change Password")
+                            Spacer(modifier = spacerModifier)
                             PasswordField(
                                 value = uiState.oldPassword,
                                 label = "Old Password",
                                 onValueChange = viewModel::onOldPasswordChange
                             )
+                            Spacer(modifier = spacerModifier)
                             PasswordField(
                                 value = uiState.newPassword,
                                 label = "New Password",
                                 onValueChange = viewModel::onNewPasswordChange
                             )
+                            Spacer(modifier = spacerModifier)
                             Button(
                                 onClick = viewModel::updatePassword,
                                 enabled = viewModel.updatePasswordEnabled()
