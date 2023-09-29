@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.chaquo.python")
     kotlin("plugin.serialization") version "1.9.0"
 }
 
@@ -22,6 +23,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
@@ -51,6 +55,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        pip {
+            install("pygltflib")
         }
     }
 }
