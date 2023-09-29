@@ -47,8 +47,19 @@ class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo
 //                            message = googlePlacesInfoState.value.direction?.routes?.get(0)?.overview_polyline?.points.toString()
 //                            )
 //                        )
-                        googlePlacesInfoState.value.direction?.routes?.get(0)?.overview_polyline?.points?.let { decoPoints(points = it) }
-                        Log.d(TAG, "POLYLINE:  ${googlePlacesInfoState.value.direction?.routes?.get(0)?.overview_polyline?.points}")
+                        val routes = googlePlacesInfoState.value.direction?.routes
+                        if (!routes.isNullOrEmpty()) {
+                            val overviewPolyline = routes[0].overview_polyline
+                            val polylinePoints = overviewPolyline?.points
+                            if (!polylinePoints.isNullOrEmpty()) {
+                                decoPoints(points = polylinePoints)
+                                Log.d(TAG, "POLYLINE: $polylinePoints")
+                            } else {
+                                //Pass
+                            }
+                        } else {
+                            // Pass
+                        }
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(
