@@ -49,6 +49,8 @@ class CreateViewModel @Inject constructor(
     var uiState by mutableStateOf(CreateUiState())
         private set
 
+    private var fileBytes: ByteArray? = null
+
     fun onTitleChange(newValue: String) {
         uiState = uiState.copy(title = newValue)
     }
@@ -61,8 +63,9 @@ class CreateViewModel @Inject constructor(
         uiState = uiState.copy(location = newValue)
     }
 
-    fun onFileChange(newUri: Uri, newFilename: String) {
+    fun onFileChange(newUri: Uri, newFilename: String, bytes: ByteArray) {
         uiState = uiState.copy(uri = newUri, filename = newFilename)
+        fileBytes = bytes
     }
 
     fun isValid(): Boolean {
@@ -70,6 +73,7 @@ class CreateViewModel @Inject constructor(
                 && uiState.description.isNotEmpty()
                 && uiState.location != null
                 && uiState.uri != null
+                && fileBytes != null
     }
 
     fun onPostArtwork(open: (String) -> Unit) {

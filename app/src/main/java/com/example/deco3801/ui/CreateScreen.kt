@@ -28,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ScreenNames
+import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
@@ -49,8 +50,13 @@ fun CreateScreen(
         viewModel.onLocationChange(getCurrentLocation(context))
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            viewModel.onFileChange(it, it.getFileName(context))
+        uri ?: return@rememberLauncherForActivityResult
+        try {
+            val bytes =
+                context.contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
+            viewModel.onFileChange(uri, uri.getFileName(context), bytes!!)
+        } catch (e: Exception) {
+            SnackbarManager.showError("Unable to upload file!")
         }
     }
 
@@ -104,7 +110,7 @@ fun CreateScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 10.dp)
-                    ){
+                    ) {
                         Button(
                             onClick = {
                                 // Open the file selection dialog
