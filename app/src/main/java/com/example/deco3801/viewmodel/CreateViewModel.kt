@@ -4,21 +4,20 @@ import android.content.Context
 import android.location.Location
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
+import com.chaquo.python.PyException
+import com.chaquo.python.Python
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.ui.components.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import com.chaquo.python.PyException
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
-import okio.ByteString.Companion.toByteString
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileWriter
+import javax.inject.Inject
 
 data class CreateUiState(
     var title: String = "",
@@ -26,6 +25,7 @@ data class CreateUiState(
     var location: Location? = null,
     var uri: Uri? = null,
     var filename: String = "",
+    var filename3d: String = ""
 )
 
 fun Uri.getFileName(context: Context): String {
@@ -56,7 +56,6 @@ class CreateViewModel @Inject constructor(
         private set
 
     private var fileBytes: ByteArray? = null
-    public var filePath: String = ""
 
     fun onTitleChange(newValue: String) {
         uiState = uiState.copy(title = newValue)
@@ -70,25 +69,30 @@ class CreateViewModel @Inject constructor(
         uiState = uiState.copy(location = newValue)
     }
 
-    fun onFileChange(newUri: Uri, newFilename: String, bytes: ByteArray) {
-        uiState = uiState.copy(uri = newUri, filename = newFilename)
-        fileBytes = bytes
+    fun onFileChange(filename: String, bytes: ByteArray) {
 
         val py = Python.getInstance()
-        val module = py.getModule("convert")
+        val module = py.getModule("jpeg_glb_template_converter")
 
         try {
-            val glbPy = module.callAttr("convert", fileBytes!!.toByteString())
+            val glbPy = module.callAttr("convert", bytes)
             fileBytes = glbPy.toJava(ByteArray::class.java)
 
-            val tempFile = File.createTempFile("user_image", ".glb")
+            val tempFile = File.createTempFile(filename, ".glb")
             FileOutputStream(tempFile).use { outputStream ->
                 outputStream.write(fileBytes)
             }
 
-            filePath = tempFile.absolutePath
+            uiState = uiState.copy(
+                uri = tempFile.toUri(),
+                filename = filename,
+                filename3d = tempFile.name
+            )
         } catch (e: PyException) {
+            SnackbarManager.showError("Failed to convert image to 3d")
+            Log.e("CREATE", e.stackTraceToString())
         }
+
     }
 
     fun isValid(): Boolean {
@@ -113,7 +117,7 @@ class CreateViewModel @Inject constructor(
                 tmp.description,
                 tmp.location!!,
                 tmp.uri!!,
-                tmp.filename,
+                tmp.filename3d,
             )
             SnackbarManager.showMessage("Artwork Posted!")
             open(ScreenNames.Home.name)
