@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
         val virtualTryOnViewModel by viewModels<ArtDisplayViewModel>()
 
-        if (! Python.isStarted()) {
+        if (!Python.isStarted()) {
             Python.start(AndroidPlatform(this));
         }
 

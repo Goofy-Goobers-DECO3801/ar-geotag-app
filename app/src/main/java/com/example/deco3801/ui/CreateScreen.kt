@@ -1,5 +1,6 @@
 package com.example.deco3801.ui
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -52,11 +53,14 @@ fun CreateScreen(
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         try {
-            val bytes =
-                context.contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
-            viewModel.onFileChange(uri, uri.getFileName(context), bytes!!)
+            val bytes = context.contentResolver
+                .openInputStream(uri)
+                ?.use { it.buffered().readBytes() }
+
+            viewModel.onFileChange(uri.getFileName(context), bytes!!)
         } catch (e: Exception) {
             SnackbarManager.showError("Unable to upload file!")
+            Log.e("CREATE", e.stackTraceToString())
         }
     }
 
