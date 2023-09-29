@@ -12,7 +12,13 @@ import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.ui.components.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-
+import com.chaquo.python.PyException
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
+import okio.ByteString.Companion.toByteString
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
 
 data class CreateUiState(
     var title: String = "",
@@ -50,6 +56,7 @@ class CreateViewModel @Inject constructor(
         private set
 
     private var fileBytes: ByteArray? = null
+    public var filePath: String = ""
 
     fun onTitleChange(newValue: String) {
         uiState = uiState.copy(title = newValue)
@@ -66,6 +73,22 @@ class CreateViewModel @Inject constructor(
     fun onFileChange(newUri: Uri, newFilename: String, bytes: ByteArray) {
         uiState = uiState.copy(uri = newUri, filename = newFilename)
         fileBytes = bytes
+
+        val py = Python.getInstance()
+        val module = py.getModule("convert")
+
+        try {
+            val glbPy = module.callAttr("convert", fileBytes!!.toByteString())
+            fileBytes = glbPy.toJava(ByteArray::class.java)
+
+            val tempFile = File.createTempFile("user_image", ".glb")
+            FileOutputStream(tempFile).use { outputStream ->
+                outputStream.write(fileBytes)
+            }
+
+            filePath = tempFile.absolutePath
+        } catch (e: PyException) {
+        }
     }
 
     fun isValid(): Boolean {
