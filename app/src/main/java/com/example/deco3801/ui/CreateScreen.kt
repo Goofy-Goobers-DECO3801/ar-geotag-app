@@ -1,7 +1,10 @@
 package com.example.deco3801.ui
 
+import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,29 +14,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
+import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
 import com.example.deco3801.viewmodel.getFileName
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,24 +69,57 @@ fun CreateScreen(
     val textFieldModifier: Modifier = Modifier.fillMaxWidth()
     val spacerModifier: Modifier = Modifier.height(10.dp)
     val context = LocalContext.current
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var takePhotoFile by remember { mutableStateOf<File?>(null) }
+    var takePhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val uiState = viewModel.uiState
+
     LaunchedEffect(Unit) {
         viewModel.onLocationChange(getCurrentLocation(context))
     }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        try {
-            val bytes = context.contentResolver
-                .openInputStream(uri)
-                ?.use { it.buffered().readBytes() }
 
-            viewModel.onFileChange(uri.getFileName(context), bytes!!)
-        } catch (e: Exception) {
-            SnackbarManager.showError("Unable to upload file!")
-            Log.e("CREATE", e.stackTraceToString())
+    val imagePicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            try {
+                val bytes = context.contentResolver
+                    .openInputStream(uri)
+                    ?.use { it.buffered().readBytes() }
+                viewModel.onSelectImage(uri.getFileName(context), bytes!!)
+            } catch (e: Exception) {
+                SnackbarManager.showError("Unable to upload file!")
+                Log.e("CREATE", e.stackTraceToString())
+            }
         }
-    }
+
+    val filePicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            viewModel.onSelectFile(uri.getFileName(context), uri)
+        }
+
+
+    val takePhoto =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
+            if (!bool || takePhotoUri == null || takePhotoFile == null) {
+                Log.e("CREATE", "Failed to take photo")
+                return@rememberLauncherForActivityResult
+            }
+            try {
+                val bytes = context.contentResolver
+                    .openInputStream(takePhotoUri!!)
+                    ?.use { it.buffered().readBytes() }
+
+                viewModel.onSelectImage(takePhotoUri!!.getFileName(context), bytes!!)
+            } catch (e: Exception) {
+                SnackbarManager.showError("Unable to upload file!")
+                Log.e("CREATE", e.stackTraceToString())
+            } finally {
+                takePhotoFile!!.delete()
+            }
+        }
 
     Scaffold(
         topBar = {
@@ -73,6 +130,58 @@ fun CreateScreen(
             )
         },
     ) { innerPadding ->
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+            ) {
+                // Sheet content
+                BottomSheetSurface(
+                    text = "Pick image",
+                    onClick = {
+                        showBottomSheet = false
+                        imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    icon = Icons.Filled.Image,
+                    iconDescription = "image"
+                )
+                BottomSheetSurface(
+                    text = "Pick 3D Model",
+                    onClick = {
+                        showBottomSheet = false
+                        filePicker.launch("model/gltf-binary")
+//                        filePicker.launch("*/*")
+                    },
+                    icon = Icons.Filled.ViewInAr,
+                    iconDescription = "model"
+                )
+                BottomSheetSurface(
+                    text = "Take photo",
+                    onClick = {
+                        showBottomSheet = false
+                        takePhotoFile = File.createTempFile(
+                            System.currentTimeMillis().toString(),
+                            ".jpg",
+                            File(
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                                "Camera"
+                            )
+                        )
+                        takePhotoUri = FileProvider.getUriForFile(
+                            context,
+                            context.applicationContext.packageName + ".provider",
+                            takePhotoFile!!
+                        )
+                        takePhoto.launch(takePhotoUri)
+                    },
+                    icon = Icons.Filled.PhotoCamera,
+                    iconDescription = "camera"
+                )
+                Spacer(Modifier.height(20.dp))
+            }
+        }
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
                 modifier = Modifier
@@ -117,11 +226,12 @@ fun CreateScreen(
                     ) {
                         Button(
                             onClick = {
-                                // Open the file selection dialog
-                                launcher.launch("*/*")// You can specify MIME types if needed
+                                showBottomSheet = true
                             }
                         ) {
-                            Text(text = "Upload from files")
+                            Icon(Icons.Filled.Upload, contentDescription = "upload")
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(text = "Upload")
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Button(
@@ -130,13 +240,24 @@ fun CreateScreen(
                             },
                             enabled = uiState.uri != null
                         ) {
+                            Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(text = "Preview in AR")
                         }
                     }
 
                     Spacer(modifier = spacerModifier)
-                    // Display the selected file path
-                    uiState.uri?.let {
+                    if (uiState.imageBytes != null) {
+                        ExpandableAsyncImage(
+                            model = uiState.imageBytes,
+                            placeholder = painterResource(id = R.drawable.default_img),
+                            contentDescription = "profile",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Spacer(modifier = spacerModifier)
+
+                    } else if (uiState.filename.isNotBlank()) {
                         Text(
                             text = "Selected File: ${uiState.filename}",
                             style = MaterialTheme.typography.bodySmall
@@ -199,7 +320,34 @@ fun CreateScreen(
             }
         }
     }
+
 }
+
+@Composable
+fun BottomSheetSurface(
+    text: String,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    iconDescription: String
+) {
+    Surface(
+        onClick = onClick,
+        enabled = true,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = iconDescription
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(text)
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
