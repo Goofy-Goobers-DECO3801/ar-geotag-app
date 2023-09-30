@@ -25,7 +25,8 @@ data class CreateUiState(
     var location: Location? = null,
     var uri: Uri? = null,
     var filename: String = "",
-    var filename3d: String = ""
+    var imageBytes: ByteArray? = null
+
 )
 
 fun Uri.getFileName(context: Context): String {
@@ -55,8 +56,6 @@ class CreateViewModel @Inject constructor(
     var uiState by mutableStateOf(CreateUiState())
         private set
 
-    private var fileBytes: ByteArray? = null
-
     fun onTitleChange(newValue: String) {
         uiState = uiState.copy(title = newValue)
     }
@@ -69,24 +68,31 @@ class CreateViewModel @Inject constructor(
         uiState = uiState.copy(location = newValue)
     }
 
-    fun onFileChange(filename: String, bytes: ByteArray) {
+    fun onSelectFile(filename: String, uri: Uri) {
+        uiState = uiState.copy(
+            uri = uri,
+            filename = filename,
+            imageBytes = null,
+        )
+    }
+
+    fun onSelectImage(filename: String, inBytes: ByteArray) {
 
         val py = Python.getInstance()
         val module = py.getModule("jpeg_glb_template_converter")
-
         try {
-            val glbPy = module.callAttr("convert", bytes)
-            fileBytes = glbPy.toJava(ByteArray::class.java)
+            val glbPy = module.callAttr("convert", inBytes)
+            val outBytes = glbPy.toJava(ByteArray::class.java)
 
             val tempFile = File.createTempFile(filename, ".glb")
             FileOutputStream(tempFile).use { outputStream ->
-                outputStream.write(fileBytes)
+                outputStream.write(outBytes)
             }
 
             uiState = uiState.copy(
                 uri = tempFile.toUri(),
-                filename = filename,
-                filename3d = tempFile.name
+                filename = tempFile.name,
+                imageBytes = inBytes,
             )
         } catch (e: PyException) {
             SnackbarManager.showError("Failed to convert image to 3d")
@@ -100,7 +106,7 @@ class CreateViewModel @Inject constructor(
                 && uiState.description.isNotEmpty()
                 && uiState.location != null
                 && uiState.uri != null
-                && fileBytes != null
+                && uiState.imageBytes != null
     }
 
     fun onPostArtwork(open: (String) -> Unit) {
@@ -117,7 +123,7 @@ class CreateViewModel @Inject constructor(
                 tmp.description,
                 tmp.location!!,
                 tmp.uri!!,
-                tmp.filename3d,
+                tmp.filename,
             )
             SnackbarManager.showMessage("Artwork Posted!")
             open(ScreenNames.Home.name)
