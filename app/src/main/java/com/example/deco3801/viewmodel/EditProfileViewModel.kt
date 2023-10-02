@@ -42,10 +42,13 @@ class EditProfileViewModel @Inject constructor(
             onFailure = { _loading = false }
         ) {
             userRepo.editUser(_oldUser.value, _newUser.value)
-            _newUser.value = _oldUser.value
             SnackbarManager.showMessage("Updated profile!")
             open()
         }
+    }
+
+    fun onPictureRemove() {
+        _newUser.value = _newUser.value.copy(pictureUri = "")
     }
 
     fun onPictureChange(value: Uri) {
