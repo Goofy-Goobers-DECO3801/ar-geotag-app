@@ -1,6 +1,8 @@
 package com.example.deco3801.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.deco3801.R
+import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
@@ -28,16 +31,28 @@ import com.example.deco3801.util.toRadius
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.location.Location
+import android.os.Bundle;
+import androidx.compose.ui.graphics.Color
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.storage.ktx.storageMetadata
+import com.google.maps.android.compose.Polyline
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
 ) {
     Scaffold(
         topBar = {
@@ -51,6 +66,7 @@ fun HomeScreen(
     ) { innerPadding ->
 
         val context = LocalContext.current
+        val userLocation = remember { mutableStateOf<Location?>(null) }
 
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
@@ -70,6 +86,7 @@ fun HomeScreen(
         ) {
             LaunchedEffect(Unit) {
                 viewModel.onLocationChange(getCurrentLocation(context))
+                userLocation.value = getCurrentLocation(context)
             }
 
         }
@@ -106,6 +123,26 @@ fun HomeScreen(
             }
         }
 
+        var apiKey: String? = null
+
+        context.packageManager
+            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            .apply {
+                apiKey = metaData.getString("com.google.android.geo.API_KEY")
+            }
+
+        val markerClick: (Marker) -> Boolean = {marker ->
+            // Call the ViewModel function in GooglePlacesInfoViewModel when a marker is clicked
+            apiKey?.let {
+                googlePlacesViewModel.getDirection(
+                    origin = "${userLocation.value!!.latitude}, ${userLocation.value!!.longitude}", // Modify this to get the actual origin
+                    destination = "${marker.position!!.latitude}, ${marker.position!!.longitude}", // Use the marker's location as the destination
+                    key = it
+                )
+            }
+            false
+        }
+
         Column(modifier = Modifier.padding(innerPadding)) {
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
@@ -124,11 +161,19 @@ fun HomeScreen(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.title,
                         snippet = it.description,
-                        icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker)
+                        icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
+                        onClick = markerClick
 
                     )
                 }
+
+                Polyline(points = googlePlacesViewModel.polyLinesPoints.value, onClick = {
+                    Log.d(TAG, "${it.points} was clicked")
+                }, color = Color.Blue)
             }
+
+
+
         }
     }
 }
