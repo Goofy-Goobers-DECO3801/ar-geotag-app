@@ -88,6 +88,7 @@ fun HomeScreen(
 
         val uiState by viewModel.uiState.collectAsState()
         val art by viewModel.activeArt.collectAsState()
+        val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
 
 
         // TODO: What do we display if we cannot get the users location?
@@ -106,10 +107,10 @@ fun HomeScreen(
         onDocumentChanged callback gets triggered. (idk how to fix this so just hard coding our
         geoquery to 100,000km)
          */
-       if (cameraPositionState.isMoving) {
-           viewModel.onLocationChange(cameraPositionState.position.target)
-           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
-       }
+//       if (cameraPositionState.isMoving) {
+//           viewModel.onLocationChange(cameraPositionState.position.target)
+//           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
+//       }
 
         DisposableEffect(Unit) {
             viewModel.listenForArt()
@@ -162,7 +163,7 @@ fun HomeScreen(
                     )
                 }
 
-                Polyline(points = googlePlacesViewModel.polyLinesPoints.value, onClick = {
+                Polyline(points = routePoints, onClick = {
                     Log.d(TAG, "${it.points} was clicked")
                 }, color = Color.Blue)
             }
