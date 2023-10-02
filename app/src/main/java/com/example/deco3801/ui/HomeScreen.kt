@@ -1,6 +1,7 @@
 package com.example.deco3801.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -38,10 +39,14 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.location.Location
 import android.os.Bundle;
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.storage.ktx.storageMetadata
 import com.google.maps.android.compose.Polyline
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -60,6 +65,7 @@ fun HomeScreen(
     ) { innerPadding ->
 
         val context = LocalContext.current
+        val userLocation = remember { mutableStateOf<Location?>(null) }
 
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
@@ -79,6 +85,7 @@ fun HomeScreen(
         ) {
             LaunchedEffect(Unit) {
                 viewModel.onLocationChange(getCurrentLocation(context))
+                userLocation.value = getCurrentLocation(context)
             }
 
         }
@@ -119,12 +126,12 @@ fun HomeScreen(
             }
 
         val markerClick: (Marker) -> Boolean = {marker ->
-            val markerLocation = marker.position
+            val currentLocation = // todo current phone location
             // Call the ViewModel function in GooglePlacesInfoViewModel when a marker is clicked
             apiKey?.let {
                 googlePlacesViewModel.getDirection(
-                    origin = uiState.currentLocation.toString(), // Modify this to get the actual origin
-                    destination = markerLocation.toString(), // Use the marker's location as the destination
+                    origin = "${userLocation.value!!.latitude}, ${userLocation.value!!.longitude}", // Modify this to get the actual origin
+                    destination = "${marker.position!!.latitude}, ${marker.position!!.longitude}", // Use the marker's location as the destination
                     key = it
                 )
             }
@@ -154,10 +161,15 @@ fun HomeScreen(
 
                     )
                 }
+
+                //
+                // cause of pain
+                Polyline(points = googlePlacesViewModel.polyLinesPoints.value, onClick = {
+                    Log.d(TAG, "${it.points} was clicked")
+                })
             }
-            Polyline(points = googlePlacesViewModel.polyLinesPoints.value, onClick = {
-                Log.d(TAG, "${it.points} was clicked")
-            })
+
+
 
         }
     }
