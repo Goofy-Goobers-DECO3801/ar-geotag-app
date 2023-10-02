@@ -89,8 +89,10 @@ class UserRepository @Inject constructor(
 
         // Ensure that the username is unique
         val userRef = getCollectionRef().document(uid)
-        val indexRef = db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(newerUser.username)
-        val oldIndexRef = db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(oldUser.username)
+        val indexRef =
+            db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(newerUser.username)
+        val oldIndexRef =
+            db.collection("${INDEX_COLLECTION}/${USERNAME_INDEX}").document(oldUser.username)
         try {
             db.runBatch {
                 it.set(userRef, newerUser, SetOptions.merge())

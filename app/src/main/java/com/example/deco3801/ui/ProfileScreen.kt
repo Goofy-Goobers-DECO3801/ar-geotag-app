@@ -62,6 +62,7 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
@@ -134,7 +135,7 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
                         ) {
-                            AsyncImage(
+                            ExpandableAsyncImage(
                                 model = user.pictureUri.ifBlank { R.drawable.pfp },
                                 placeholder = painterResource(id = R.drawable.pfp),
                                 contentDescription = "profile",
@@ -407,7 +408,7 @@ fun formatDate(date: Date): String {
             val currentYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(now)
             val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
             if (currentYear == year) {
-                SimpleDateFormat("dd MMM", Locale.getDefault()).format(date)
+                SimpleDateFormat("dd MMMM", Locale.getDefault()).format(date)
             } else {
                 SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(date)
             }

@@ -27,8 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.ViewInAr
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -61,10 +59,8 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.BioField
 import com.example.deco3801.ui.components.NameField
-import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.EditProfileViewModel
-import com.example.deco3801.viewmodel.getFileName
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import java.io.File
