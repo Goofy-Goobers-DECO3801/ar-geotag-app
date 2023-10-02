@@ -32,7 +32,7 @@ class ProfileViewModel @Inject constructor(
     private val _follows = MutableStateFlow<List<User>>(emptyList())
     val follows: StateFlow<List<User>> = _follows
 
-    fun onFollowers() {
+    fun onFollowersClick() {
         launchCatching {
             val followers = followRepo.getFollowers(_user.value)
             val users = userRepo.getUsers(followers.map { it.followerId })
@@ -41,7 +41,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onFollowing() {
+    fun onFollowingClick() {
         launchCatching {
             val following = followRepo.getFollowing(_user.value)
             val users = userRepo.getUsers(following.map { it.followingId })
@@ -79,7 +79,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun attachListener(userid: String) {
-        userRepo.attachListenerId(userid) {
+        userRepo.attachListenerById(userid) {
             onUserChange(it)
             Log.d("PROFILE", it.toString())
         }

@@ -25,7 +25,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -186,7 +186,7 @@ fun ProfileScreen(
                             ClickableText(
                                 text = AnnotatedString("${user.followerCount} followers"),
                                 onClick = {
-                                    viewModel.onFollowers()
+                                    viewModel.onFollowersClick()
                                     followDialogState = FollowDialogState.FOLLOWERS
                                 },
                                 style = LocalTextStyle.current.copy(color = LocalContentColor.current)
@@ -194,7 +194,7 @@ fun ProfileScreen(
                             ClickableText(
                                 text = AnnotatedString("${user.followingCount} following"),
                                 onClick = {
-                                    viewModel.onFollowing()
+                                    viewModel.onFollowingClick()
                                     followDialogState = FollowDialogState.FOLLOWING
                                 },
                                 style = LocalTextStyle.current.copy(color = LocalContentColor.current)
@@ -204,8 +204,10 @@ fun ProfileScreen(
                     }
                 }
                 if (!user.isPrivate || isCurrentUser) {
-                    items(art) { topic ->
-                        ArtworkTile(topic)
+                    items(art) {
+                        ArtworkTile(it) {
+                            navController.navigate("${ScreenNames.ArtworkNav.name}/${it.id}")
+                        }
                     }
                 } else {
                     item {
@@ -303,9 +305,11 @@ fun ProfileScreenPreview() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtworkTile(
-    art: Art
+    art: Art,
+    onClick: () -> Unit,
 ) {
     val spacerModifier: Modifier = Modifier.height(8.dp)
     val gcd = Geocoder(LocalContext.current, Locale.getDefault())
@@ -319,7 +323,7 @@ fun ArtworkTile(
         }
     }
 
-    Card {
+    Card(onClick = onClick) {
         Column {
             Spacer(modifier = Modifier.height(14.dp))
             Row(
@@ -371,8 +375,8 @@ fun ArtworkTile(
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Icon(
-                    imageVector = Icons.Outlined.CheckCircle,
-                    contentDescription = "heart",
+                    imageVector = Icons.Outlined.Message,
+                    contentDescription = "review",
                     Modifier.size(16.dp)
                 )
 

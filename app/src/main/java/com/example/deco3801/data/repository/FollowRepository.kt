@@ -6,7 +6,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -18,11 +17,7 @@ class FollowRepository @Inject constructor(
 ) : Repository<Follow>(Follow::class.java) {
 
     suspend fun isFollowing(userId: String): Follow? {
-        return getCollectionRef()
-            .document(userId)
-            .get()
-            .await()
-            .toObject()
+        return getById(userId)
     }
 
     suspend fun getFollowing(user: User): List<Follow> {
