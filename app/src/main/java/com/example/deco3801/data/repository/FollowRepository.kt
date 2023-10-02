@@ -41,7 +41,7 @@ class FollowRepository @Inject constructor(
         return isFollowing(user.id)
     }
 
-    suspend fun followUser(user: User) {
+    fun followUser(user: User) {
         val follow = Follow(
             followerId = auth.uid!!,
             followingId = user.id,
@@ -54,10 +54,10 @@ class FollowRepository @Inject constructor(
             it.set(followingRef, follow)
             it.update(me, "followingCount", FieldValue.increment(1))
             it.update(them, "followerCount", FieldValue.increment(1))
-        }.await()
+        }
     }
 
-    suspend fun unfollowUser(user: User) {
+    fun unfollowUser(user: User) {
         val followingRef = getCollectionRef().document(user.id)
         val me = userRepo.getCollectionRef().document(auth.uid!!)
         val them = userRepo.getCollectionRef().document(user.id)
@@ -66,7 +66,7 @@ class FollowRepository @Inject constructor(
             it.delete(followingRef)
             it.update(me, "followingCount", FieldValue.increment(-1))
             it.update(them, "followerCount", FieldValue.increment(-1))
-        }.await()
+        }
     }
 
     override fun getCollectionRef(): CollectionReference {
