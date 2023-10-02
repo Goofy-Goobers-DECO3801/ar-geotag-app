@@ -37,14 +37,9 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Bundle;
 import androidx.compose.ui.graphics.Color
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.storage.ktx.storageMetadata
 import com.google.maps.android.compose.Polyline
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -111,10 +106,10 @@ fun HomeScreen(
         onDocumentChanged callback gets triggered. (idk how to fix this so just hard coding our
         geoquery to 100,000km)
          */
-//        if (cameraPositionState.isMoving) {
-//            viewModel.onLocationChange(cameraPositionState.position.target)
-//            viewModel.onDistanceChange(cameraPositionState.position.toRadius())
-//        }
+       if (cameraPositionState.isMoving) {
+           viewModel.onLocationChange(cameraPositionState.position.target)
+           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
+       }
 
         DisposableEffect(Unit) {
             viewModel.listenForArt()
@@ -123,7 +118,7 @@ fun HomeScreen(
             }
         }
 
-        var apiKey: String? = null
+        var apiKey: String?
 
         context.packageManager
             .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
@@ -136,7 +131,7 @@ fun HomeScreen(
             apiKey?.let {
                 googlePlacesViewModel.getDirection(
                     origin = "${userLocation.value!!.latitude}, ${userLocation.value!!.longitude}", // Modify this to get the actual origin
-                    destination = "${marker.position!!.latitude}, ${marker.position!!.longitude}", // Use the marker's location as the destination
+                    destination = "${marker.position.latitude}, ${marker.position.longitude}", // Use the marker's location as the destination
                     key = it
                 )
             }
