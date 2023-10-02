@@ -41,6 +41,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location
 import android.os.Bundle;
+import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.storage.ktx.storageMetadata
@@ -126,7 +127,6 @@ fun HomeScreen(
             }
 
         val markerClick: (Marker) -> Boolean = {marker ->
-            val currentLocation = // todo current phone location
             // Call the ViewModel function in GooglePlacesInfoViewModel when a marker is clicked
             apiKey?.let {
                 googlePlacesViewModel.getDirection(
@@ -162,11 +162,9 @@ fun HomeScreen(
                     )
                 }
 
-                //
-                // cause of pain
                 Polyline(points = googlePlacesViewModel.polyLinesPoints.value, onClick = {
                     Log.d(TAG, "${it.points} was clicked")
-                })
+                }, color = Color.Blue)
             }
 
 
