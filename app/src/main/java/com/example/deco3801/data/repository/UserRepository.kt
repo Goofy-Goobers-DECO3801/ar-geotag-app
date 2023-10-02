@@ -74,7 +74,7 @@ class UserRepository @Inject constructor(
 
         val newerUser = newUser.copy()
 
-        if (oldUser.pictureUri != newerUser.pictureUri) {
+        if (newerUser.pictureUri.isNotBlank() && oldUser.pictureUri != newerUser.pictureUri) {
             val storagePath = "$uid/profile-picture-${System.currentTimeMillis()}"
             storageRef = storage.reference.child(storagePath)
             storageRef.putFile(newerUser.pictureUri.toUri()).addOnProgressListener {
@@ -95,7 +95,7 @@ class UserRepository @Inject constructor(
             db.runBatch {
                 it.set(userRef, newerUser, SetOptions.merge())
                 if (oldUser.username != newerUser.username) {
-                    Log.d(USER_COLLECTION, "Chaning Index")
+                    Log.d(USER_COLLECTION, "Changing Index")
                     it.delete(oldIndexRef)
                     it.set(indexRef, hashMapOf("value" to uid))
                 }
