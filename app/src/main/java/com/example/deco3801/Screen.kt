@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
+import com.example.deco3801.ui.ArtworkNavScreen
 import com.example.deco3801.ui.CreateScreen
 import com.example.deco3801.ui.EditProfileScreen
 import com.example.deco3801.ui.HomeScreen
@@ -91,6 +92,12 @@ fun AppFunctionality(
             }
             composable(route = ScreenNames.EditProfile.name) {
                 EditProfileScreen(appState.navController)
+            }
+            composable(route = "${ScreenNames.ArtworkNav.name}/{id}") {
+                val id = it.arguments?.getString("id")
+                if (id != null) {
+                    ArtworkNavScreen(id, appState.navController)
+                }
             }
         }
     }
