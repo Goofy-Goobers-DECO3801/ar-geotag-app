@@ -6,8 +6,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,30 +31,31 @@ import io.github.sceneview.ar.node.ArModelNode
 import io.github.sceneview.ar.node.ArNode
 import com.example.deco3801.R
 import com.google.ar.core.Config
+import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
 
 @Composable
 fun ArtDisplayScreen(
     artID: Int,
-    ArtDisplayViewModel: ArtDisplayViewModel
+    artDisplayViewModel: ArtDisplayViewModel
 ) {
     val nodes = remember { mutableStateListOf<ArNode>() }
 
     LaunchedEffect(Unit) {
-        ArtDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artID))
+        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artID))
     }
 
     val context = LocalContext.current
     var sceneView by remember { mutableStateOf<ArSceneView?>(null) }
-    val viewState by ArtDisplayViewModel.state.collectAsState()
-    val uiAction by ArtDisplayViewModel.uiAction.collectAsState()
+    val viewState by artDisplayViewModel.state.collectAsState()
+    val uiAction by artDisplayViewModel.uiAction.collectAsState()
     var modelNode by remember { mutableStateOf<ArModelNode?>(null) }
 
     when (uiAction) {
         is ArtDisplayUIAction.ShowModalPlaced -> {
             LaunchedEffect(Unit) {
                 Toast.makeText(context, "Placed model!", Toast.LENGTH_SHORT).show()
-                ArtDisplayViewModel.onConsumedUiAction()
+                artDisplayViewModel.onConsumedUiAction()
             }
         }
         null -> {}
@@ -64,12 +72,12 @@ fun ArtDisplayScreen(
             },
             onSessionCreate = { session ->
                 // Configure the ARCore session if you need augmented faces, images, etc
-                session.lightEstimationMode = Config.LightEstimationMode.DISABLED
+                 session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
             },
             onFrame = { arFrame ->
                 // Update planes state to determine whether or not to UI message
                 // WARNING: DO NOT PASS ARSceneView/ARFrame TO ViewModel to avoid memory leaks
-                ArtDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
+                artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
             },
             onTap = { hitResult ->
                 // User tapped in the AR view
@@ -90,6 +98,14 @@ fun ArtDisplayScreen(
                 """
             }
         )
+
+
+        FloatingActionButton(
+            onClick = { onClick(modelNode, viewState) },
+            shape = CircleShape,
+        ) {
+            Icon(Icons.Filled.Refresh, "Large floating action button")
+        }
 
 
         if (viewState.downloadingAsset) {
@@ -137,7 +153,7 @@ fun ArtDisplayScreen(
                     sceneView?.planeRenderer?.isVisible = true
                     sceneView?.addChild(it)
                     sceneView?.selectedNode = it
-                    ArtDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.ModelPlaced)
+                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.ModelPlaced)
                 }
             }
             if (viewState.modelPlaced && modelNode != null) {
@@ -164,6 +180,11 @@ fun ArtDisplayScreen(
         }
     }
 }
+fun onClick(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
+    modelNode?.destroy()
+    viewState?.modelPlaced = false;
+}
+
 
 
 fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState): ArModelNode {
