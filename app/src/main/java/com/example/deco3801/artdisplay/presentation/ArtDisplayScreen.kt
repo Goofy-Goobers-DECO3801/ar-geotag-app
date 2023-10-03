@@ -37,7 +37,8 @@ import io.github.sceneview.math.Position
 @Composable
 fun ArtDisplayScreen(
     artID: Int,
-    artDisplayViewModel: ArtDisplayViewModel
+    artDisplayViewModel: ArtDisplayViewModel,
+    artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE
 ) {
     val nodes = remember { mutableStateListOf<ArNode>() }
 
@@ -82,7 +83,7 @@ fun ArtDisplayScreen(
             onTap = { hitResult ->
                 // User tapped in the AR view
                 sceneView?.let {
-                    modelNode = onUserTap(it, viewState)
+                    modelNode = onUserTap(it, viewState, artDisplayMode)
 
                 }
             },
@@ -187,10 +188,10 @@ fun onClick(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
 
 
 
-fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState): ArModelNode {
+fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
     return ArModelNode(
-        sceneView.engine,
+        sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
             loadModelGlbAsync(
