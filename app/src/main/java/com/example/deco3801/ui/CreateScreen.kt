@@ -52,7 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
+import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
@@ -60,8 +60,6 @@ import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
 import com.example.deco3801.viewmodel.getFileName
 import java.io.File
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,7 +238,8 @@ fun CreateScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Button(
                             onClick = {
-                                navController.navigate("${ScreenNames.ARscreen.name}?uri=${uiState.uri}")
+                                navController.navigateAR(uiState.uri.toString())
+
                             },
                             enabled = uiState.uri != null
                         ) {

@@ -50,6 +50,7 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
 
@@ -98,7 +99,7 @@ fun ArtworkNavScreen(
                 ArtworkInteract(
                     distance = 0, // TODO
                     onArClicked = {
-                        navController.navigate("${ScreenNames.ARscreen.name}?uri=${art.storageUri}")
+                        navController.navigateAR(art.storageUri)
                     },
                     )
             }

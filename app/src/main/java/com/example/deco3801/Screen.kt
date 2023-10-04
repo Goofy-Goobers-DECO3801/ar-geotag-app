@@ -1,6 +1,5 @@
 package com.example.deco3801
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -8,6 +7,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +28,8 @@ import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,9 +83,6 @@ fun AppFunctionality(
                 }
 
             }
-//            composable(route = ScreenNames.ARscreen.name) {
-//                ArtDisplayScreen("", ArtDisplayViewModel)
-//            }
             composable(
                 route = "${ScreenNames.ARscreen.name}?uri={uri}",
                 arguments = listOf(
@@ -93,7 +92,6 @@ fun AppFunctionality(
                 ),
             ) {
                 val uri = it.arguments?.getString("uri") ?: ""
-                Log.d("URI", "URI:$uri")
                 ArtDisplayScreen(uri, ArtDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
@@ -107,7 +105,7 @@ fun AppFunctionality(
             }
                 composable(route = ScreenNames.EditProfile.name) {
                 EditProfileScreen(appState.navController)
-            }
+                }
             composable(route = "${ScreenNames.ArtworkNav.name}/{id}") {
                 val id = it.arguments?.getString("id")
                 if (id != null) {
@@ -116,4 +114,9 @@ fun AppFunctionality(
             }
         }
     }
+}
+
+fun NavHostController.navigateAR(uri: String) {
+    val encondedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+    this.navigate("${ScreenNames.ARscreen.name}?uri=${encondedUri}")
 }
