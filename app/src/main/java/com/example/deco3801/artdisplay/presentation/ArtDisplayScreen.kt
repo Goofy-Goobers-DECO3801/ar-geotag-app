@@ -36,14 +36,14 @@ import io.github.sceneview.math.Position
 
 @Composable
 fun ArtDisplayScreen(
-    artID: Int,
+    artAddress: String,
     artDisplayViewModel: ArtDisplayViewModel,
     artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE
 ) {
     val nodes = remember { mutableStateListOf<ArNode>() }
 
     LaunchedEffect(Unit) {
-        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artID))
+        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artAddress))
     }
 
     val context = LocalContext.current
