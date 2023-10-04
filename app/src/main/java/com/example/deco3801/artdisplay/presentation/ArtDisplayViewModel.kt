@@ -30,14 +30,14 @@ class ArtDisplayViewModel : ViewModel() {
         when (event) {
             is ArtDisplayUIEvent.ModelPlaced -> onModelPlaced()
             is ArtDisplayUIEvent.OnPlanesUpdated -> onPlanesUpdated(event.updatedPlanes)
-            is ArtDisplayUIEvent.FetchAsset -> onFetchAsset(event.artID)
+            is ArtDisplayUIEvent.FetchAsset -> onFetchAsset(event.artAddress)
         }
     }
 
-    private fun onFetchAsset(artID: Int) {
+    private fun onFetchAsset(artAddress: String) {
         viewModelScope.launch {
             setState(state.value.copy(downloadingAsset = true))
-            remoteAsset = repository.fetchAsset(artID)
+            remoteAsset = repository.fetchAsset(artAddress)
             setState(state.value.copy(downloadingAsset = false, modelAsset = remoteAsset))
         }
     }

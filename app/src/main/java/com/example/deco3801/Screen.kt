@@ -79,7 +79,7 @@ fun AppFunctionality(
 
             }
             composable(route = ScreenNames.ARscreen.name) {
-                ArtDisplayScreen(0, ArtDisplayViewModel)
+                ArtDisplayScreen("", ArtDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
                 SettingsScreen(appState.navController)
@@ -90,7 +90,7 @@ fun AppFunctionality(
             composable(route = ScreenNames.PrivacyPolicy.name) {
                 PrivacyPolicyScreen(appState.navController)
             }
-            composable(route = ScreenNames.EditProfile.name) {
+                composable(route = ScreenNames.EditProfile.name) {
                 EditProfileScreen(appState.navController)
             }
             composable(route = "${ScreenNames.ArtworkNav.name}/{id}") {
