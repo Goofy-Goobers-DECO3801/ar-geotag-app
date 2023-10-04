@@ -1,5 +1,6 @@
 package com.example.deco3801
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -7,9 +8,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.ArtworkNavScreen
@@ -78,8 +81,20 @@ fun AppFunctionality(
                 }
 
             }
-            composable(route = ScreenNames.ARscreen.name) {
-                ArtDisplayScreen("", ArtDisplayViewModel)
+//            composable(route = ScreenNames.ARscreen.name) {
+//                ArtDisplayScreen("", ArtDisplayViewModel)
+//            }
+            composable(
+                route = "${ScreenNames.ARscreen.name}?uri={uri}",
+                arguments = listOf(
+                    navArgument("uri") {
+                        type = NavType.StringType
+                    }
+                ),
+            ) {
+                val uri = it.arguments?.getString("uri") ?: ""
+                Log.d("URI", "URI:$uri")
+                ArtDisplayScreen(uri, ArtDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
                 SettingsScreen(appState.navController)

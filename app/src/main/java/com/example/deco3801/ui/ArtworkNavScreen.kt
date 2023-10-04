@@ -95,7 +95,12 @@ fun ArtworkNavScreen(
                 ArtworkMap()
             }
             item {
-                ArtworkInteract(distance = 10) // TODO
+                ArtworkInteract(
+                    distance = 0, // TODO
+                    onArClicked = {
+                        navController.navigate("${ScreenNames.ARscreen.name}?uri=${art.storageUri}")
+                    },
+                    )
             }
             item {
                 ArtworkDescription(art, liked) {
@@ -233,7 +238,10 @@ fun ArtworkMap() {
 }
 
 @Composable
-fun ArtworkInteract(distance: Int) {
+fun ArtworkInteract(
+    distance: Int,
+    onArClicked: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -249,7 +257,7 @@ fun ArtworkInteract(distance: Int) {
                 modifier = Modifier.padding(top = 15.dp, bottom = 10.dp)
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = onArClicked,
                 modifier = Modifier.padding(bottom = 20.dp)
             ) {
                 Icon(

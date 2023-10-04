@@ -60,6 +60,8 @@ import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
 import com.example.deco3801.viewmodel.getFileName
 import java.io.File
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,7 +240,7 @@ fun CreateScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Button(
                             onClick = {
-                                navController.navigate(ScreenNames.ARscreen.name)
+                                navController.navigate("${ScreenNames.ARscreen.name}?uri=${uiState.uri}")
                             },
                             enabled = uiState.uri != null
                         ) {

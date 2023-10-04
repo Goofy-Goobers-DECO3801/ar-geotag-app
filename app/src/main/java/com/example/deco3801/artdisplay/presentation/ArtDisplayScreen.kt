@@ -1,6 +1,7 @@
 package com.example.deco3801.artdisplay.presentation
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -194,6 +195,7 @@ fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplay
         sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
+            Log.d("ARMODEL", it)
             loadModelGlbAsync(
                 glbFileLocation = it,
 //                glbFileLocation = "models/bear.glb",
