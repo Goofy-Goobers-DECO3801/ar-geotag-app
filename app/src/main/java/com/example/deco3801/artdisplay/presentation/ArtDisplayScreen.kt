@@ -74,7 +74,11 @@ fun ArtDisplayScreen(
             },
             onSessionCreate = { session ->
                 // Configure the ARCore session if you need augmented faces, images, etc
-                 session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                session.depthMode = Config.DepthMode.AUTOMATIC
+                session.instantPlacementEnabled = true
+                artDisplayViewModel.resetStates()
+
             },
             onFrame = { arFrame ->
                 // Update planes state to determine whether or not to UI message
@@ -184,7 +188,7 @@ fun ArtDisplayScreen(
 }
 fun onClick(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     modelNode?.destroy()
-    viewState?.modelPlaced = false;
+    viewState?.modelPlaced = false
 }
 
 

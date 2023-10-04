@@ -68,6 +68,19 @@ class ArtDisplayViewModel : ViewModel() {
         }
     }
 
+    public fun resetStates() {
+        setState(
+            state.value.copy(
+                modelPlaced = false,
+                readyToPlaceModel = false,
+                downloadingAsset = false,
+                modelAsset = null
+            )
+        )
+
+
+    }
+
     private fun setUiAction(uiAction: ArtDisplayUIAction) {
         viewModelScope.launch {
             _uiAction.emit(uiAction)

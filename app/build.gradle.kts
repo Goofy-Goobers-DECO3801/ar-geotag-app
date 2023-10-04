@@ -93,6 +93,7 @@ dependencies {
     implementation("com.google.ar:core:1.39.0")
     implementation("io.github.sceneview:arsceneview:0.10.2")
     implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     
     // Saving objects as key-value pairs to app storage.
     implementation("androidx.preference:preference-ktx:1.2.1")

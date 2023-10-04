@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // TODO("look into dependency injection")
 
-        val virtualTryOnViewModel by viewModels<ArtDisplayViewModel>()
+        val artDisplayViewModel by viewModels<ArtDisplayViewModel>()
 
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(this));
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DECO3801Theme {
-                AppFunctionality(virtualTryOnViewModel)
+                AppFunctionality(artDisplayViewModel)
             }
         }
     }
