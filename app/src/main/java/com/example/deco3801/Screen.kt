@@ -1,5 +1,6 @@
 package com.example.deco3801
 
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -30,12 +31,14 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.activity.viewModels
+import com.example.deco3801.artdisplay.presentation.ArtDisplayViewState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
-    ArtDisplayViewModel: ArtDisplayViewModel,
+    artDisplayViewModel: ArtDisplayViewModel,
     appState: AppState = rememberAppState(),
 ) {
     val startDestination = if (Firebase.auth.currentUser == null) {
@@ -92,7 +95,8 @@ fun AppFunctionality(
                 ),
             ) {
                 val uri = it.arguments?.getString("uri") ?: ""
-                ArtDisplayScreen(uri, ArtDisplayViewModel)
+
+                ArtDisplayScreen(uri, artDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
                 SettingsScreen(appState.navController)
