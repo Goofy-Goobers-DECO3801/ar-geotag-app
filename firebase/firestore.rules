@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function getIndexAfter(path) {
+      return getAfter(/databases/$(database)/documents/index/$(path))
+    }
+
+    function getIndexBefore(path) {
+      return get(/databases/$(database)/documents/index/$(path))
+    }
+
+    function indexExistsAfter(path) {
+      return existsAfter(/databases/$(database)/documents/index/$(path))
+    }
+
+    function indexExistsBefore(path) {
+      return exists(/databases/$(database)/documents/index/$(path))
+    }
+
+    function getUserAfter(id) {
+      return getAfter(/databases/$(database)/documents/user/$(id))
+    }
+
+    function getUserBefore(id) {
+      return get(/databases/$(database)/documents/user/$(id))
+    }
+
+    function userExistsAfter(id) {
+      return existsAfter(/databases/$(database)/documents/user/$(id))
+    }
+    
+    function isAuth() {
+    	return request.auth != null;
+    }
+    
+    function isOwner(id) {
+      return isAuth() && request.auth.uid == id;
+    }
+	
+  	match /user/{id}/following/{followId} {
+    	allow read: if isAuth();
+      allow write: if isOwner(id);
+    }
+    
+    match /{path=**}/following/{followId} {
+    	allow read: if isAuth();
+      allow write: if false;
+    }
+
+		match /art/{art} {
+    	allow read: if isAuth();   
+      allow write: if isOwner(request.resource.data.userId);
+            // Other users are allowed to like
+      allow update: if isAuth() && (request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(["likeCount"]));
+    }
+
+		match /art/{art}/likes/{userId} {
+    	allow read: if isAuth();
+      allow write: if isOwner(userId);
+    }
+
+    match /user/{id} {
+      allow read: if isAuth();
+
+      allow create: if isOwner(id) &&
+        getIndexAfter(/user/username/$(getUserAfter(id).data.username)).data.value == id;
+
+      // I can change username with some restrictions to keep it unique
+      allow update: if isOwner(id) &&
+        getIndexAfter(/user/username/$(getUserAfter(id).data.username)).data.value == id &&
+        !indexExistsBefore(/user/username/$(getUserAfter(id).data.username));
+      
+      // I can change everything freely but username
+      allow update: if isOwner(id) && (request.resource.data.diff(resource.data).unchangedKeys()
+      	.hasAll(["username"]));
+      
+      // Other users are allowed to follow me and increase follower count
+      allow update: if isAuth() && (request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(["followerCount"]));
+
+      allow delete: if isOwner(id) &&
+        !indexExistsAfter(/user/username/$(getUserBefore(id).data.username));
+    }
+ 
+    match /index/user/username/{username} {
+      allow read: if isAuth();
+
+      allow create: if isOwner(request.resource.data.value) &&
+        getUserAfter(getIndexAfter(/user/username/$(username)).data.value).data.username == username;
+
+      allow delete: if isOwner(getIndexBefore(/user/username/$(username)).data.value) && 
+      (!userExistsAfter(getIndexBefore(/user/username/$(username)).data.value) || 
+        getUserAfter(getIndexBefore(/user/username/$(username)).data.value).data.username != username);
+    }
+  }
+}

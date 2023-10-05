@@ -49,12 +49,15 @@ class ArtRepository @Inject constructor(
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
             storageUri = storageRef.downloadUrl.await().toString(),
+            storageRef = storagePath,
         )
 
         Log.d(ART_COLLECTION, art.toString())
 
         db.collection(ART_COLLECTION).add(art).addOnFailureListener {
             storageRef.delete()
+        }.addOnSuccessListener {
+            art.id = it.id
         }.await()
         return art
     }
