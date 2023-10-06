@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +56,8 @@ fun TopBar(
     showSettings: Boolean = false,
     navigateUp: () -> Unit = {},
     showArtFilter: Boolean = false,
+    showRefresh: Boolean = false,
+    refresh: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -98,6 +101,14 @@ fun TopBar(
                 }
             } else if (showArtFilter) {
                 ArtFilterMenu()
+            } else if (showRefresh) {
+                IconButton(onClick = refresh) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color.White
+                    )
+                }
             }
         }
     )
