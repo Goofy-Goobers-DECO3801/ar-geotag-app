@@ -1,6 +1,7 @@
 package com.example.deco3801.artdisplay.presentation
 
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,17 +28,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArModelNode
 import io.github.sceneview.ar.node.ArNode
 import com.example.deco3801.R
+import com.example.deco3801.ui.components.TopBar
 import com.google.ar.core.Config
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ArtDisplayScreen(
+    navigator: NavHostController,
     artAddress: String,
     artDisplayViewModel: ArtDisplayViewModel,
     artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE
@@ -63,37 +69,48 @@ fun ArtDisplayScreen(
         null -> {}
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        ARScene(
-            modifier = Modifier.fillMaxSize(),
-            nodes = nodes,
-            planeRenderer = true,
-            onCreate = { arSceneView ->
-                // Apply your configuration
-                sceneView = arSceneView
-            },
-            onSessionCreate = { session ->
-                // Configure the ARCore session if you need augmented faces, images, etc
-                session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
-                session.depthMode = Config.DepthMode.AUTOMATIC
-                session.instantPlacementEnabled = true
-                artDisplayViewModel.resetStates()
+    Scaffold(
+        topBar = {
+            TopBar(
+                canNavigateBack = true,
+                navigateUp = { onReturn(modelNode, viewState, navigator) },
+                showRefresh = true,
+                refresh = { onRefresh(modelNode, viewState) }
 
-            },
-            onFrame = { arFrame ->
-                // Update planes state to determine whether or not to UI message
-                // WARNING: DO NOT PASS ARSceneView/ARFrame TO ViewModel to avoid memory leaks
-                artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
-            },
-            onTap = { hitResult ->
-                // User tapped in the AR view
-                sceneView?.let {
-                    modelNode = onUserTap(it, viewState, artDisplayMode)
+            )
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            ARScene(
+                modifier = Modifier.fillMaxSize(),
+                nodes = nodes,
+                planeRenderer = true,
+                onCreate = { arSceneView ->
+                    // Apply your configuration
+                    sceneView = arSceneView
+                },
+                onSessionCreate = { session ->
+                    // Configure the ARCore session if you need augmented faces, images, etc
+                    session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                    session.depthMode = Config.DepthMode.AUTOMATIC
+                    session.instantPlacementEnabled = true
+                    artDisplayViewModel.resetStates()
 
-                }
-            },
-            onTrackingFailureChanged = { trackingFailureReason ->
-                """
+                },
+                onFrame = { arFrame ->
+                    // Update planes state to determine whether or not to UI message
+                    // WARNING: DO NOT PASS ARSceneView/ARFrame TO ViewModel to avoid memory leaks
+                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
+                },
+                onTap = { hitResult ->
+                    // User tapped in the AR view
+                    sceneView?.let {
+                        modelNode = onUserTap(it, viewState, artDisplayMode)
+
+                    }
+                },
+                onTrackingFailureChanged = { trackingFailureReason ->
+                    """
                  You can also show a tracking failure message if needed
                     
                  virtualTryOnViewModel.dispatchEvent(
@@ -102,23 +119,68 @@ fun ArtDisplayScreen(
                     )
                  )
                 """
-            }
-        )
+                }
+            )
 
 
-        FloatingActionButton(
-            onClick = { onClick(modelNode, viewState) },
-            shape = CircleShape,
-        ) {
-            Icon(Icons.Filled.Refresh, "Large floating action button")
-        }
+//        FloatingActionButton(
+//            onClick = { onClick(modelNode, viewState) },
+//            shape = CircleShape,
+//        ) {
+//            Icon(Icons.Filled.Refresh, "Large floating action button")
+//        }
 
 
-        if (viewState.downloadingAsset) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            if (!viewState.modelPlaced) {
-                if (viewState.readyToPlaceModel) {
+            if (viewState.downloadingAsset) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                if (!viewState.modelPlaced) {
+                    if (viewState.readyToPlaceModel) {
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(16.dp, bottom = 100.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(colorResource(id = R.color.translucent)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Ready to place model!",
+                                modifier = Modifier.padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(16.dp, bottom = 100.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(colorResource(id = R.color.translucent)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Move your phone to place model",
+                                modifier = Modifier.padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                if (!viewState.modelPlaced) {
+                    modelNode?.let {
+                        sceneView?.planeRenderer?.isVisible = true
+                        sceneView?.addChild(it)
+                        sceneView?.selectedNode = it
+                        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.ModelPlaced)
+                    }
+                }
+                if (viewState.modelPlaced && modelNode != null) {
+
 
                     Box(
                         modifier = Modifier
@@ -129,69 +191,32 @@ fun ArtDisplayScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Ready to place model!",
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp, bottom = 100.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(colorResource(id = R.color.translucent)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Move your phone to place model",
+                            "Use one finger to move and two fingers to rotate the model!",
                             modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center,
                             color = Color.White
                         )
                     }
                 }
+
+
             }
-
-            if (!viewState.modelPlaced) {
-                modelNode?.let {
-                    sceneView?.planeRenderer?.isVisible = true
-                    sceneView?.addChild(it)
-                    sceneView?.selectedNode = it
-                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.ModelPlaced)
-                }
-            }
-            if (viewState.modelPlaced && modelNode != null) {
-
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp, bottom = 100.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(colorResource(id = R.color.translucent)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Use one finger to move and two fingers to rotate the model!",
-                        modifier = Modifier.padding(16.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                }
-            }
-
-
         }
+
     }
 }
-fun onClick(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
+private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     modelNode?.destroy()
     viewState?.modelPlaced = false
 }
 
-
+private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, navigator: NavHostController) {
+    onRefresh(modelNode, viewState)
+    viewState?.downloadingAsset = false
+    viewState?.readyToPlaceModel = false
+    viewState?.modelAsset = null
+    navigator.popBackStack()
+}
 
 fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context

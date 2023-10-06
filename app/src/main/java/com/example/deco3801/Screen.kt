@@ -96,7 +96,7 @@ fun AppFunctionality(
             ) {
                 val uri = it.arguments?.getString("uri") ?: ""
 
-                ArtDisplayScreen(uri, artDisplayViewModel)
+                ArtDisplayScreen(appState.navController, uri, artDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
                 SettingsScreen(appState.navController)
