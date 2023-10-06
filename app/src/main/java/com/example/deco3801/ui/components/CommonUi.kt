@@ -103,7 +103,8 @@ fun TopBar(
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = "Refresh",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
                     )
                 }
             }
