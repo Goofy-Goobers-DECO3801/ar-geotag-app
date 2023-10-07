@@ -7,4 +7,5 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.48" apply false
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1" apply false
     id("com.chaquo.python") version "15.0.0" apply false // for integrating python file
+    id("com.diffplug.spotless") version "6.22.0" apply false
 }

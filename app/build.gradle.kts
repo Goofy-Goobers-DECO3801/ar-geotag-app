@@ -6,6 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.chaquo.python")
+    id("com.diffplug.spotless")
     kotlin("plugin.serialization") version "1.9.0"
 }
 
