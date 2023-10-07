@@ -1,0 +1,81 @@
+name: "CI"
+on:
+  push:
+    branches: [ci, main]
+  pull_request:
+    branches: [ci, main]
+
+env:
+  JAVA_DISTRO: temurin
+  JAVA_VERSION: 17
+  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+jobs:
+  jvm:
+    name: "Local JVM Build & Unit Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v1
+      - run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DISTRO }}
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/gradle-build-action@v2
+
+
+      - name: Build & test
+        run: ./gradlew build
+
+
+  android:
+    name: "Android Tests"
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        api-level: [24, 29, 34]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v1
+      - run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
+
+      - name: "Setup firebase"
+        run: curl -sL https://firebase.tools | bash
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DISTRO }}
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/gradle-build-action@v2
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: firebase emulators:exec "./gradlew connectedCheck"

@@ -1,6 +1,6 @@
 package com.example.deco3801
 
-import androidx.activity.viewModels
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -27,21 +27,20 @@ import com.example.deco3801.ui.SettingsScreen
 import com.example.deco3801.ui.SignUpScreen
 import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseUser
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import androidx.activity.viewModels
-import com.example.deco3801.artdisplay.presentation.ArtDisplayViewState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
     artDisplayViewModel: ArtDisplayViewModel,
+    authUser: FirebaseUser?,
     appState: AppState = rememberAppState(),
 ) {
-    val startDestination = if (Firebase.auth.currentUser == null) {
+    Log.d("AUTH", authUser.toString())
+    val startDestination = if (authUser == null) {
         ScreenNames.Login.name
     } else {
         ScreenNames.Home.name

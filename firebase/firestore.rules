@@ -29,35 +29,45 @@ service cloud.firestore {
     function userExistsAfter(id) {
       return existsAfter(/databases/$(database)/documents/user/$(id))
     }
-    
+
+    function getArtAfter(id) {
+      return getAfter(/databases/$(database)/documents/art/$(id))
+    }
+
+    function getArtBefore(id) {
+      return get(/databases/$(database)/documents/art/$(id))
+    }
+
     function isAuth() {
     	return request.auth != null;
     }
-    
+
     function isOwner(id) {
       return isAuth() && request.auth.uid == id;
     }
-	
+
   	match /user/{id}/following/{followId} {
-    	allow read: if isAuth();
+      allow read: if isAuth();
       allow write: if isOwner(id);
     }
-    
+
     match /{path=**}/following/{followId} {
-    	allow read: if isAuth();
+      allow read: if isAuth();
       allow write: if false;
     }
 
-		match /art/{art} {
-    	allow read: if isAuth();   
-      allow write: if isOwner(request.resource.data.userId);
-            // Other users are allowed to like
+    match /art/{art} {
+      allow read: if isAuth();
+      allow create: if isOwner(getArtAfter(art).data.userId);
+      allow update: if isOwner(getArtBefore(art).data.userId);
+      allow delete: if isOwner(getArtBefore(art).data.userId);
+      // Other users are allowed to like
       allow update: if isAuth() && (request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(["likeCount"]));
     }
 
-		match /art/{art}/likes/{userId} {
-    	allow read: if isAuth();
+    match /art/{art}/likes/{userId} {
+      allow read: if isAuth();
       allow write: if isOwner(userId);
     }
 
@@ -71,11 +81,11 @@ service cloud.firestore {
       allow update: if isOwner(id) &&
         getIndexAfter(/user/username/$(getUserAfter(id).data.username)).data.value == id &&
         !indexExistsBefore(/user/username/$(getUserAfter(id).data.username));
-      
+
       // I can change everything freely but username
       allow update: if isOwner(id) && (request.resource.data.diff(resource.data).unchangedKeys()
       	.hasAll(["username"]));
-      
+
       // Other users are allowed to follow me and increase follower count
       allow update: if isAuth() && (request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(["followerCount"]));
@@ -83,15 +93,15 @@ service cloud.firestore {
       allow delete: if isOwner(id) &&
         !indexExistsAfter(/user/username/$(getUserBefore(id).data.username));
     }
- 
+
     match /index/user/username/{username} {
       allow read: if isAuth();
 
       allow create: if isOwner(request.resource.data.value) &&
         getUserAfter(getIndexAfter(/user/username/$(username)).data.value).data.username == username;
 
-      allow delete: if isOwner(getIndexBefore(/user/username/$(username)).data.value) && 
-      (!userExistsAfter(getIndexBefore(/user/username/$(username)).data.value) || 
+      allow delete: if isOwner(getIndexBefore(/user/username/$(username)).data.value) &&
+      (!userExistsAfter(getIndexBefore(/user/username/$(username)).data.value) ||
         getUserAfter(getIndexBefore(/user/username/$(username)).data.value).data.username != username);
     }
   }

@@ -1,7 +1,5 @@
 package com.example.deco3801
 
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
