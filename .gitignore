@@ -8,3 +8,4 @@ local.properties
 *.apk
 .idea/*
 !.idea/runConfigurations
+node_modules/

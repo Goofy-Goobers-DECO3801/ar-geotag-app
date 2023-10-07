@@ -1,3 +1,6 @@
+import org.gradle.internal.os.OperatingSystem
+import java.nio.file.Paths
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -66,6 +69,61 @@ chaquopy {
         pip {
             install("pygltflib")
         }
+    }
+}
+
+val npx = if (OperatingSystem.current().isWindows) {
+  "npx.cmd"
+} else {
+  "npx"
+}
+
+val installFirebaseEmulators by tasks.registering {
+    doLast {
+        exec {
+            commandLine(npx, "firebase", "setup:emulators:firestore")
+        }
+        exec {
+            commandLine(npx, "firebase", "setup:emulators:storage")
+        }
+    }
+}
+
+installFirebaseEmulators {
+    onlyIf {
+        val emulatorDir = file(Paths.get(System.getProperty("user.home")).resolve(".cache/firebase/emulators"))
+        !emulatorDir.exists()
+    }
+}
+
+val startFirebaseEmulators by tasks.registering {
+    dependsOn(installFirebaseEmulators)
+    doLast {
+        val process = ProcessBuilder()
+            .directory(projectDir)
+            .command(npx, "firebase", "emulators:start")
+            .start()
+        project.extensions.extraProperties.set("firebaseEmulators", process)
+    }
+}
+
+val stopFirebaseEmulators by tasks.registering {
+    doLast {
+        // Retrieve the process reference from the watch task
+        val process = project.extensions.extraProperties.get("firebaseEmulators") as? Process
+        process?.destroy()
+        exec {// Firebase doesnt cleanup nicely on its own...
+            commandLine(npx, "kill-port", "4400", "8080", "9099", "9199", "9150")
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    tasks.getByName("preDebugAndroidTestBuild") {
+        dependsOn(startFirebaseEmulators)
+    }
+    tasks.getByName("connectedDebugAndroidTest") {
+        finalizedBy(stopFirebaseEmulators)
     }
 }
 

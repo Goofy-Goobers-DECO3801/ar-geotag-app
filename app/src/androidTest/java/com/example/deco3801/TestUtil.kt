@@ -7,6 +7,7 @@ import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.di.TestFirebaseModule
 import com.google.firebase.auth.FirebaseAuthException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -33,13 +34,15 @@ fun ArtRepository.createTestArt(): Art = runBlocking {
     tempFile.writeText("geoARt")
     val uri = Uri.fromFile(tempFile)
 
-    return@runBlocking createArt(
+    val art = createArt(
         "Test art",
         "testing 123",
         location,
         uri,
         "art.txt"
     )
+    delay(100)
+    return@runBlocking art
 }
 
 inline fun <reified T : Throwable> assertThrows(
