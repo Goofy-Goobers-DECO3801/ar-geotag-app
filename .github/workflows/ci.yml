@@ -1,9 +1,9 @@
 name: "CI"
-on:
-  push:
-    branches: [ ci, main ]
-  pull_request:
-    branches: [ ci, main ]
+on: workflow_dispatch
+#  push:
+#    branches: [ ci, main ]
+#  pull_request:
+#    branches: [ ci, main ]
 
 env:
   JAVA_DISTRO: temurin
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 24, 29, 33 ]
+        api-level: [ 24, 29, 34 ]
         target: [ google_apis ]
         arch: [ x86_64 ]
     steps:
@@ -72,7 +72,7 @@ jobs:
       - name: Cache firebase emulators
         uses: actions/cache@v2
         with:
-          path: ~/.cache/firebase/emulators
+          path: ~/.cache/firebase/emulators/*
           key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('~/.cache/firebase/emulators/**') }}
 
       - name: "Install firebase"
