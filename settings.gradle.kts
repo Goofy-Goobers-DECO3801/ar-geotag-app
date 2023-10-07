@@ -3,7 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven ("https://chaquo.com/maven-test")
+        maven("https://chaquo.com/maven-test")
     }
 }
 dependencyResolutionManagement {

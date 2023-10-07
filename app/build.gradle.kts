@@ -9,7 +9,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.chaquo.python")
-    id("com.diffplug.spotless")
+    id("org.jlleitschuh.gradle.ktlint")
     kotlin("plugin.serialization") version "1.9.0"
 }
 
@@ -31,7 +31,6 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
-
     }
 
     buildTypes {
@@ -39,7 +38,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -72,11 +71,12 @@ chaquopy {
     }
 }
 
-val npx = if (OperatingSystem.current().isWindows) {
-  "npx.cmd"
-} else {
-  "npx"
-}
+val npx =
+    if (OperatingSystem.current().isWindows) {
+        "npx.cmd"
+    } else {
+        "npx"
+    }
 
 val installFirebaseEmulators by tasks.registering {
     doLast {
@@ -99,10 +99,11 @@ installFirebaseEmulators {
 val startFirebaseEmulators by tasks.registering {
     dependsOn(installFirebaseEmulators)
     doLast {
-        val process = ProcessBuilder()
-            .directory(projectDir)
-            .command(npx, "firebase", "emulators:start")
-            .start()
+        val process =
+            ProcessBuilder()
+                .directory(projectDir)
+                .command(npx, "firebase", "emulators:start")
+                .start()
         project.extensions.extraProperties.set("firebaseEmulators", process)
     }
 }
@@ -112,7 +113,7 @@ val stopFirebaseEmulators by tasks.registering {
         // Retrieve the process reference from the watch task
         val process = project.extensions.extraProperties.get("firebaseEmulators") as? Process
         process?.destroy()
-        exec {// Firebase doesnt cleanup nicely on its own...
+        exec { // Firebase doesnt cleanup nicely on its own...
             commandLine(npx, "kill-port", "4400", "8080", "9099", "9199", "9150")
         }
     }
@@ -175,7 +176,7 @@ dependencies {
     ksp("com.google.dagger:hilt-compiler:2.48.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
-    //Retrofit
+    // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
@@ -192,4 +193,12 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    ktlintRuleset("io.nlopez.compose.rules:ktlint:0.3.0")
+}
+
+ktlint {
+    version.set("1.0.0")
+    android.set(true)
+    ignoreFailures.set(true)
 }
