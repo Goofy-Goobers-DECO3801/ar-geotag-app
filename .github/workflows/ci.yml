@@ -35,7 +35,7 @@ jobs:
     name: "Android Tests"
     runs-on: macos-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         api-level: [ 24, 29, 34 ]
         target: [ google_apis ]
@@ -45,7 +45,13 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
       - run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
 
-      - name: "Setup firebase"
+      - name: Cache firebase emulators
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('~/.cache/firebase/emulators/**') }}
+
+      - name: "Install firebase"
         run: curl -sL https://firebase.tools | bash
 
       - uses: actions/setup-java@v3

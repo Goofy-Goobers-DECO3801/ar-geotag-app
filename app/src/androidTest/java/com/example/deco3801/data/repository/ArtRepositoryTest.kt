@@ -40,6 +40,7 @@ class ArtRepositoryTest {
     fun testCreateArt() = runTest {
         val art = artRepository.createTestArt()
         assertThat(art).isNotNull()
+        assertThat(art.id).isNotEmpty()
 
         val artCmp = artRepository.getById(art.id)
         assertThat(artCmp).isNotNull()
