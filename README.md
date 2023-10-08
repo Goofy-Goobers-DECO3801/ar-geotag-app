@@ -88,6 +88,6 @@ the code:
   with Jetpack Compose.
 - [GeoFirestore](https://github.com/imperiumlabs/GeoFirestore-Android) - Provides realtime
   geo-queries using Firebase Firestore.
-- [Hilt](https://github.com/google/dagger) - Provides depedency injection.
+- [Hilt](https://github.com/google/dagger) - Provides dependency injection.
 - [Coil](https://github.com/coil-kt/coil) - Async image loading and displaying.
 - [ktlint](https://pinterest.github.io/ktlint/1.0.0/) - Code style checker and formatter
