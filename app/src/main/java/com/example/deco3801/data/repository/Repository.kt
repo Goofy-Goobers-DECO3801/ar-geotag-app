@@ -9,6 +9,12 @@ import kotlinx.coroutines.tasks.await
 abstract class Repository<T>(private val clazz: Class<T>) {
     private var listener: ListenerRegistration? = null
 
+    suspend fun getAll(): List<T> {
+        return getCollectionRef()
+            .get()
+            .await()
+            .toObjects(clazz)
+    }
     suspend fun getById(id: String): T? {
         return getCollectionRef()
             .document(id)
