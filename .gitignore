@@ -8,5 +8,6 @@ local.properties
 *.apk
 .idea/*
 !.idea/runConfigurations
+!.idea/codeStyles
 node_modules/
 build

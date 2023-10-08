@@ -91,7 +91,8 @@ val installFirebaseEmulators by tasks.registering {
 
 installFirebaseEmulators {
     onlyIf {
-        val emulatorDir = file(Paths.get(System.getProperty("user.home")).resolve(".cache/firebase/emulators"))
+        val emulatorDir =
+            file(Paths.get(System.getProperty("user.home")).resolve(".cache/firebase/emulators"))
         !emulatorDir.exists()
     }
 }
@@ -200,5 +201,4 @@ dependencies {
 ktlint {
     version.set("1.0.0")
     android.set(true)
-    ignoreFailures.set(true)
 }

@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "DECO3801"
 include(":app")
- 
