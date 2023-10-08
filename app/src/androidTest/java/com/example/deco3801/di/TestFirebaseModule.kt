@@ -24,29 +24,34 @@ object TestFirebaseModule {
 
     @Singleton
     @Provides
-    fun auth(): FirebaseAuth = Firebase.auth.apply {
-        try {
-
-            useEmulator(HOST, AUTH_PORT)
-        } catch (_: IllegalStateException) { }
-    }
-
-    @Singleton
-    @Provides
-    fun firestore(): FirebaseFirestore = Firebase.firestore.apply {
-        try {
-            clearPersistence()
-            useEmulator(HOST, FIRESTORE_PORT)
-        } catch (_: IllegalStateException) { }
-    }
+    fun auth(): FirebaseAuth =
+        Firebase.auth.apply {
+            try {
+                useEmulator(HOST, AUTH_PORT)
+            } catch (_: IllegalStateException) {
+            }
+        }
 
     @Singleton
     @Provides
-    fun storage(): FirebaseStorage = Firebase.storage.apply {
-        try {
-            useEmulator(HOST, STORAGE_PORT)
-        } catch (_: IllegalStateException) { }
-    }
+    fun firestore(): FirebaseFirestore =
+        Firebase.firestore.apply {
+            try {
+                clearPersistence()
+                useEmulator(HOST, FIRESTORE_PORT)
+            } catch (_: IllegalStateException) {
+            }
+        }
+
+    @Singleton
+    @Provides
+    fun storage(): FirebaseStorage =
+        Firebase.storage.apply {
+            try {
+                useEmulator(HOST, STORAGE_PORT)
+            } catch (_: IllegalStateException) {
+            }
+        }
 
     @Singleton
     @Provides

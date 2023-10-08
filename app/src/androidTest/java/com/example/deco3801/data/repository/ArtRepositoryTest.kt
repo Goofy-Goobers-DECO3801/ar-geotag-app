@@ -19,36 +19,44 @@ import javax.inject.Inject
 @HiltAndroidTest
 class ArtRepositoryTest {
     @get:Rule val hilt = HiltAndroidRule(this)
-    @Inject lateinit var artRepository: ArtRepository
+
     @Inject lateinit var firestore: FirebaseFirestore
+
     @Inject lateinit var auth: FirebaseAuth
+
     @Inject lateinit var storage: FirebaseStorage
+
+    @Inject lateinit var userRepository: UserRepository
+
+    @Inject lateinit var artRepository: ArtRepository
 
     @Before
     fun setup() {
         hilt.inject()
-        createOrLogin()
+        userRepository.createOrLogin()
     }
 
     @Test
-    fun testNonExistentArt() = runTest {
-        val result = artRepository.getById("Nope")
-        assertThat(result).isNull()
-    }
+    fun testNonExistentArt() =
+        runTest {
+            val result = artRepository.getById("Nope")
+            assertThat(result).isNull()
+        }
 
     @Test
-    fun testCreateArt() = runTest {
-        val art = artRepository.createTestArt()
-        assertThat(art).isNotNull()
-        assertThat(art.id).isNotEmpty()
+    fun testCreateArt() =
+        runTest {
+            val art = artRepository.createTestArt()
+            assertThat(art).isNotNull()
+            assertThat(art.id).isNotEmpty()
 
-        val artCmp = artRepository.getById(art.id)
-        assertThat(artCmp).isNotNull()
-        artCmp as Art
-        assertThat(artCmp.timestamp).isNotNull()
-        artCmp.timestamp = null
-        assertThat(artCmp).isEqualTo(art)
-        val artModel = storage.reference.child(art.storageRef).getBytes(1024 * 1024).await()
-        assertThat(artModel).isEqualTo("geoARt".toByteArray())
-    }
+            val artCmp = artRepository.getById(art.id)
+            assertThat(artCmp).isNotNull()
+            artCmp as Art
+            assertThat(artCmp.timestamp).isNotNull()
+            artCmp.timestamp = null
+            assertThat(artCmp).isEqualTo(art)
+            val artModel = storage.reference.child(art.storageRef).getBytes(1024 * 1024).await()
+            assertThat(artModel).isEqualTo("geoARt".toByteArray())
+        }
 }
