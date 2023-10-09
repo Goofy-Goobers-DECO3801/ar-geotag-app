@@ -54,6 +54,10 @@ fun GeoPoint.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
 }
 
+fun GeoPoint.toGeoLocation(): GeoLocation {
+    return GeoLocation(this.latitude, this.longitude)
+}
+
 fun LatLng.toGeoPoint(): GeoPoint {
     return GeoPoint(this.latitude, this.longitude)
 }

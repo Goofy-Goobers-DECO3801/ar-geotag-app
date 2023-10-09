@@ -1,5 +1,8 @@
 package com.example.deco3801.ui
 
+import android.content.pm.PackageManager
+import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
@@ -31,13 +33,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,9 +57,24 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
 import com.example.deco3801.navigateAR
+import com.example.deco3801.ui.components.GetUserLocation
+import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.theme.UnchangingAppColors
+import com.example.deco3801.util.LocationUtil
+import com.example.deco3801.util.toGeoLocation
+import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.rememberCameraPositionState
+import org.imperiumlabs.geofirestore.util.GeoUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,10 +83,16 @@ fun ArtworkNavScreen(
     navController: NavHostController,
     viewModel: ArtworkNavViewModel = hiltViewModel()
 ) {
-
+    val context = LocalContext.current
+    var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
+
+    GetUserLocation(onChange = { userLocation = it })
+    LaunchedEffect(Unit) { // This is much quicker for the first time
+        userLocation = LocationUtil.getCurrentLocation(context)
+    }
 
     DisposableEffect(Unit) {
         viewModel.hasLiked(artId)
@@ -78,35 +106,34 @@ fun ArtworkNavScreen(
         topBar = {
             ArtworkTopBar(
                 navController = navController,
-                artworkTitle = art.title,
+                artworkTitle = art.title
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            item {
-                ArtworkTitle(art, user) {
-                    navController.navigate("${ScreenNames.Profile.name}/${user.id}")
-                }
+            ArtworkTitle(art, user) {
+                navController.navigate("${ScreenNames.Profile.name}/${user.id}")
             }
-            item {
-                ArtworkMap()
-            }
-            item {
-                ArtworkInteract(
-                    distance = 0, // TODO
-                    onArClicked = {
-                        navController.navigateAR(art.storageUri)
-                    },
+            ArtworkMap(art, userLocation)
+
+            ArtworkInteract(
+                distanceInM = if (art.location != null && userLocation != null) {
+                    GeoUtils.distance(
+                        art.location!!.toGeoLocation(),
+                        userLocation!!.toGeoLocation()
                     )
-            }
-            item {
-                ArtworkDescription(art, liked) {
-                    viewModel.onLikeClicked()
+                } else {
+                    Double.MAX_VALUE
                 }
+            ) {
+                navController.navigateAR(art.storageUri)
+            }
+            ArtworkDescription(art, liked) {
+                viewModel.onLikeClicked()
             }
         }
     }
@@ -116,7 +143,7 @@ fun ArtworkNavScreen(
 fun ArtworkTitle(
     art: Art,
     user: User,
-    onUserClicked: () -> Unit = {},
+    onUserClicked: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -138,7 +165,7 @@ fun ArtworkTitle(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+                .background(UnchangingAppColors.main_theme)
         ) {
             Column(
                 modifier = Modifier.padding(
@@ -191,7 +218,7 @@ fun ArtworkTitle(
 @Composable
 fun ArtworkTopBar(
     artworkTitle: String,
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     TopAppBar(
         title = {
@@ -226,22 +253,79 @@ fun ArtworkTopBar(
 }
 
 @Composable
-fun ArtworkMap() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(200.dp))
-        Text("Map goes here")
-        Spacer(Modifier.height(200.dp))
+fun ArtworkMap(
+    art: Art,
+    userLocation: Location?,
+    googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel()
+) {
+    DisposableEffect(Unit) {
+        ProgressbarState.showIndeterminateProgressbar()
+        onDispose {
+            ProgressbarState.resetProgressbar()
+        }
+    }
+
+    if (userLocation == null) {
+        return
+    }
+
+    val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
+    val context = LocalContext.current
+    var apiKey by remember { mutableStateOf<String?>(null) }
+    val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(userLocation.toLatLng(), 15f)
+    }
+
+    LaunchedEffect(Unit) {
+        context.packageManager
+            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            .apply {
+                apiKey = metaData.getString("com.google.android.geo.API_KEY")
+            }
+    }
+
+    LaunchedEffect(apiKey != null && art.location != null) {
+        if (apiKey != null && art.location != null) {
+            googlePlacesViewModel.getDirection(
+                // Modify this to get the actual origin
+                origin = "${userLocation.latitude}, ${userLocation.longitude}",
+                // Use the marker's location as the destination
+                destination = "${art.location!!.latitude}, ${art.location!!.longitude}",
+                key = apiKey!!
+            )
+        }
+    }
+
+    Column(modifier = Modifier.height(400.dp)) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = mapProperties,
+            onMapLoaded = {
+                ProgressbarState.resetProgressbar()
+            }
+        ) {
+            art.location?.let {
+                Marker(
+                    state = MarkerState(position = it.toLatLng()),
+                    title = art.title,
+                    snippet = art.description,
+                    icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker)
+                )
+            }
+
+            Polyline(points = routePoints, onClick = {
+                Log.d("ROUTE", "${it.points} was clicked")
+            }, color = Color.Blue)
+        }
     }
 }
 
 @Composable
 fun ArtworkInteract(
-    distance: Int,
-    onArClicked: () -> Unit,
+    distanceInM: Double,
+    onArClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -249,7 +333,7 @@ fun ArtworkInteract(
             .background(UnchangingAppColors.main_theme),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (distance == 0) {
+        if (distanceInM <= 10.0) {
             Text(
                 text = "You have arrived",
                 style = MaterialTheme.typography.titleMedium,
@@ -274,7 +358,7 @@ fun ArtworkInteract(
             }
         } else {
             Text(
-                text = "$distance m",
+                text = formatDistance(distanceInM),
                 style = MaterialTheme.typography.headlineLarge,
                 color = Color.White,
                 modifier = Modifier.padding(15.dp)
@@ -287,7 +371,7 @@ fun ArtworkInteract(
 fun ArtworkDescription(
     art: Art,
     liked: Boolean?,
-    onLikeClicked: () -> Unit,
+    onLikeClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -297,19 +381,19 @@ fun ArtworkDescription(
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 enabled = liked != null,
-                onClick = onLikeClicked,
+                onClick = onLikeClicked
             ) {
                 Icon(
                     imageVector = if (liked != null && liked) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
-                    tint = if (liked != null && liked) Color.Red else Color.Unspecified,
+                    tint = if (liked != null && liked) Color.Red else Color.Unspecified
                 )
             }
             Spacer(Modifier.width(5.dp))
             Text("${art.likeCount} likes")
             Spacer(Modifier.width(10.dp))
             IconButton(
-                onClick = { },
+                onClick = { }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Message,
@@ -326,7 +410,7 @@ fun ArtworkDescription(
 
 @Preview
 @Composable
-fun PreviewArtworkNavScreen() {
+private fun PreviewArtworkNavScreen() {
     ArtworkNavScreen(
         "1",
         rememberNavController()

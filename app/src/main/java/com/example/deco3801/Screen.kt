@@ -73,7 +73,7 @@ fun AppFunctionality(
                 SignUpScreen(appState.navController)
             }
             composable(route = ScreenNames.Home.name) {
-                HomeScreen()
+                HomeScreen(appState.navController)
             }
             composable(route = ScreenNames.Create.name) {
                 CreateScreen(appState.navController)
@@ -121,5 +121,9 @@ fun AppFunctionality(
 
 fun NavHostController.navigateAR(uri: String) {
     val encondedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-    this.navigate("${ScreenNames.ARscreen.name}?uri=${encondedUri}")
+    return this.navigate("${ScreenNames.ARscreen.name}?uri=${encondedUri}")
+}
+
+fun NavHostController.navigateArt(artId: String) {
+    return this.navigate("${ScreenNames.ArtworkNav.name}/${artId}")
 }

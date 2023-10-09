@@ -1,34 +1,53 @@
 package com.example.deco3801.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
-import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
+import com.example.deco3801.data.model.Art
+import com.example.deco3801.data.model.User
+import com.example.deco3801.navigateArt
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
+import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
-import com.example.deco3801.util.toRadius
 import com.example.deco3801.viewmodel.HomeViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.Marker
@@ -37,17 +56,14 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import android.content.pm.PackageManager
-import android.location.Location
-import androidx.compose.ui.graphics.Color
-import com.google.maps.android.compose.Polyline
+import kotlinx.coroutines.launch
+import org.imperiumlabs.geofirestore.util.GeoUtils
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(),
-    googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
+    navController: NavHostController,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     Scaffold(
         topBar = {
@@ -61,7 +77,6 @@ fun HomeScreen(
     ) { innerPadding ->
 
         val context = LocalContext.current
-        val userLocation = remember { mutableStateOf<Location?>(null) }
 
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
@@ -77,25 +92,22 @@ fun HomeScreen(
             ),
             title = "Location Permissions",
             description = "This app functions best when we can use your precise location.\n" +
-                    "You can opt out of this at anytime."
+                "You can opt out of this at anytime."
         ) {
             LaunchedEffect(Unit) {
                 viewModel.onLocationChange(getCurrentLocation(context))
-                userLocation.value = getCurrentLocation(context)
             }
-
         }
 
         val uiState by viewModel.uiState.collectAsState()
         val art by viewModel.activeArt.collectAsState()
-        val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
-
 
         // TODO: What do we display if we cannot get the users location?
         if (uiState.currentLocation == null) {
             return@Scaffold
         }
 
+        val scope = rememberCoroutineScope()
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 10f)
         }
@@ -119,24 +131,16 @@ fun HomeScreen(
             }
         }
 
-        var apiKey: String?
+        val markerClick: (Marker) -> Boolean = { marker ->
+            marker.title?.let { viewModel.onArtSelect(it) }
 
-        context.packageManager
-            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-            .apply {
-                apiKey = metaData.getString("com.google.android.geo.API_KEY")
-            }
-
-        val markerClick: (Marker) -> Boolean = {marker ->
-            // Call the ViewModel function in GooglePlacesInfoViewModel when a marker is clicked
-            apiKey?.let {
-                googlePlacesViewModel.getDirection(
-                    origin = "${userLocation.value!!.latitude}, ${userLocation.value!!.longitude}", // Modify this to get the actual origin
-                    destination = "${marker.position.latitude}, ${marker.position.longitude}", // Use the marker's location as the destination
-                    key = it
+            scope.launch {
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLng(marker.position),
+                    50
                 )
             }
-            false
+            true // Disable default marker selection
         }
 
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -155,29 +159,89 @@ fun HomeScreen(
                     Log.d("MARKER", art.toString())
                     Marker(
                         state = MarkerState(position = it.location!!.toLatLng()),
-                        title = it.title,
+                        title = it.id,
                         snippet = it.description,
                         icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
                         onClick = markerClick
-
                     )
                 }
-
-                Polyline(points = routePoints, onClick = {
-                    Log.d(TAG, "${it.points} was clicked")
-                }, color = Color.Blue)
             }
+        }
 
-
-
+        if (uiState.selectedArt != null) {
+            ArtMarker(
+                art = uiState.selectedArt!!,
+                artist = uiState.selectArtUser!!,
+                onDismissRequest = viewModel::onArtUnselect,
+                onSelect = { navController.navigateArt(it) }
+            )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArtMarker(
+    art: Art,
+    artist: User,
+    onDismissRequest: () -> Unit,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var distanceAway by remember { mutableDoubleStateOf(0.0) }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        val currentLocation = getCurrentLocation(context)?.toGeoLocation()
+        val artLocation = art.location?.toGeoLocation()
+        if (artLocation != null && currentLocation != null) {
+            distanceAway = GeoUtils.distance(artLocation, currentLocation)
+        }
+    }
+
+    ModalBottomSheet(
+        modifier = modifier,
+        onDismissRequest = onDismissRequest
+    ) {
+        Surface(
+            onClick = {
+                onDismissRequest()
+                onSelect(art.id)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp)
+            ) {
+                Row {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "distance"
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text("${formatDistance(distanceAway)} away")
+                }
+                Text(
+                    art.title,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text("@${artist.username}")
+                Text(art.timestamp?.let { formatDate(it) } ?: "")
+                Spacer(Modifier.height(20.dp))
+            }
+        }
+    }
+}
+
+fun formatDistance(distanceInM: Double): String {
+    return when {
+        distanceInM >= 1000 -> String.format("%.2fkm", distanceInM / 1000)
+        else -> { String.format("%.0fm", distanceInM) }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen()
+private fun HomeScreenPreview() {
+    HomeScreen(rememberNavController())
 }
-

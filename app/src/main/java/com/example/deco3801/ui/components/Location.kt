@@ -23,6 +23,7 @@ private const val LOCATION_TAG = "LOCATION"
 @Composable
 fun GetUserLocation(
     onChange: (Location?) -> Unit,
+    delayInSeconds: Long = 5,
 ) {
     val context = LocalContext.current
     val currentOnChange by rememberUpdatedState(newValue = onChange)
@@ -54,7 +55,7 @@ fun GetUserLocation(
         // Create a location request for precise location every 3 seconds
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            TimeUnit.SECONDS.toMillis(3)
+            TimeUnit.SECONDS.toMillis(delayInSeconds)
         ).build()
 
         // Send the location request while we are in the composition
