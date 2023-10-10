@@ -106,7 +106,6 @@ class CreateViewModel @Inject constructor(
                 && uiState.description.isNotEmpty()
                 && uiState.location != null
                 && uiState.uri != null
-                && uiState.imageBytes != null
     }
 
     fun onPostArtwork(open: (String) -> Unit) {
