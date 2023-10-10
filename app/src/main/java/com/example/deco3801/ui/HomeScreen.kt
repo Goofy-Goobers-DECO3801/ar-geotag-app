@@ -63,7 +63,7 @@ import org.imperiumlabs.geofirestore.util.GeoUtils
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     Scaffold(
         topBar = {
@@ -71,9 +71,9 @@ fun HomeScreen(
                 canNavigateBack = false,
                 showSettings = false,
                 navigateUp = {},
-                showArtFilter = true
+                showArtFilter = true,
             )
-        }
+        },
     ) { innerPadding ->
 
         val context = LocalContext.current
@@ -86,13 +86,15 @@ fun HomeScreen(
         }
         // Location Permissions
         RequestPermissions(
-            permissions = listOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
+            permissions =
+                listOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                ),
             title = "Location Permissions",
-            description = "This app functions best when we can use your precise location.\n" +
-                "You can opt out of this at anytime."
+            description =
+                "This app functions best when we can use your precise location.\n" +
+                    "You can opt out of this at anytime.",
         ) {
             LaunchedEffect(Unit) {
                 viewModel.onLocationChange(getCurrentLocation(context))
@@ -108,9 +110,10 @@ fun HomeScreen(
         }
 
         val scope = rememberCoroutineScope()
-        val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 10f)
-        }
+        val cameraPositionState =
+            rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 10f)
+            }
 
         val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
 
@@ -137,7 +140,7 @@ fun HomeScreen(
             scope.launch {
                 cameraPositionState.animate(
                     CameraUpdateFactory.newLatLng(marker.position),
-                    50
+                    50,
                 )
             }
             true // Disable default marker selection
@@ -150,7 +153,7 @@ fun HomeScreen(
                 properties = mapProperties,
                 onMapLoaded = {
                     ProgressbarState.resetProgressbar()
-                }
+                },
             ) {
                 art.values.forEach {
                     if (it.location == null) {
@@ -162,7 +165,7 @@ fun HomeScreen(
                         title = it.id,
                         snippet = it.description,
                         icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
-                        onClick = markerClick
+                        onClick = markerClick,
                     )
                 }
             }
@@ -173,7 +176,7 @@ fun HomeScreen(
                 art = uiState.selectedArt!!,
                 artist = uiState.selectArtUser!!,
                 onDismissRequest = viewModel::onArtUnselect,
-                onSelect = { navController.navigateArt(it) }
+                onSelect = { navController.navigateArt(it) },
             )
         }
     }
@@ -186,7 +189,7 @@ fun ArtMarker(
     artist: User,
     onDismissRequest: () -> Unit,
     onSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var distanceAway by remember { mutableDoubleStateOf(0.0) }
     val context = LocalContext.current
@@ -201,29 +204,29 @@ fun ArtMarker(
 
     ModalBottomSheet(
         modifier = modifier,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Surface(
             onClick = {
                 onDismissRequest()
                 onSelect(art.id)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(10.dp),
             ) {
                 Row {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
-                        contentDescription = "distance"
+                        contentDescription = "distance",
                     )
                     Spacer(Modifier.width(5.dp))
                     Text("${formatDistance(distanceAway)} away")
                 }
                 Text(
                     art.title,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 Text("@${artist.username}")
                 Text(art.timestamp?.let { formatDate(it) } ?: "")
@@ -236,7 +239,9 @@ fun ArtMarker(
 fun formatDistance(distanceInM: Double): String {
     return when {
         distanceInM >= 1000 -> String.format("%.2fkm", distanceInM / 1000)
-        else -> { String.format("%.0fm", distanceInM) }
+        else -> {
+            String.format("%.0fm", distanceInM)
+        }
     }
 }
 

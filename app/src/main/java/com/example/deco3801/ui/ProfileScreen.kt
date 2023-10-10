@@ -62,6 +62,8 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.navigateArt
+import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.ProfileViewModel
@@ -71,7 +73,7 @@ import java.util.Locale
 enum class FollowDialogState {
     HIDDEN,
     FOLLOWERS,
-    FOLLOWING
+    FOLLOWING,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,14 +105,14 @@ fun ProfileScreen(
             TopBar(
                 canNavigateBack = false,
                 showSettings = isCurrentUser,
-                navigateUp = { navController.navigate(ScreenNames.Settings.name) }
+                navigateUp = { navController.navigate(ScreenNames.Settings.name) },
             )
-        }
+        },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (followDialogState != FollowDialogState.HIDDEN) {
                 FollowersDialog(
-                    open = { navController.navigate(it) },
+                    open = { navController.navigateProfile(it.id) },
                     onClose = { followDialogState = FollowDialogState.HIDDEN },
                     follows = follows,
                     followDialogState,
@@ -120,43 +122,51 @@ fun ProfileScreen(
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = modifier
+                modifier = modifier,
             ) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
+                            horizontalArrangement = Arrangement.Start,
                         ) {
                             ExpandableAsyncImage(
                                 model = user.pictureUri.ifBlank { R.drawable.pfp },
                                 placeholder = painterResource(id = R.drawable.pfp),
                                 contentDescription = "profile",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .size(92.dp)
+                                modifier =
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .size(92.dp),
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 if (user.fullname.isNotEmpty()) {
                                     Text(
                                         text = user.fullname,
-                                        style = MaterialTheme.typography.titleLarge
+                                        style = MaterialTheme.typography.titleLarge,
                                     )
                                 }
 
                                 Text(
                                     text = "@${user.username}",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleMedium,
                                 )
                                 if (isCurrentUser) {
-                                    Button(onClick = { navController.navigate(ScreenNames.EditProfile.name) }) {
+                                    Button(
+                                        onClick = {
+                                            navController.navigate(
+                                                ScreenNames.EditProfile.name,
+                                            )
+                                        },
+                                    ) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
@@ -164,20 +174,19 @@ fun ProfileScreen(
                                         Text(text = if (isFollowing!!) "Unfollow" else "Follow")
                                     }
                                 }
-
                             }
                         }
                         Spacer(modifier = spacerModifier)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                             Text(text = user.bio)
                         }
                         Spacer(modifier = spacerModifier)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                             Text(
                                 text = "${art.count()} posts",
@@ -188,7 +197,10 @@ fun ProfileScreen(
                                     viewModel.onFollowersClick()
                                     followDialogState = FollowDialogState.FOLLOWERS
                                 },
-                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                                style =
+                                    LocalTextStyle.current.copy(
+                                        color = LocalContentColor.current,
+                                    ),
                             )
                             ClickableText(
                                 text = AnnotatedString("${user.followingCount} following"),
@@ -196,23 +208,25 @@ fun ProfileScreen(
                                     viewModel.onFollowingClick()
                                     followDialogState = FollowDialogState.FOLLOWING
                                 },
-                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                                style =
+                                    LocalTextStyle.current.copy(
+                                        color = LocalContentColor.current,
+                                    ),
                             )
                         }
-
                     }
                 }
                 if (!user.isPrivate || isCurrentUser) {
                     items(art) {
                         ArtworkTile(it) {
-                            navController.navigate("${ScreenNames.ArtworkNav.name}/${it.id}")
+                            navController.navigateArt(it.id)
                         }
                     }
                 } else {
                     item {
                         Text(
                             "Private account.",
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -224,31 +238,32 @@ fun ProfileScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FollowersDialog(
-    open: (String) -> Unit,
+    open: (User) -> Unit,
     onClose: () -> Unit,
     follows: List<User>,
     followDialogState: FollowDialogState,
 ) {
-
     Dialog(
-        onDismissRequest = { onClose() }
+        onDismissRequest = { onClose() },
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
             ) {
                 Text(
                     text = if (followDialogState == FollowDialogState.FOLLOWING) "Following" else "Followers",
                     modifier = Modifier.padding(bottom = 16.dp),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
                 )
 
                 LazyColumn(
@@ -256,9 +271,9 @@ fun FollowersDialog(
                 ) {
                     items(follows) { user ->
                         Surface(
-                            onClick = { open("${ScreenNames.Profile.name}/${user.id}") },
+                            onClick = { open(user) },
                             modifier = Modifier.fillMaxSize(),
-                            color = Color.Transparent
+                            color = Color.Transparent,
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -269,26 +284,26 @@ fun FollowersDialog(
                                     placeholder = painterResource(id = R.drawable.pfp),
                                     contentDescription = "profile",
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .size(82.dp)
+                                    modifier =
+                                        Modifier
+                                            .clip(CircleShape)
+                                            .size(82.dp),
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     if (user.fullname.isNotEmpty()) {
                                         Text(
                                             text = user.fullname,
-                                            style = MaterialTheme.typography.titleMedium
+                                            style = MaterialTheme.typography.titleMedium,
                                         )
                                     }
 
                                     Text(
                                         text = "@${user.username}",
-                                        style = MaterialTheme.typography.titleMedium
+                                        style = MaterialTheme.typography.titleMedium,
                                     )
                                     // TODO Maybe add unfollow/remove button for the current user
                                 }
-
                             }
                         }
                     }
@@ -302,7 +317,6 @@ fun FollowersDialog(
 fun ProfileScreenPreview() {
     ProfileScreen("", navController = rememberNavController())
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -327,25 +341,25 @@ fun ArtworkTile(
             Spacer(modifier = Modifier.height(14.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 // TODO: map preview
                 AsyncImage(
                     model = R.drawable.default_img,
                     contentDescription = "post",
-                    modifier = Modifier.size(146.dp)
+                    modifier = Modifier.size(146.dp),
                 )
             }
             Spacer(modifier = spacerModifier)
             Text(
                 text = art.title,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp),
             )
             Text(
                 text = formatDate(art.timestamp!!),
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp),
             )
             Row {
                 Icon(
@@ -353,11 +367,11 @@ fun ArtworkTile(
                     contentDescription = "location",
                     Modifier
                         .padding(start = 16.dp)
-                        .size(16.dp)
+                        .size(16.dp),
                 )
                 Text(
                     text = locationName,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             Row {
@@ -366,22 +380,22 @@ fun ArtworkTile(
                     contentDescription = "heart",
                     Modifier
                         .padding(start = 16.dp)
-                        .size(16.dp)
+                        .size(16.dp),
                 )
                 Text(
                     text = "${art.likeCount} likes",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Icon(
                     imageVector = Icons.Outlined.Message,
                     contentDescription = "review",
-                    Modifier.size(16.dp)
+                    Modifier.size(16.dp),
                 )
 
                 Text(
                     text = "${art.reviewCount} reviews",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))
@@ -414,9 +428,8 @@ fun formatDate(date: Date): String {
     }
 }
 
-
-//@Composable
-//fun ProfileGrid (modifier: Modifier = Modifier) {
+// @Composable
+// fun ProfileGrid (modifier: Modifier = Modifier) {
 //    LazyVerticalGrid(
 //        columns = GridCells.Fixed(2),
 //        verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -427,7 +440,4 @@ fun formatDate(date: Date): String {
 //            ArtworkTile(topic)
 //        }
 //    }
-//}
-
-
-
+// }

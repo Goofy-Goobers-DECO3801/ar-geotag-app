@@ -12,12 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-
 @HiltViewModel
 class ArtworkNavViewModel @Inject constructor(
     private val userRepo: UserRepository,
     private val artRepo: ArtRepository,
-    private val likeRepo: LikeRepository
+    private val likeRepo: LikeRepository,
 ) : AppViewModel() {
     private val _art = MutableStateFlow(Art())
     val art: StateFlow<Art> = _art
@@ -27,7 +26,6 @@ class ArtworkNavViewModel @Inject constructor(
 
     private val _liked = MutableStateFlow<Boolean?>(null)
     val liked: StateFlow<Boolean?> = _liked
-
 
     fun hasLiked(artId: String) {
         launchCatching {
@@ -47,7 +45,6 @@ class ArtworkNavViewModel @Inject constructor(
                 likeRepo.likeArt(_art.value.id)
             }
             _liked.value = !_liked.value!!
-
         }
     }
 
@@ -60,7 +57,6 @@ class ArtworkNavViewModel @Inject constructor(
             userRepo.attachListenerById(userid) {
                 onUserChange(it)
             }
-
         }
         Log.d("PROFILE", "attaching listeners")
     }
@@ -70,7 +66,6 @@ class ArtworkNavViewModel @Inject constructor(
         userRepo.detachListener()
         Log.d("PROFILE", "detaching listeners")
     }
-
 
     fun onArtChange(art: Art) {
         _art.value = art
