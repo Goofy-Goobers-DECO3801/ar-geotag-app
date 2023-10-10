@@ -52,6 +52,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -81,7 +82,6 @@ enum class FollowDialogState {
 fun ProfileScreen(
     userId: String,
     navController: NavHostController,
-    modifier: Modifier = Modifier.padding(8.dp),
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val spacerModifier: Modifier = Modifier.height(12.dp)
@@ -122,13 +122,13 @@ fun ProfileScreen(
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = modifier
+                modifier = Modifier.padding(start = 25.dp, end = 25.dp)
             ) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(20.dp),
+                            .padding(top = 30.dp, bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
@@ -312,7 +312,7 @@ fun ArtworkTile(
     art: Art,
     onClick: () -> Unit,
 ) {
-    val spacerModifier: Modifier = Modifier.height(8.dp)
+    val spacerModifier: Modifier = Modifier.height(5.dp)
     val gcd = Geocoder(LocalContext.current, Locale.getDefault())
     var locationName by remember { mutableStateOf("") }
 
@@ -326,7 +326,7 @@ fun ArtworkTile(
 
     Card(onClick = onClick) {
         Column {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -342,32 +342,37 @@ fun ArtworkTile(
             Text(
                 text = art.title,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 12.dp)
             )
             Text(
                 text = formatDate(art.timestamp!!),
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 15.dp)
             )
+            Spacer(modifier = spacerModifier)
             Row {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "location",
                     Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 12.dp)
                         .size(16.dp)
                 )
                 Text(
                     text = locationName,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(end = 12.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Spacer(modifier = spacerModifier)
             Row {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
                     Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 12.dp)
                         .size(16.dp)
                 )
                 Text(

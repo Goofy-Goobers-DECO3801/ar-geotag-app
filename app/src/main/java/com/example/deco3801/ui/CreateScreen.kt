@@ -188,12 +188,12 @@ fun CreateScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        start = 35.dp,
-                        end = 35.dp
+                        start = 30.dp,
+                        end = 30.dp
                     )
             ) {
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
                     Text(
                         text = "Upload an Artwork",
                         modifier = textModifier,
