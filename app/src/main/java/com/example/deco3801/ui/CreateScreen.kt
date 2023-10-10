@@ -188,7 +188,6 @@ fun CreateScreen(
                     icon = Icons.Filled.PhotoCamera,
                     iconDescription = "camera",
                 )
-                Spacer(Modifier.height(20.dp))
             }
         }
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -197,12 +196,12 @@ fun CreateScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(
-                            start = 35.dp,
-                            end = 35.dp,
-                            top = 40.dp,
+                            start = 30.dp,
+                            end = 30.dp,
                         ),
             ) {
                 item {
+                    Spacer(modifier = Modifier.height(30.dp))
                     Text(
                         text = "Upload an Artwork",
                         modifier = textModifier,
@@ -228,32 +227,32 @@ fun CreateScreen(
                         text = "Upload Artwork",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Row(
+                    Button(
+                        onClick = {
+                            showBottomSheet = true
+                        },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(start = 10.dp),
+                                .padding(start = 50.dp, end = 50.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                showBottomSheet = true
-                            },
-                        ) {
-                            Icon(Icons.Filled.Upload, contentDescription = "upload")
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = "Upload")
-                        }
+                        Icon(Icons.Filled.Upload, contentDescription = "upload")
                         Spacer(modifier = Modifier.width(10.dp))
-                        Button(
-                            onClick = {
-                                navController.navigateAR(uiState.uri.toString())
-                            },
-                            enabled = uiState.uri != null,
-                        ) {
-                            Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = "Preview in AR")
-                        }
+                        Text(text = "Upload")
+                    }
+                    Button(
+                        onClick = {
+                            navController.navigateAR(uiState.uri.toString())
+
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 50.dp, end = 50.dp),
+                        enabled = uiState.uri != null
+                    ) {
+                        Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = "Preview in AR")
                     }
 
                     Spacer(modifier = spacerModifier)
@@ -290,8 +289,11 @@ fun CreateScreen(
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Button(
-                        modifier = Modifier.padding(start = 10.dp),
-                        onClick = { /* TODO */ },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 50.dp, end = 50.dp),
+                        onClick = { /* TODO */ }
                     ) {
                         Text(text = "Select Location")
                     }
@@ -321,8 +323,8 @@ fun CreateScreen(
                         ) {
                             Text(text = "Post Artwork")
                         }
-                        Spacer(Modifier.height(30.dp))
                     }
+                    Spacer(Modifier.height(50.dp))
                 }
             }
         }
