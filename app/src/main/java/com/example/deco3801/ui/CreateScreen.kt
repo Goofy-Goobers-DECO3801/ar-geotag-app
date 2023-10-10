@@ -150,7 +150,7 @@ fun CreateScreen(
             ) {
                 // Sheet content
                 BottomSheetSurface(
-                    text = "Pick image",
+                    text = "Select image",
                     onClick = {
                         showBottomSheet = false
                         imagePicker.launch(
@@ -163,7 +163,7 @@ fun CreateScreen(
                     iconDescription = "image",
                 )
                 BottomSheetSurface(
-                    text = "Pick 3D Model",
+                    text = "Select 3D model",
                     onClick = {
                         showBottomSheet = false
                         filePicker.launch("model/gltf-binary")
