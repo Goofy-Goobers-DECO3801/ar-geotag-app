@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Upload
@@ -48,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -75,6 +77,8 @@ fun CreateScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var takePhotoFile by remember { mutableStateOf<File?>(null) }
     var takePhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var showSampleList by remember { mutableStateOf(false) }
+    val sampleSheetState = rememberModalBottomSheetState()
 
     val uiState = viewModel.uiState
 
@@ -188,7 +192,26 @@ fun CreateScreen(
                     icon = Icons.Filled.PhotoCamera,
                     iconDescription = "camera",
                 )
+                BottomSheetSurface(
+                    text = "Select from samples",
+                    onClick = {
+                        showBottomSheet = false
+                        showSampleList = true
+
+                    },
+                    icon = Icons.Filled.Animation,
+                    iconDescription = "sample"
+                )
+                Spacer(Modifier.height(20.dp))
             }
+        }
+        if (showSampleList) {
+            SampleModelList(
+                onDismissRequest = {
+                    showSampleList = false
+                },
+                onSelect = viewModel::onSelectFile
+            )
         }
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
@@ -357,6 +380,53 @@ fun BottomSheetSurface(
             Spacer(Modifier.width(10.dp))
             Text(text)
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SampleModelList(
+    onDismissRequest: () -> Unit,
+    onSelect: (String, Uri) -> Unit,
+) {
+    val sampleSheetState = rememberModalBottomSheetState()
+    val samples by remember {
+        mutableStateOf(
+            listOf(
+                "https://sceneview.github.io/assets/models/Halloween.glb",
+                "https://sceneview.github.io/assets/models/DamagedHelmet.glb",
+                "https://sceneview.github.io/assets/models/GameBoy.glb",
+                "https://sceneview.github.io/assets/models/Gumball.glb",
+                "https://sceneview.github.io/assets/models/Hair.glb",
+                "https://sceneview.github.io/assets/models/MetalRoughSpheres.glb",
+                "https://sceneview.github.io/assets/models/Spoons.glb",
+                "https://sceneview.github.io/assets/models/FiatPunto.glb",
+                "https://sceneview.github.io/assets/models/ClearCoat.glb",
+                "https://sceneview.github.io/assets/models/MaterialSuite.glb"
+            )
+        )
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        sheetState = sampleSheetState,
+    ) {
+        // Sheet content
+        samples.forEach {
+            val name = it.substringAfterLast("/")
+            BottomSheetSurface(
+                text = name,
+                onClick = {
+                    onDismissRequest()
+                    onSelect(name, it.toUri())
+                },
+                icon = Icons.Filled.ViewInAr,
+                iconDescription = "image",
+            )
+        }
+        Spacer(Modifier.height(20.dp))
     }
 }
 

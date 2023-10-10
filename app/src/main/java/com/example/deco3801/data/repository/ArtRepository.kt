@@ -13,6 +13,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.tasks.await
 import org.imperiumlabs.geofirestore.core.GeoHash
 import javax.inject.Inject
@@ -30,16 +31,17 @@ class ArtRepository @Inject constructor(
         uri: Uri,
         filename: String,
     ): Art {
-
         val uid = auth.uid!!
+        var storageRef: StorageReference? = null
 
-        val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
-        val storageRef = storage.reference.child(storagePath)
-        storageRef.putFile(uri).addOnProgressListener {
-            val progress = it.bytesTransferred.toFloat() / it.totalByteCount
-            ProgressbarState.updateProgressbar(progress)
-        }.await()
-
+        if (uri.scheme != "https" ) {
+            val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+            storageRef = storage.reference.child(storagePath)
+            storageRef.putFile(uri).addOnProgressListener {
+                val progress = it.bytesTransferred.toFloat() / it.totalByteCount
+                ProgressbarState.updateProgressbar(progress)
+            }.await()
+        }
         val art = Art(
             title = title,
             description = description,
@@ -47,14 +49,13 @@ class ArtRepository @Inject constructor(
             altitude = location.altitude,
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
-            storageUri = storageRef.downloadUrl.await().toString(),
-            storageRef = storagePath,
+            storageUri = storageRef?.downloadUrl?.await()?.toString() ?: uri.toString(),
         )
 
         Log.d(ART_COLLECTION, art.toString())
 
         db.collection(ART_COLLECTION).add(art).addOnFailureListener {
-            storageRef.delete()
+            storageRef?.delete()
         }.addOnSuccessListener {
             art.id = it.id
         }.await()
