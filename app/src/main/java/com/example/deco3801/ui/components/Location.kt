@@ -23,6 +23,7 @@ private const val LOCATION_TAG = "LOCATION"
 @Composable
 fun GetUserLocation(
     onChange: (Location?) -> Unit,
+    delayInSeconds: Long = 5,
 ) {
     val context = LocalContext.current
     val currentOnChange by rememberUpdatedState(newValue = onChange)
@@ -30,10 +31,10 @@ fun GetUserLocation(
     // Check for permissions
     if (ActivityCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
         ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
         ) != PackageManager.PERMISSION_GRANTED
     ) {
         return
@@ -43,25 +44,27 @@ fun GetUserLocation(
         // The Fused Location Provider provides access to location APIs.
         val locationProvider = LocationServices.getFusedLocationProviderClient(context)
 
-        val locationCallback: LocationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                // Run the callback with the user's new location
-                currentOnChange(result.lastLocation)
-                Log.d(LOCATION_TAG, "${result.lastLocation}")
+        val locationCallback: LocationCallback =
+            object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    // Run the callback with the user's new location
+                    currentOnChange(result.lastLocation)
+                    Log.d(LOCATION_TAG, "${result.lastLocation}")
+                }
             }
-        }
 
         // Create a location request for precise location every 3 seconds
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            TimeUnit.SECONDS.toMillis(3)
-        ).build()
+        val locationRequest =
+            LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                TimeUnit.SECONDS.toMillis(delayInSeconds),
+            ).build()
 
         // Send the location request while we are in the composition
         locationProvider.requestLocationUpdates(
             locationRequest,
             locationCallback,
-            Looper.getMainLooper()
+            Looper.getMainLooper(),
         )
 
         onDispose {

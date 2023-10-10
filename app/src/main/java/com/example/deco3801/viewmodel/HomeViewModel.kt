@@ -8,6 +8,7 @@ import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.FollowRepository
+import com.example.deco3801.data.repository.UserRepository
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.util.toGeoPoint
 import com.example.deco3801.util.toLatLng
@@ -39,6 +40,8 @@ data class HomeUiState(
     val currentLocation: LatLng? = null,
     val distanceInKm: Double = 100_000.0, // XXX
     val ready: Boolean = false,
+    val selectedArt: Art? = null,
+    val selectArtUser: User? = null,
 )
 
 sealed class ArtFilterAction {
@@ -89,6 +92,19 @@ class HomeViewModel @Inject constructor(
     private var _geoQuery: GeoQuery? = null
 
     private val STORE_ART_FILTER = "artFilter"
+
+    fun onArtUnselect() {
+        _uiState.value = _uiState.value.copy(selectedArt = null, selectArtUser = null)
+    }
+
+    fun onArtSelect(artId: String) {
+        launchCatching {
+            val selectedArt = _activeArt.value[artId] ?: return@launchCatching
+            val selectedArtUser = artRepo.getArtist(selectedArt)
+            _uiState.value = _uiState.value.copy(selectedArt = selectedArt, selectArtUser =  selectedArtUser)
+        }
+
+    }
 
     fun readFilterStateFromStore(store: SharedPreferences) {
         try {

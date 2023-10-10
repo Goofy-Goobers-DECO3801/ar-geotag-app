@@ -4,6 +4,7 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import com.example.deco3801.data.model.Art
+import com.example.deco3801.data.model.User
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toGeoPoint
@@ -20,6 +21,7 @@ class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val auth: FirebaseAuth,
+    private val userRepo: UserRepository
 ) : Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
@@ -64,6 +66,10 @@ class ArtRepository @Inject constructor(
             query.whereEqualTo("userId", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
         }
+    }
+
+    suspend fun getArtist(art: Art): User {
+        return userRepo.getUser(art.userId)!!
     }
 
     override fun getCollectionRef(): CollectionReference {

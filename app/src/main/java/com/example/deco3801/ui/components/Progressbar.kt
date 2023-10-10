@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 data class ProgressbarData(
     val visible: Boolean = false,
-    val progress: Float = 0f
+    val progress: Float = 0f,
 )
 
 object ProgressbarState {

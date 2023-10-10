@@ -86,9 +86,10 @@ fun CreateScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             uri ?: return@rememberLauncherForActivityResult
             try {
-                val bytes = context.contentResolver
-                    .openInputStream(uri)
-                    ?.use { it.buffered().readBytes() }
+                val bytes =
+                    context.contentResolver
+                        .openInputStream(uri)
+                        ?.use { it.buffered().readBytes() }
                 viewModel.onSelectImage(uri.getFileName(context), bytes!!)
             } catch (e: Exception) {
                 SnackbarManager.showError("Unable to upload file!")
@@ -102,7 +103,6 @@ fun CreateScreen(
             viewModel.onSelectFile(uri.getFileName(context), uri)
         }
 
-
     val takePhoto =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
             if (!bool || takePhotoUri == null || takePhotoFile == null) {
@@ -110,9 +110,10 @@ fun CreateScreen(
                 return@rememberLauncherForActivityResult
             }
             try {
-                val bytes = context.contentResolver
-                    .openInputStream(takePhotoUri!!)
-                    ?.use { it.buffered().readBytes() }
+                val bytes =
+                    context.contentResolver
+                        .openInputStream(takePhotoUri!!)
+                        ?.use { it.buffered().readBytes() }
 
                 viewModel.onSelectImage(takePhotoUri!!.getFileName(context), bytes!!)
             } catch (e: Exception) {
@@ -128,7 +129,7 @@ fun CreateScreen(
             TopBar(
                 canNavigateBack = false,
                 showSettings = false,
-                navigateUp = {}
+                navigateUp = {},
             )
         },
     ) { innerPadding ->
@@ -144,10 +145,14 @@ fun CreateScreen(
                     text = "Pick image",
                     onClick = {
                         showBottomSheet = false
-                        imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        imagePicker.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly,
+                            ),
+                        )
                     },
                     icon = Icons.Filled.Image,
-                    iconDescription = "image"
+                    iconDescription = "image",
                 )
                 BottomSheetSurface(
                     text = "Pick 3D Model",
@@ -157,40 +162,43 @@ fun CreateScreen(
 //                        filePicker.launch("*/*")
                     },
                     icon = Icons.Filled.ViewInAr,
-                    iconDescription = "model"
+                    iconDescription = "model",
                 )
                 BottomSheetSurface(
                     text = "Take photo",
                     onClick = {
                         showBottomSheet = false
-                        takePhotoFile = File.createTempFile(
-                            System.currentTimeMillis().toString(),
-                            ".jpg",
-                            File(
-                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                                "Camera"
+                        takePhotoFile =
+                            File.createTempFile(
+                                System.currentTimeMillis().toString(),
+                                ".jpg",
+                                File(
+                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                                    "Camera",
+                                ),
                             )
-                        )
-                        takePhotoUri = FileProvider.getUriForFile(
-                            context,
-                            context.applicationContext.packageName + ".provider",
-                            takePhotoFile!!
-                        )
+                        takePhotoUri =
+                            FileProvider.getUriForFile(
+                                context,
+                                context.applicationContext.packageName + ".provider",
+                                takePhotoFile!!,
+                            )
                         takePhoto.launch(takePhotoUri)
                     },
                     icon = Icons.Filled.PhotoCamera,
-                    iconDescription = "camera"
+                    iconDescription = "camera",
                 )
             }
         }
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = 30.dp,
-                        end = 30.dp
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 30.dp,
+                            end = 30.dp,
+                        ),
             ) {
                 item {
                     Spacer(modifier = Modifier.height(30.dp))
@@ -198,7 +206,7 @@ fun CreateScreen(
                         text = "Upload an Artwork",
                         modifier = textModifier,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Spacer(modifier = spacerModifier)
                 }
@@ -206,7 +214,7 @@ fun CreateScreen(
                     Text(
                         text = "Title",
                         modifier = textModifier,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     TextField(
                         value = uiState.title,
@@ -215,18 +223,18 @@ fun CreateScreen(
                     )
                     Spacer(modifier = spacerModifier)
 
-
                     Text(
                         text = "Upload Artwork",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     Button(
                         onClick = {
                             showBottomSheet = true
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 50.dp, end = 50.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 50.dp, end = 50.dp)
                     ) {
                         Icon(Icons.Filled.Upload, contentDescription = "upload")
                         Spacer(modifier = Modifier.width(10.dp))
@@ -254,38 +262,37 @@ fun CreateScreen(
                             placeholder = painterResource(id = R.drawable.default_img),
                             contentDescription = "profile",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(50.dp)
+                            modifier = Modifier.size(50.dp),
                         )
                         Spacer(modifier = spacerModifier)
-
                     } else if (uiState.filename.isNotBlank()) {
                         Text(
                             text = "Selected File: ${uiState.filename}",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         Spacer(modifier = spacerModifier)
                     }
 
                     Text(
                         text = "Artwork Description",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     TextField(
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
-                        modifier = textFieldModifier.height(130.dp)
+                        modifier = textFieldModifier.height(130.dp),
                     )
                     Spacer(modifier = spacerModifier)
 
-
                     Text(
                         text = "Select Location",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 50.dp, end = 50.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 50.dp, end = 50.dp),
                         onClick = { /* TODO */ }
                     ) {
                         Text(text = "Select Location")
@@ -294,26 +301,25 @@ fun CreateScreen(
                     // Display the selected location
                     uiState.location?.let {
                         Text(
-                            text = "Location: $it", /* TODO: Make this a map? */
-                            style = MaterialTheme.typography.bodySmall
+                            text = "Location: $it", // TODO: Make this a map?
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         Spacer(modifier = spacerModifier)
                     }
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         Button(
                             onClick = {
                                 viewModel.onPostArtwork(
                                     open = {
                                         navController.navigate(it)
-                                    }
+                                    },
                                 )
                             },
-                            enabled = viewModel.isValid()
+                            enabled = viewModel.isValid(),
                         ) {
                             Text(text = "Post Artwork")
                         }
@@ -323,7 +329,6 @@ fun CreateScreen(
             }
         }
     }
-
 }
 
 @Composable
@@ -340,14 +345,14 @@ fun BottomSheetSurface(
         enabled = true,
         modifier = Modifier.fillMaxWidth(),
         color = color,
-        contentColor= contentColor,
+        contentColor = contentColor,
     ) {
         Row(
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(10.dp),
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = iconDescription
+                contentDescription = iconDescription,
             )
             Spacer(Modifier.width(10.dp))
             Text(text)
@@ -355,9 +360,8 @@ fun BottomSheetSurface(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun CreateScreenPreview() {
+private fun CreateScreenPreview() {
     CreateScreen(navController = rememberNavController())
 }
