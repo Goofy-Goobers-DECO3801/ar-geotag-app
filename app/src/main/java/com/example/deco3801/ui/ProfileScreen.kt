@@ -1,8 +1,6 @@
 package com.example.deco3801.ui
 
 import android.icu.text.SimpleDateFormat
-import android.location.Geocoder
-import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,7 +36,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +62,7 @@ import com.example.deco3801.data.model.User
 import com.example.deco3801.navigateArt
 import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.ExpandableAsyncImage
+import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.ProfileViewModel
 import java.util.Date
@@ -126,9 +123,10 @@ fun ProfileScreen(
             ) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 30.dp, bottom = 20.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(top = 30.dp, bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
@@ -324,16 +322,9 @@ fun ArtworkTile(
     onClick: () -> Unit,
 ) {
     val spacerModifier: Modifier = Modifier.height(5.dp)
-    val gcd = Geocoder(LocalContext.current, Locale.getDefault())
     var locationName by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            gcd.getFromLocation(art.location!!.latitude, art.location!!.longitude, 1) {
-                locationName = "${it[0].locality}, ${it[0].adminArea}"
-            }
-        }
-    }
+    GetLocationName(location = art.location, onLocationName = {locationName = it})
 
     Card(onClick = onClick) {
         Column {

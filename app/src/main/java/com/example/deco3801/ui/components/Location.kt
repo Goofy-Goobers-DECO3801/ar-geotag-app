@@ -2,20 +2,26 @@ package com.example.deco3801.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.example.deco3801.util.toGeoPoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.firebase.firestore.GeoPoint
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private const val LOCATION_TAG = "LOCATION"
@@ -72,4 +78,49 @@ fun GetUserLocation(
             locationProvider.removeLocationUpdates(locationCallback)
         }
     }
+}
+
+@Composable
+fun GetLocationName(
+    location: GeoPoint?,
+    onLocationName: (String) -> Unit,
+    fullAddress: Boolean = false,
+) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        return
+    }
+
+    val context = LocalContext.current
+    val gcd = Geocoder(context, Locale.getDefault())
+
+    LaunchedEffect(location) {
+        if (location != null) {
+            gcd.getFromLocation(location.latitude, location.longitude, 1) {
+                if (it.size == 0) {
+                    return@getFromLocation
+                }
+
+                onLocationName(
+                    if (fullAddress) {
+                        it[0].getAddressLine(0)
+                    } else {
+                        "${it[0].locality}, ${it[0].adminArea}"
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GetLocationName(
+    location: Location?,
+    onLocationName: (String) -> Unit,
+    fullAddress: Boolean = false,
+) {
+    return GetLocationName(
+        location = location?.toGeoPoint(),
+        onLocationName = onLocationName,
+        fullAddress = fullAddress,
+    )
 }
