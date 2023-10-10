@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.components.ExpandableAsyncImage
+import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
@@ -78,13 +79,16 @@ fun CreateScreen(
     var takePhotoFile by remember { mutableStateOf<File?>(null) }
     var takePhotoUri by remember { mutableStateOf<Uri?>(null) }
     var showSampleList by remember { mutableStateOf(false) }
-    val sampleSheetState = rememberModalBottomSheetState()
 
     val uiState = viewModel.uiState
+    var locationName by remember { mutableStateOf("") }
+
 
     LaunchedEffect(Unit) {
         viewModel.onLocationChange(getCurrentLocation(context))
     }
+
+    GetLocationName(location = uiState.location, onLocationName = {locationName = it}, fullAddress = true)
 
     val imagePicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -308,23 +312,23 @@ fun CreateScreen(
                     Spacer(modifier = spacerModifier)
 
                     Text(
-                        text = "Select Location",
+                        text = "Location",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Button(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(start = 50.dp, end = 50.dp),
-                        onClick = { /* TODO */ }
-                    ) {
-                        Text(text = "Select Location")
-                    }
-                    Spacer(modifier = spacerModifier)
+//                    Button(
+//                        modifier =
+//                            Modifier
+//                                .fillMaxWidth()
+//                                .padding(start = 50.dp, end = 50.dp),
+//                        onClick = { /* TODO */ }
+//                    ) {
+//                        Text(text = "Select Location")
+//                    }
+//                    Spacer(modifier = spacerModifier)
                     // Display the selected location
                     uiState.location?.let {
                         Text(
-                            text = "Location: $it", // TODO: Make this a map?
+                            text = locationName, // TODO: Make this a map?
                             style = MaterialTheme.typography.bodySmall,
                         )
                         Spacer(modifier = spacerModifier)
