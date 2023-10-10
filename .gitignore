@@ -1,4 +1,13 @@
 .gradle
-.idea
 .DS_Store
 local.properties
+*.log
+*.iml
+*.ipr
+*.iws
+*.apk
+.idea/*
+!.idea/runConfigurations
+!.idea/codeStyles
+node_modules/
+build

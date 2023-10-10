@@ -50,6 +50,7 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
 
@@ -95,7 +96,12 @@ fun ArtworkNavScreen(
                 ArtworkMap()
             }
             item {
-                ArtworkInteract(distance = 10) // TODO
+                ArtworkInteract(
+                    distance = 0, // TODO
+                    onArClicked = {
+                        navController.navigateAR(art.storageUri)
+                    },
+                    )
             }
             item {
                 ArtworkDescription(art, liked) {
@@ -233,7 +239,10 @@ fun ArtworkMap() {
 }
 
 @Composable
-fun ArtworkInteract(distance: Int) {
+fun ArtworkInteract(
+    distance: Int,
+    onArClicked: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -249,7 +258,7 @@ fun ArtworkInteract(distance: Int) {
                 modifier = Modifier.padding(top = 15.dp, bottom = 10.dp)
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = onArClicked,
                 modifier = Modifier.padding(bottom = 20.dp)
             ) {
                 Icon(

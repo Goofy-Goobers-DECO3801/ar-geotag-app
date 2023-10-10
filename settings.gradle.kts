@@ -3,7 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven ("https://chaquo.com/maven-test")
+        maven("https://chaquo.com/maven-test")
     }
 }
 dependencyResolutionManagement {
@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "DECO3801"
 include(":app")
- 

@@ -8,7 +8,10 @@ import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.theme.DECO3801Theme
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import javax.inject.Provider
 
 enum class ScreenNames {
     Login,
@@ -27,10 +30,14 @@ enum class ScreenNames {
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject
+    lateinit var authUser: Provider<FirebaseUser?>
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // TODO("look into dependency injection")
 
-        val virtualTryOnViewModel by viewModels<ArtDisplayViewModel>()
+        val artDisplayViewModel by viewModels<ArtDisplayViewModel>()
 
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(this));
@@ -40,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DECO3801Theme {
-                AppFunctionality(virtualTryOnViewModel)
+                AppFunctionality(artDisplayViewModel, authUser = authUser.get())
             }
         }
     }

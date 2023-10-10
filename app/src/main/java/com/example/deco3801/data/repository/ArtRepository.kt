@@ -7,7 +7,7 @@ import com.example.deco3801.data.model.Art
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toGeoPoint
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val user: FirebaseUser?
+    private val auth: FirebaseAuth,
 ) : Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
@@ -29,10 +29,7 @@ class ArtRepository @Inject constructor(
         filename: String,
     ): Art {
 
-        if (user == null) {
-            throw Exception("User is not logged in.")
-        }
-        val uid = user.uid
+        val uid = auth.uid!!
 
         val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
         val storageRef = storage.reference.child(storagePath)
@@ -49,12 +46,15 @@ class ArtRepository @Inject constructor(
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
             storageUri = storageRef.downloadUrl.await().toString(),
+            storageRef = storagePath,
         )
 
         Log.d(ART_COLLECTION, art.toString())
 
         db.collection(ART_COLLECTION).add(art).addOnFailureListener {
             storageRef.delete()
+        }.addOnSuccessListener {
+            art.id = it.id
         }.await()
         return art
     }

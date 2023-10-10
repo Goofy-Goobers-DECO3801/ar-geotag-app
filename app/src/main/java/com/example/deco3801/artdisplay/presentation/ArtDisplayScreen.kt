@@ -1,6 +1,7 @@
 package com.example.deco3801.artdisplay.presentation
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,14 +37,14 @@ import io.github.sceneview.math.Position
 
 @Composable
 fun ArtDisplayScreen(
-    artID: Int,
+    artAddress: String,
     artDisplayViewModel: ArtDisplayViewModel,
     artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE
 ) {
     val nodes = remember { mutableStateListOf<ArNode>() }
 
     LaunchedEffect(Unit) {
-        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artID))
+        artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artAddress))
     }
 
     val context = LocalContext.current
@@ -73,7 +74,11 @@ fun ArtDisplayScreen(
             },
             onSessionCreate = { session ->
                 // Configure the ARCore session if you need augmented faces, images, etc
-                 session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                session.depthMode = Config.DepthMode.AUTOMATIC
+                session.instantPlacementEnabled = true
+                artDisplayViewModel.resetStates()
+
             },
             onFrame = { arFrame ->
                 // Update planes state to determine whether or not to UI message
@@ -183,7 +188,7 @@ fun ArtDisplayScreen(
 }
 fun onClick(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     modelNode?.destroy()
-    viewState?.modelPlaced = false;
+    viewState?.modelPlaced = false
 }
 
 
@@ -194,6 +199,7 @@ fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplay
         sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
+            Log.d("ARMODEL", it)
             loadModelGlbAsync(
                 glbFileLocation = it,
 //                glbFileLocation = "models/bear.glb",

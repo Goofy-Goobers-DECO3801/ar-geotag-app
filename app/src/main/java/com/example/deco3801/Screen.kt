@@ -1,5 +1,6 @@
 package com.example.deco3801
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -7,9 +8,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.deco3801.artdisplay.presentation.ArtDisplayScreen
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
 import com.example.deco3801.ui.ArtworkNavScreen
@@ -23,17 +27,20 @@ import com.example.deco3801.ui.SettingsScreen
 import com.example.deco3801.ui.SignUpScreen
 import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseUser
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
-    ArtDisplayViewModel: ArtDisplayViewModel,
+    artDisplayViewModel: ArtDisplayViewModel,
+    authUser: FirebaseUser?,
     appState: AppState = rememberAppState(),
 ) {
-    val startDestination = if (Firebase.auth.currentUser == null) {
+    Log.d("AUTH", authUser.toString())
+    val startDestination = if (authUser == null) {
         ScreenNames.Login.name
     } else {
         ScreenNames.Home.name
@@ -78,8 +85,17 @@ fun AppFunctionality(
                 }
 
             }
-            composable(route = ScreenNames.ARscreen.name) {
-                ArtDisplayScreen(0, ArtDisplayViewModel)
+            composable(
+                route = "${ScreenNames.ARscreen.name}?uri={uri}",
+                arguments = listOf(
+                    navArgument("uri") {
+                        type = NavType.StringType
+                    }
+                ),
+            ) {
+                val uri = it.arguments?.getString("uri") ?: ""
+
+                ArtDisplayScreen(uri, artDisplayViewModel)
             }
             composable(route = ScreenNames.Settings.name) {
                 SettingsScreen(appState.navController)
@@ -90,9 +106,9 @@ fun AppFunctionality(
             composable(route = ScreenNames.PrivacyPolicy.name) {
                 PrivacyPolicyScreen(appState.navController)
             }
-            composable(route = ScreenNames.EditProfile.name) {
+                composable(route = ScreenNames.EditProfile.name) {
                 EditProfileScreen(appState.navController)
-            }
+                }
             composable(route = "${ScreenNames.ArtworkNav.name}/{id}") {
                 val id = it.arguments?.getString("id")
                 if (id != null) {
@@ -101,4 +117,9 @@ fun AppFunctionality(
             }
         }
     }
+}
+
+fun NavHostController.navigateAR(uri: String) {
+    val encondedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+    this.navigate("${ScreenNames.ARscreen.name}?uri=${encondedUri}")
 }

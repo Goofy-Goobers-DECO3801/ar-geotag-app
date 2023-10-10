@@ -6,8 +6,7 @@ import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.FollowRepository
 import com.example.deco3801.data.repository.UserRepository
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +18,7 @@ class ProfileViewModel @Inject constructor(
     private val userRepo: UserRepository,
     private val artRepo: ArtRepository,
     private val followRepo: FollowRepository,
+    private val auth: FirebaseAuth,
 ) : AppViewModel() {
     private val _user = MutableStateFlow(User())
     val user: StateFlow<User> = _user
@@ -31,6 +31,8 @@ class ProfileViewModel @Inject constructor(
 
     private val _follows = MutableStateFlow<List<User>>(emptyList())
     val follows: StateFlow<List<User>> = _follows
+
+    fun isCurrentUser(userId: String) = userId == auth.uid
 
     fun onFollowersClick() {
         launchCatching {
@@ -52,7 +54,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun isFollowing(userId: String) {
-        if (userId != Firebase.auth.uid) {
+        if (!isCurrentUser(userId)) {
             launchCatching {
                 _isFollowing.value = followRepo.isFollowing(userId) != null
             }

@@ -66,8 +66,6 @@ import com.example.deco3801.data.model.User
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.ProfileViewModel
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import java.util.Date
 import java.util.Locale
 
@@ -89,7 +87,7 @@ fun ProfileScreen(
     val art by viewModel.art.collectAsState()
     val isFollowing by viewModel.isFollowing.collectAsState()
     val follows by viewModel.follows.collectAsState()
-    val isCurrentUser = userId == Firebase.auth.uid!!
+    val isCurrentUser = viewModel.isCurrentUser(userId)
     var followDialogState by remember { mutableStateOf(FollowDialogState.HIDDEN) }
 
     DisposableEffect(userId) {

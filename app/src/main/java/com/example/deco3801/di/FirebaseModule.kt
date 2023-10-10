@@ -12,21 +12,26 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
 
+    @Singleton
     @Provides
     fun auth(): FirebaseAuth = Firebase.auth
 
+    @Singleton
     @Provides
     fun firestore(): FirebaseFirestore = Firebase.firestore
 
+    @Singleton
     @Provides
     fun storage(): FirebaseStorage = Firebase.storage
 
+    @Singleton
     @Provides
-    fun user(): FirebaseUser? = Firebase.auth.currentUser
+    fun user(): FirebaseUser? = auth().currentUser
 
 }

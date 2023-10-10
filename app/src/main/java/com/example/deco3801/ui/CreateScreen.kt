@@ -52,7 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
+import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
@@ -234,12 +234,13 @@ fun CreateScreen(
                     }
                     Button(
                         onClick = {
-                            navController.navigate(ScreenNames.ARscreen.name)
+                            navController.navigateAR(uiState.uri.toString())
+
                         },
-                        enabled = uiState.uri != null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 50.dp, end = 50.dp)
+                            .padding(start = 50.dp, end = 50.dp),
+                        enabled = uiState.uri != null
                     ) {
                         Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
                         Spacer(modifier = Modifier.width(10.dp))
