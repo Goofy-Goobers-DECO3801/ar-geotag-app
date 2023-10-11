@@ -358,7 +358,7 @@ fun ArtworkTile(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = formatDate(art.timestamp!!),
+                text = art.timestamp?.let { formatDate(it) } ?: "",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 15.dp),
                 maxLines = 1,
