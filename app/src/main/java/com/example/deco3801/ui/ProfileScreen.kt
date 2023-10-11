@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,15 +67,12 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.TopBar
+import com.example.deco3801.viewmodel.FollowSheetState
 import com.example.deco3801.viewmodel.ProfileViewModel
 import java.util.Date
 import java.util.Locale
 
-enum class FollowDialogState {
-    HIDDEN,
-    FOLLOWERS,
-    FOLLOWING,
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,9 +85,8 @@ fun ProfileScreen(
     val user by viewModel.user.collectAsState()
     val art by viewModel.art.collectAsState()
     val isFollowing by viewModel.isFollowing.collectAsState()
-    val follows by viewModel.follows.collectAsState()
+    val followSheetState by viewModel.followSheetState.collectAsState()
     val isCurrentUser = viewModel.isCurrentUser(userId)
-    var followDialogState by remember { mutableStateOf(FollowDialogState.HIDDEN) }
 
     DisposableEffect(userId) {
         viewModel.attachListener(userId)
@@ -108,12 +105,9 @@ fun ProfileScreen(
             )
         },
     ) { innerPadding ->
-        if (followDialogState != FollowDialogState.HIDDEN) {
+        if (followSheetState != FollowSheetState.HIDDEN) {
             FollowersBottomSheet(
                 onOpen = { navController.navigateProfile(it.id) },
-                onClose = { followDialogState = FollowDialogState.HIDDEN },
-                follows = follows,
-                followDialogState,
             )
         }
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -194,7 +188,6 @@ fun ProfileScreen(
                                 text = AnnotatedString("${user.followerCount} followers"),
                                 onClick = {
                                     viewModel.onFollowersClick()
-                                    followDialogState = FollowDialogState.FOLLOWERS
                                 },
                                 style =
                                     LocalTextStyle.current.copy(
@@ -205,7 +198,6 @@ fun ProfileScreen(
                                 text = AnnotatedString("${user.followingCount} following"),
                                 onClick = {
                                     viewModel.onFollowingClick()
-                                    followDialogState = FollowDialogState.FOLLOWING
                                 },
                                 style =
                                     LocalTextStyle.current.copy(
@@ -238,20 +230,22 @@ fun ProfileScreen(
 @Composable
 fun FollowersBottomSheet(
     onOpen: (User) -> Unit,
-    onClose: () -> Unit,
-    follows: List<User>,
-    followDialogState: FollowDialogState,
     modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
+
+    val followSheetState by viewModel.followSheetState.collectAsState()
+    val follows by viewModel.follows.collectAsState()
+
     ModalBottomSheet(
-        onDismissRequest = onClose,
+        onDismissRequest = viewModel::hideFollowSheet,
         sheetState = sheetState,
-        modifier = modifier,
+        modifier = modifier.heightIn(min=400.dp),
     ) {
 
         Text(
-            text = if (followDialogState == FollowDialogState.FOLLOWING) "Following" else "Followers",
+            text = if (followSheetState == FollowSheetState.FOLLOWING) "Following" else "Followers",
             modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
             style = MaterialTheme.typography.titleLarge,
         )
@@ -263,9 +257,24 @@ fun FollowersBottomSheet(
                     .background(MaterialTheme.colorScheme.onError)
         )
         LazyColumn {
-            items(follows) { user ->
-                FollowerBottomSheetSurface(user = user, onOpen = onOpen)
+            if (follows.isEmpty()) {
+                item {
+                    Text(
+                        text =
+                        if (followSheetState == FollowSheetState.FOLLOWING)  {
+                            "You are not following anyone!"
+                        } else {
+                            "No one is following you!"
+                        },
+                        modifier = Modifier.padding(10.dp),
+                    )
+                }
+            } else {
+                items(follows) { user ->
+                    FollowerBottomSheetSurface(user = user, onOpen = onOpen)
+                }
             }
+
         }
     }
 }
@@ -274,7 +283,7 @@ fun FollowersBottomSheet(
 fun FollowerBottomSheetSurface(
     user: User,
     onOpen: (User) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = { onOpen(user) },
