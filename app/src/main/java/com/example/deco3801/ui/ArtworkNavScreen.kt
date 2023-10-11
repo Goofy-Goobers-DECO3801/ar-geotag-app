@@ -52,8 +52,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -67,6 +70,7 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
+import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.toGeoLocation
@@ -135,13 +139,13 @@ fun ArtworkNavScreen(
     ) { innerPadding ->
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(
-                        rememberScrollState(),
-                        columnScrollingEnabled,
-                    ),
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(
+                    rememberScrollState(),
+                    columnScrollingEnabled,
+                ),
         ) {
             ArtworkTitle(art, user) {
                 navController.navigateProfile(user.id)
@@ -150,23 +154,23 @@ fun ArtworkNavScreen(
                 art = art,
                 userLocation = userLocation,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                        .pointerInteropFilter(
-                            onTouchEvent = {
-                                when (it.action) {
-                                    MotionEvent.ACTION_DOWN -> {
-                                        columnScroll(false)
-                                        false
-                                    }
-
-                                    else -> {
-                                        true
-                                    }
+                Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .pointerInteropFilter(
+                        onTouchEvent = {
+                            when (it.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    columnScroll(false)
+                                    false
                                 }
-                            },
-                        ),
+
+                                else -> {
+                                    true
+                                }
+                            }
+                        },
+                    ),
                 columnScroll = columnScroll,
             )
 
@@ -194,25 +198,11 @@ fun ArtworkTitle(
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        /*Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme)
-                .padding(bottom = 10.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = artworkTitle,
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }*/
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(UnchangingAppColors.main_theme),
+            Modifier
+                .fillMaxWidth()
+                .background(UnchangingAppColors.main_theme),
         ) {
             Column(
                 modifier =
@@ -227,23 +217,23 @@ fun ArtworkTitle(
                     contentDescription = "profile",
                     contentScale = ContentScale.Crop,
                     modifier =
-                        Modifier
-                            .clip(CircleShape)
-                            .size(45.dp)
-                            .clickable {
-                                onUserClicked()
-                            },
+                    Modifier
+                        .clip(CircleShape)
+                        .size(45.dp)
+                        .clickable {
+                            onUserClicked()
+                        },
                 )
             }
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 10.dp,
-                            top = 10.dp,
-                            bottom = 15.dp,
-                        ),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 10.dp,
+                        top = 10.dp,
+                        bottom = 15.dp,
+                    ),
             ) {
                 Text(
                     text = "@${user.username}",
@@ -271,38 +261,33 @@ fun ArtworkTopBar(
     artworkTitle: String,
     navController: NavHostController,
 ) {
-    TopAppBar(
-        title = {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 30.dp, end = 48.dp),
-            ) {
-                Text(
-                    text = artworkTitle,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        },
-        colors =
-            TopAppBarDefaults.mediumTopAppBarColors(
-                titleContentColor = Color.White,
-                containerColor = UnchangingAppColors.main_theme,
-            ),
-        navigationIcon = {
+    Row(modifier = Modifier.fillMaxWidth().background(UnchangingAppColors.main_theme)) {
+        Column () {
             IconButton(onClick = navController::popBackStack) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIos,
                     contentDescription = "ArrowBack",
                     tint = Color.White,
+                    modifier = Modifier.size(50.dp).padding(10.dp)
                 )
             }
-        },
-    )
+        }
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp, end = 48.dp)) {
+            Text(
+                text = artworkTitle,
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
 
 @Composable
@@ -457,7 +442,7 @@ fun ArtworkDescription(
                 Icon(
                     imageVector = if (liked != null && liked) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
-                    tint = if (liked != null && liked) Color.Red else Color.Unspecified,
+                    tint = if (liked != null && liked) Color.Red else MaterialTheme.colorScheme.onBackground,
                 )
             }
             Spacer(Modifier.width(5.dp))
@@ -482,8 +467,10 @@ fun ArtworkDescription(
 @Preview
 @Composable
 private fun PreviewArtworkNavScreen() {
+    /*
     ArtworkNavScreen(
         "1",
         rememberNavController(),
-    )
+    )*/
+    ArtworkTopBar(artworkTitle = "This is a long title that goes 2 line", navController = rememberNavController())
 }
