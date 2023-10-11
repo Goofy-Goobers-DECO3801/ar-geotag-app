@@ -1,6 +1,7 @@
 package com.example.deco3801.ui
 
 import android.icu.text.SimpleDateFormat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -31,9 +31,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -50,7 +53,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -106,15 +108,15 @@ fun ProfileScreen(
             )
         },
     ) { innerPadding ->
+        if (followDialogState != FollowDialogState.HIDDEN) {
+            FollowersBottomSheet(
+                onOpen = { navController.navigateProfile(it.id) },
+                onClose = { followDialogState = FollowDialogState.HIDDEN },
+                follows = follows,
+                followDialogState,
+            )
+        }
         Column(modifier = Modifier.padding(innerPadding)) {
-            if (followDialogState != FollowDialogState.HIDDEN) {
-                FollowersDialog(
-                    open = { navController.navigateProfile(it.id) },
-                    onClose = { followDialogState = FollowDialogState.HIDDEN },
-                    follows = follows,
-                    followDialogState,
-                )
-            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -234,85 +236,83 @@ fun ProfileScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FollowersDialog(
-    open: (User) -> Unit,
+fun FollowersBottomSheet(
+    onOpen: (User) -> Unit,
     onClose: () -> Unit,
     follows: List<User>,
     followDialogState: FollowDialogState,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    Dialog(
-        onDismissRequest = { onClose() },
+    ModalBottomSheet(
+        onDismissRequest = onClose,
+        sheetState = sheetState,
+        modifier = modifier,
     ) {
-        Card(
+
+        Text(
+            text = if (followDialogState == FollowDialogState.FOLLOWING) "Following" else "Followers",
+            modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-            ) {
-                Text(
-                    text = if (followDialogState == FollowDialogState.FOLLOWING) "Following" else "Followers",
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(follows) { user ->
-                        Surface(
-                            onClick = { open(user) },
-                            modifier = Modifier.fillMaxSize(),
-                            color = Color.Transparent,
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start,
-                            ) {
-                                AsyncImage(
-                                    model = user.pictureUri.ifBlank { R.drawable.pfp },
-                                    placeholder = painterResource(id = R.drawable.pfp),
-                                    contentDescription = "profile",
-                                    contentScale = ContentScale.Crop,
-                                    modifier =
-                                        Modifier
-                                            .clip(CircleShape)
-                                            .size(82.dp),
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    if (user.fullname.isNotEmpty()) {
-                                        Text(
-                                            text = user.fullname,
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                    }
-
-                                    Text(
-                                        text = "@${user.username}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                    )
-                                    // TODO Maybe add unfollow/remove button for the current user
-                                }
-                            }
-                        }
-                    }
-                }
+                    .height((0.5).dp)
+                    .background(MaterialTheme.colorScheme.onError)
+        )
+        LazyColumn {
+            items(follows) { user ->
+                FollowerBottomSheetSurface(user = user, onOpen = onOpen)
             }
         }
     }
 }
 
 @Composable
-fun ProfileScreenPreview() {
-    ProfileScreen("", navController = rememberNavController())
+fun FollowerBottomSheetSurface(
+    user: User,
+    onOpen: (User) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = { onOpen(user) },
+        modifier = modifier.fillMaxWidth(),
+        color = Color.Transparent,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.padding(10.dp),
+        ) {
+            AsyncImage(
+                model = user.pictureUri.ifBlank { R.drawable.pfp },
+                placeholder = painterResource(id = R.drawable.pfp),
+                contentDescription = "profile",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .size(82.dp),
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                if (user.fullname.isNotEmpty()) {
+                    Text(
+                        text = user.fullname,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+
+                Text(
+                    text = "@${user.username}",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                // TODO Maybe add unfollow/remove button for the current user
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -423,6 +423,11 @@ fun formatDate(date: Date): String {
             }
         }
     }
+}
+
+@Composable
+private fun ProfileScreenPreview() {
+    ProfileScreen("", navController = rememberNavController())
 }
 
 // @Composable
