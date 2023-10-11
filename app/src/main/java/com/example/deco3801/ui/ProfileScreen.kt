@@ -354,11 +354,15 @@ fun ArtworkTile(
                 text = art.title,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 12.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = formatDate(art.timestamp!!),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 15.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = spacerModifier)
             Row {
@@ -375,7 +379,7 @@ fun ArtworkTile(
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(end = 12.dp),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Spacer(modifier = spacerModifier)
