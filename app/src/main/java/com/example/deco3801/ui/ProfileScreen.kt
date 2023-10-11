@@ -284,7 +284,10 @@ fun FollowerBottomSheetSurface(
     user: User,
     onOpen: (User) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
+    val followSheetState by viewModel.followSheetState.collectAsState()
+
     Surface(
         onClick = { onOpen(user) },
         modifier = modifier.fillMaxWidth(),
@@ -319,6 +322,24 @@ fun FollowerBottomSheetSurface(
                     style = MaterialTheme.typography.titleMedium,
                 )
                 // TODO Maybe add unfollow/remove button for the current user
+            }
+            Spacer(Modifier.weight(1f))
+            Button(
+                onClick = {
+                    when(followSheetState) {
+                        FollowSheetState.FOLLOWERS -> viewModel.removeFollower(user)
+                        FollowSheetState.FOLLOWING -> viewModel.unfollowUser(user)
+                        else -> {}
+                    }
+                }
+            ) {
+                Text(
+                    when(followSheetState) {
+                        FollowSheetState.FOLLOWERS -> "Remove"
+                        FollowSheetState.FOLLOWING -> "Unfollow"
+                        else -> ""
+                    }
+                )
             }
         }
     }

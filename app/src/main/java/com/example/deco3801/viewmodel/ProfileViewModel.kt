@@ -76,6 +76,17 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun removeFollower(user: User) {
+        // TODO:
+    }
+
+    fun unfollowUser(user: User) {
+        launchCatching {
+            followRepo.unfollowUser(user)
+            _follows.value = _follows.value.toMutableList().apply { remove(user) }
+        }
+    }
+
     fun follow() {
         if (_isFollowing.value == null) {
             return
