@@ -1,3 +1,6 @@
+import org.gradle.internal.os.OperatingSystem
+import java.nio.file.Paths
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,6 +9,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.chaquo.python")
+    id("org.jlleitschuh.gradle.ktlint")
     kotlin("plugin.serialization") version "1.9.0"
 }
 
@@ -20,7 +24,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.deco3801.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -34,7 +38,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -67,6 +71,64 @@ chaquopy {
     }
 }
 
+val npx =
+    if (OperatingSystem.current().isWindows) {
+        "npx.cmd"
+    } else {
+        "npx"
+    }
+
+val installFirebaseEmulators by tasks.registering {
+    doLast {
+        exec {
+            commandLine(npx, "firebase", "setup:emulators:firestore")
+        }
+        exec {
+            commandLine(npx, "firebase", "setup:emulators:storage")
+        }
+    }
+}
+
+installFirebaseEmulators {
+    onlyIf {
+        val emulatorDir =
+            file(Paths.get(System.getProperty("user.home")).resolve(".cache/firebase/emulators"))
+        !emulatorDir.exists()
+    }
+}
+
+val startFirebaseEmulators by tasks.registering {
+    dependsOn(installFirebaseEmulators)
+    doLast {
+        val process =
+            ProcessBuilder()
+                .directory(projectDir)
+                .command(npx, "firebase", "emulators:start")
+                .start()
+        project.extensions.extraProperties.set("firebaseEmulators", process)
+    }
+}
+
+val stopFirebaseEmulators by tasks.registering {
+    doLast {
+        // Retrieve the process reference from the watch task
+        val process = project.extensions.extraProperties.get("firebaseEmulators") as? Process
+        process?.destroy()
+        exec { // Firebase doesnt cleanup nicely on its own...
+            commandLine(npx, "kill-port", "4400", "8080", "9099", "9199", "9150")
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    tasks.getByName("preDebugAndroidTestBuild") {
+        dependsOn(startFirebaseEmulators)
+    }
+    tasks.getByName("connectedDebugAndroidTest") {
+        finalizedBy(stopFirebaseEmulators)
+    }
+}
+
 dependencies {
     // Compose
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -94,7 +156,7 @@ dependencies {
     implementation("io.github.sceneview:arsceneview:0.10.2")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
-    
+
     // Saving objects as key-value pairs to app storage.
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
@@ -111,20 +173,32 @@ dependencies {
     implementation("com.github.imperiumlabs:GeoFirestore-Android:v1.5.0")
 
     // Hilt Dependency Injection
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.48.1")
+    ksp("com.google.dagger:hilt-compiler:2.48.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
-    //Retrofit
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // Test
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("com.google.truth:truth:1.1.4")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48.1")
+    kspAndroidTest("com.google.dagger:hilt-compiler:2.48.1")
+
+    // Compose Testing
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    ktlintRuleset("io.nlopez.compose.rules:ktlint:0.3.0")
+}
+
+ktlint {
+    version.set("1.0.0")
+    android.set(true)
 }

@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "firebase-tools": "^12.6.2",
+    "kill-port": "^2.0.1"
+  }
+}

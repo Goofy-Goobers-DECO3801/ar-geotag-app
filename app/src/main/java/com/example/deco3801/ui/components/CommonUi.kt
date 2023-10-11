@@ -4,8 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -115,15 +118,15 @@ fun TopBar(
 @Composable
 fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
     val backgroundColor = if (isSelected) {
-        Color.White
+        UnchangingAppColors.lighter_main_theme
     } else {
-        UnchangingAppColors.main_theme
+        MaterialTheme.colorScheme.background
     }
 
     val contentColor = if (isSelected) {
         UnchangingAppColors.main_theme
     } else {
-        Color.White
+        MaterialTheme.colorScheme.onBackground
     }
 
     Button(
@@ -132,6 +135,7 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
             containerColor = backgroundColor,
             contentColor = contentColor
         ),
+        contentPadding = PaddingValues(top = 4.dp, bottom = 4.dp, start = 25.dp, end = 25.dp),
         modifier = Modifier
             .padding(
                 top = 7.dp,
@@ -165,11 +169,16 @@ fun NavBar(navController: NavHostController) {
                 )
             }
         }
-
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height((0.5).dp)
+                .background(MaterialTheme.colorScheme.onError)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+                .background(MaterialTheme.colorScheme.background),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NavButton(

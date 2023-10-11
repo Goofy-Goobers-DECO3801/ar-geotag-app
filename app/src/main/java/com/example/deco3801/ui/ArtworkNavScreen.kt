@@ -1,5 +1,9 @@
 package com.example.deco3801.ui
 
+import android.content.pm.PackageManager
+import android.location.Location
+import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,8 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
@@ -31,13 +36,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,24 +59,53 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
 import com.example.deco3801.navigateAR
+import com.example.deco3801.navigateProfile
+import com.example.deco3801.ui.components.GetUserLocation
+import com.example.deco3801.ui.components.ProgressbarState
+import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.theme.UnchangingAppColors
+import com.example.deco3801.util.LocationUtil
+import com.example.deco3801.util.toGeoLocation
+import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.rememberCameraPositionState
+import org.imperiumlabs.geofirestore.util.GeoUtils
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val DISTANCE_AWAY_MARGIN = 10.0
+
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ArtworkNavScreen(
     artId: String,
     navController: NavHostController,
-    viewModel: ArtworkNavViewModel = hiltViewModel()
+    viewModel: ArtworkNavViewModel = hiltViewModel(),
 ) {
-
+    val context = LocalContext.current
+    var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
+    var distanceInM by remember { mutableStateOf<Double?>(null) }
+    var columnScrollingEnabled by remember { mutableStateOf(true) }
+    val columnScroll: (Boolean) -> Unit = {
+        columnScrollingEnabled = it
+    }
+
+    GetUserLocation(onChange = { userLocation = it })
+    LaunchedEffect(Unit) { // This is much quicker for the first time
+        userLocation = LocationUtil.getCurrentLocation(context)
+    }
 
     DisposableEffect(Unit) {
         viewModel.hasLiked(artId)
@@ -74,40 +115,72 @@ fun ArtworkNavScreen(
         }
     }
 
+    distanceInM =
+        if (art.location != null && userLocation != null) {
+            GeoUtils.distance(
+                art.location!!.toGeoLocation(),
+                userLocation!!.toGeoLocation(),
+            )
+        } else {
+            null
+        }
+
     Scaffold(
         topBar = {
             ArtworkTopBar(
                 navController = navController,
                 artworkTitle = art.title,
             )
-        }
+        },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(
+                        rememberScrollState(),
+                        columnScrollingEnabled,
+                    ),
         ) {
-            item {
-                ArtworkTitle(art, user) {
-                    navController.navigate("${ScreenNames.Profile.name}/${user.id}")
-                }
+            ArtworkTitle(art, user) {
+                navController.navigateProfile(user.id)
             }
-            item {
-                ArtworkMap()
+            ArtworkMap(
+                art = art,
+                userLocation = userLocation,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                        .pointerInteropFilter(
+                            onTouchEvent = {
+                                when (it.action) {
+                                    MotionEvent.ACTION_DOWN -> {
+                                        columnScroll(false)
+                                        false
+                                    }
+
+                                    else -> {
+                                        true
+                                    }
+                                }
+                            },
+                        ),
+                columnScroll = columnScroll,
+            )
+
+            ArtworkInteract(
+                distanceInM = distanceInM,
+            ) {
+                navController.navigateAR(art.storageUri)
             }
-            item {
-                ArtworkInteract(
-                    distance = 0, // TODO
-                    onArClicked = {
-                        navController.navigateAR(art.storageUri)
-                    },
-                    )
-            }
-            item {
-                ArtworkDescription(art, liked) {
-                    viewModel.onLikeClicked()
-                }
-            }
+            ArtworkDescription(
+                art = art,
+                liked = liked,
+                onLikeClicked = viewModel::onLikeClicked,
+                distanceInM = distanceInM,
+            )
         }
     }
 }
@@ -119,7 +192,7 @@ fun ArtworkTitle(
     onUserClicked: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         /*Row(
             modifier = Modifier
@@ -136,51 +209,56 @@ fun ArtworkTitle(
             )
         }*/
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(UnchangingAppColors.main_theme),
         ) {
             Column(
-                modifier = Modifier.padding(
-                    start = 15.dp,
-                    top = 10.dp
-                )
+                modifier =
+                    Modifier.padding(
+                        start = 15.dp,
+                        top = 10.dp,
+                    ),
             ) {
                 AsyncImage(
                     model = user.pictureUri.ifBlank { R.drawable.pfp },
                     placeholder = painterResource(id = R.drawable.pfp),
                     contentDescription = "profile",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .size(45.dp)
-                        .clickable {
-                            onUserClicked()
-                        }
+                    modifier =
+                        Modifier
+                            .clip(CircleShape)
+                            .size(45.dp)
+                            .clickable {
+                                onUserClicked()
+                            },
                 )
             }
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 10.dp,
-                        top = 10.dp,
-                        bottom = 15.dp
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 10.dp,
+                            top = 10.dp,
+                            bottom = 15.dp,
+                        ),
             ) {
                 Text(
                     text = "@${user.username}",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        onUserClicked()
-                    }
+                    modifier =
+                        Modifier.clickable {
+                            onUserClicked()
+                        },
                 )
                 Text(
                     text = art.timestamp?.let { formatDate(it) } ?: "",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
+                    color = Color.White,
                 )
             }
         }
@@ -197,87 +275,154 @@ fun ArtworkTopBar(
         title = {
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp, end = 48.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 30.dp, end = 48.dp),
             ) {
                 Text(
                     text = artworkTitle,
                     style = MaterialTheme.typography.headlineLarge,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
         },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            titleContentColor = Color.White,
-            containerColor = UnchangingAppColors.main_theme
-        ),
+        colors =
+            TopAppBarDefaults.mediumTopAppBarColors(
+                titleContentColor = Color.White,
+                containerColor = UnchangingAppColors.main_theme,
+            ),
         navigationIcon = {
             IconButton(onClick = navController::popBackStack) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIos,
                     contentDescription = "ArrowBack",
-                    tint = Color.White
+                    tint = Color.White,
                 )
             }
-        }
+        },
     )
 }
 
 @Composable
-fun ArtworkMap() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+fun ArtworkMap(
+    art: Art,
+    userLocation: Location?,
+    modifier: Modifier = Modifier,
+    columnScroll: (Boolean) -> Unit,
+    googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
+) {
+    DisposableEffect(Unit) {
+        ProgressbarState.showIndeterminateProgressbar()
+        onDispose {
+            ProgressbarState.resetProgressbar()
+        }
+    }
+
+    if (userLocation == null) {
+        return
+    }
+
+    val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
+    val context = LocalContext.current
+    var apiKey by remember { mutableStateOf<String?>(null) }
+    val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
+    val cameraPositionState =
+        rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(userLocation.toLatLng(), 15f)
+        }
+
+    LaunchedEffect(Unit) {
+        context.packageManager
+            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            .apply {
+                apiKey = metaData.getString("com.google.android.geo.API_KEY")
+            }
+    }
+
+    LaunchedEffect(apiKey != null && art.location != null) {
+        if (apiKey != null && art.location != null) {
+            googlePlacesViewModel.getDirection(
+                // Modify this to get the actual origin
+                origin = "${userLocation.latitude}, ${userLocation.longitude}",
+                // Use the marker's location as the destination
+                destination = "${art.location!!.latitude}, ${art.location!!.longitude}",
+                key = apiKey!!,
+            )
+        }
+    }
+
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (!cameraPositionState.isMoving) {
+            columnScroll(true)
+        }
+    }
+
+    GoogleMap(
+        modifier = modifier,
+        cameraPositionState = cameraPositionState,
+        properties = mapProperties,
+        onMapLoaded = {
+            ProgressbarState.resetProgressbar()
+        },
     ) {
-        Spacer(Modifier.height(200.dp))
-        Text("Map goes here")
-        Spacer(Modifier.height(200.dp))
+        art.location?.let {
+            Marker(
+                state = MarkerState(position = it.toLatLng()),
+                title = art.title,
+                snippet = art.description,
+                icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
+            )
+        }
+
+        Polyline(points = routePoints, onClick = {
+            Log.d("ROUTE", "${it.points} was clicked")
+        }, color = Color.Blue)
     }
 }
 
 @Composable
 fun ArtworkInteract(
-    distance: Int,
+    distanceInM: Double?,
     onArClicked: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(UnchangingAppColors.main_theme),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(UnchangingAppColors.main_theme),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (distance == 0) {
+        if (distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN) {
             Text(
                 text = "You have arrived",
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 15.dp, bottom = 10.dp)
+                modifier = Modifier.padding(top = 15.dp, bottom = 10.dp),
             )
             Button(
                 onClick = onArClicked,
-                modifier = Modifier.padding(bottom = 20.dp)
+                modifier = Modifier.padding(bottom = 20.dp),
             ) {
                 Icon(
                     imageVector = Icons.Filled.CenterFocusWeak,
-                    contentDescription = "AR"
+                    contentDescription = "AR",
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
                     text = "View in AR",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
         } else {
             Text(
-                text = "$distance m",
+                text = distanceInM?.let { formatDistance(it) } ?: "??",
                 style = MaterialTheme.typography.headlineLarge,
                 color = Color.White,
-                modifier = Modifier.padding(15.dp)
+                modifier = Modifier.padding(15.dp),
             )
         }
     }
@@ -288,16 +433,26 @@ fun ArtworkDescription(
     art: Art,
     liked: Boolean?,
     onLikeClicked: () -> Unit,
+    distanceInM: Double?,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp, 5.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(20.dp, 5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
-                enabled = liked != null,
-                onClick = onLikeClicked,
+                enabled = liked != null && distanceInM != null,
+                onClick = {
+                    if (distanceInM!! > DISTANCE_AWAY_MARGIN) {
+                        SnackbarManager.showMessage(
+                            "You must be at the location to like the geoARt.",
+                        )
+                        return@IconButton
+                    }
+                    onLikeClicked()
+                },
             ) {
                 Icon(
                     imageVector = if (liked != null && liked) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
@@ -313,7 +468,7 @@ fun ArtworkDescription(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Message,
-                    contentDescription = "reviews"
+                    contentDescription = "reviews",
                 )
             }
             Spacer(Modifier.width(5.dp))
@@ -326,9 +481,9 @@ fun ArtworkDescription(
 
 @Preview
 @Composable
-fun PreviewArtworkNavScreen() {
+private fun PreviewArtworkNavScreen() {
     ArtworkNavScreen(
         "1",
-        rememberNavController()
+        rememberNavController(),
     )
 }

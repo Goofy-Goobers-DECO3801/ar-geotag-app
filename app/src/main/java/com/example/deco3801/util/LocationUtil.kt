@@ -15,16 +15,15 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.pow
 
-
 object LocationUtil {
     suspend fun getCurrentLocation(context: Context): Location? {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (ActivityCompat.checkSelfPermission(
                 context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return null
@@ -52,6 +51,10 @@ fun Location.toLatLng(): LatLng {
 
 fun GeoPoint.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
+}
+
+fun GeoPoint.toGeoLocation(): GeoLocation {
+    return GeoLocation(this.latitude, this.longitude)
 }
 
 fun LatLng.toGeoPoint(): GeoPoint {

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Upload
@@ -48,12 +49,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 import com.example.deco3801.navigateAR
 import com.example.deco3801.ui.components.ExpandableAsyncImage
+import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
@@ -75,20 +78,26 @@ fun CreateScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var takePhotoFile by remember { mutableStateOf<File?>(null) }
     var takePhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var showSampleList by remember { mutableStateOf(false) }
 
     val uiState = viewModel.uiState
+    var locationName by remember { mutableStateOf("") }
+
 
     LaunchedEffect(Unit) {
         viewModel.onLocationChange(getCurrentLocation(context))
     }
 
+    GetLocationName(location = uiState.location, onLocationName = {locationName = it}, fullAddress = true)
+
     val imagePicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             uri ?: return@rememberLauncherForActivityResult
             try {
-                val bytes = context.contentResolver
-                    .openInputStream(uri)
-                    ?.use { it.buffered().readBytes() }
+                val bytes =
+                    context.contentResolver
+                        .openInputStream(uri)
+                        ?.use { it.buffered().readBytes() }
                 viewModel.onSelectImage(uri.getFileName(context), bytes!!)
             } catch (e: Exception) {
                 SnackbarManager.showError("Unable to upload file!")
@@ -102,7 +111,6 @@ fun CreateScreen(
             viewModel.onSelectFile(uri.getFileName(context), uri)
         }
 
-
     val takePhoto =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
             if (!bool || takePhotoUri == null || takePhotoFile == null) {
@@ -110,9 +118,10 @@ fun CreateScreen(
                 return@rememberLauncherForActivityResult
             }
             try {
-                val bytes = context.contentResolver
-                    .openInputStream(takePhotoUri!!)
-                    ?.use { it.buffered().readBytes() }
+                val bytes =
+                    context.contentResolver
+                        .openInputStream(takePhotoUri!!)
+                        ?.use { it.buffered().readBytes() }
 
                 viewModel.onSelectImage(takePhotoUri!!.getFileName(context), bytes!!)
             } catch (e: Exception) {
@@ -128,7 +137,7 @@ fun CreateScreen(
             TopBar(
                 canNavigateBack = false,
                 showSettings = false,
-                navigateUp = {}
+                navigateUp = {},
             )
         },
     ) { innerPadding ->
@@ -141,65 +150,90 @@ fun CreateScreen(
             ) {
                 // Sheet content
                 BottomSheetSurface(
-                    text = "Pick image",
+                    text = "Select image",
                     onClick = {
                         showBottomSheet = false
-                        imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        imagePicker.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly,
+                            ),
+                        )
                     },
                     icon = Icons.Filled.Image,
-                    iconDescription = "image"
+                    iconDescription = "image",
                 )
                 BottomSheetSurface(
-                    text = "Pick 3D Model",
+                    text = "Select 3D model",
                     onClick = {
                         showBottomSheet = false
                         filePicker.launch("model/gltf-binary")
 //                        filePicker.launch("*/*")
                     },
                     icon = Icons.Filled.ViewInAr,
-                    iconDescription = "model"
+                    iconDescription = "model",
                 )
                 BottomSheetSurface(
                     text = "Take photo",
                     onClick = {
                         showBottomSheet = false
-                        takePhotoFile = File.createTempFile(
-                            System.currentTimeMillis().toString(),
-                            ".jpg",
-                            File(
-                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                                "Camera"
+                        takePhotoFile =
+                            File.createTempFile(
+                                System.currentTimeMillis().toString(),
+                                ".jpg",
+                                File(
+                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                                    "Camera",
+                                ),
                             )
-                        )
-                        takePhotoUri = FileProvider.getUriForFile(
-                            context,
-                            context.applicationContext.packageName + ".provider",
-                            takePhotoFile!!
-                        )
+                        takePhotoUri =
+                            FileProvider.getUriForFile(
+                                context,
+                                context.applicationContext.packageName + ".provider",
+                                takePhotoFile!!,
+                            )
                         takePhoto.launch(takePhotoUri)
                     },
                     icon = Icons.Filled.PhotoCamera,
-                    iconDescription = "camera"
+                    iconDescription = "camera",
+                )
+                BottomSheetSurface(
+                    text = "Select from samples",
+                    onClick = {
+                        showBottomSheet = false
+                        showSampleList = true
+
+                    },
+                    icon = Icons.Filled.Animation,
+                    iconDescription = "sample"
                 )
                 Spacer(Modifier.height(20.dp))
             }
         }
+        if (showSampleList) {
+            SampleModelList(
+                onDismissRequest = {
+                    showSampleList = false
+                },
+                onSelect = viewModel::onSelectFile
+            )
+        }
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = 35.dp,
-                        end = 35.dp,
-                        top = 40.dp
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 30.dp,
+                            end = 30.dp,
+                        ),
             ) {
                 item {
+                    Spacer(modifier = Modifier.height(30.dp))
                     Text(
                         text = "Upload an Artwork",
                         modifier = textModifier,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Spacer(modifier = spacerModifier)
                 }
@@ -207,7 +241,7 @@ fun CreateScreen(
                     Text(
                         text = "Title",
                         modifier = textModifier,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     TextField(
                         value = uiState.title,
@@ -216,37 +250,36 @@ fun CreateScreen(
                     )
                     Spacer(modifier = spacerModifier)
 
-
                     Text(
                         text = "Upload Artwork",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
-                    Row(
+                    Button(
+                        onClick = {
+                            showBottomSheet = true
+                        },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 50.dp, end = 50.dp)
+                    ) {
+                        Icon(Icons.Filled.Upload, contentDescription = "upload")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = "Upload")
+                    }
+                    Button(
+                        onClick = {
+                            navController.navigateAR(uiState.uri.toString())
+
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 10.dp)
+                            .padding(start = 50.dp, end = 50.dp),
+                        enabled = uiState.uri != null
                     ) {
-                        Button(
-                            onClick = {
-                                showBottomSheet = true
-                            }
-                        ) {
-                            Icon(Icons.Filled.Upload, contentDescription = "upload")
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = "Upload")
-                        }
+                        Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
                         Spacer(modifier = Modifier.width(10.dp))
-                        Button(
-                            onClick = {
-                                navController.navigateAR(uiState.uri.toString())
-
-                            },
-                            enabled = uiState.uri != null
-                        ) {
-                            Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = "Preview in AR")
-                        }
+                        Text(text = "Preview in AR")
                     }
 
                     Spacer(modifier = spacerModifier)
@@ -256,74 +289,73 @@ fun CreateScreen(
                             placeholder = painterResource(id = R.drawable.default_img),
                             contentDescription = "profile",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(50.dp)
+                            modifier = Modifier.size(50.dp),
                         )
                         Spacer(modifier = spacerModifier)
-
                     } else if (uiState.filename.isNotBlank()) {
                         Text(
                             text = "Selected File: ${uiState.filename}",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         Spacer(modifier = spacerModifier)
                     }
 
                     Text(
                         text = "Artwork Description",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     TextField(
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
-                        modifier = textFieldModifier.height(130.dp)
+                        modifier = textFieldModifier.height(130.dp),
                     )
                     Spacer(modifier = spacerModifier)
-
 
                     Text(
-                        text = "Select Location",
-                        style = MaterialTheme.typography.titleMedium
+                        text = "Location",
+                        style = MaterialTheme.typography.titleMedium,
                     )
-                    Button(
-                        modifier = Modifier.padding(start = 10.dp),
-                        onClick = { /* TODO */ }
-                    ) {
-                        Text(text = "Select Location")
-                    }
-                    Spacer(modifier = spacerModifier)
+//                    Button(
+//                        modifier =
+//                            Modifier
+//                                .fillMaxWidth()
+//                                .padding(start = 50.dp, end = 50.dp),
+//                        onClick = { /* TODO */ }
+//                    ) {
+//                        Text(text = "Select Location")
+//                    }
+//                    Spacer(modifier = spacerModifier)
                     // Display the selected location
                     uiState.location?.let {
                         Text(
-                            text = "Location: $it", /* TODO: Make this a map? */
-                            style = MaterialTheme.typography.bodySmall
+                            text = locationName, // TODO: Make this a map?
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         Spacer(modifier = spacerModifier)
                     }
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         Button(
                             onClick = {
                                 viewModel.onPostArtwork(
                                     open = {
                                         navController.navigate(it)
-                                    }
+                                    },
                                 )
                             },
-                            enabled = viewModel.isValid()
+                            enabled = viewModel.isValid(),
                         ) {
                             Text(text = "Post Artwork")
                         }
-                        Spacer(Modifier.height(30.dp))
                     }
+                    Spacer(Modifier.height(50.dp))
                 }
             }
         }
     }
-
 }
 
 @Composable
@@ -340,14 +372,14 @@ fun BottomSheetSurface(
         enabled = true,
         modifier = Modifier.fillMaxWidth(),
         color = color,
-        contentColor= contentColor,
+        contentColor = contentColor,
     ) {
         Row(
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(10.dp),
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = iconDescription
+                contentDescription = iconDescription,
             )
             Spacer(Modifier.width(10.dp))
             Text(text)
@@ -355,9 +387,55 @@ fun BottomSheetSurface(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SampleModelList(
+    onDismissRequest: () -> Unit,
+    onSelect: (String, Uri) -> Unit,
+) {
+    val sampleSheetState = rememberModalBottomSheetState()
+    val samples by remember {
+        mutableStateOf(
+            listOf(
+                "https://sceneview.github.io/assets/models/Halloween.glb",
+                "https://sceneview.github.io/assets/models/DamagedHelmet.glb",
+                "https://sceneview.github.io/assets/models/GameBoy.glb",
+                "https://sceneview.github.io/assets/models/Gumball.glb",
+                "https://sceneview.github.io/assets/models/Hair.glb",
+                "https://sceneview.github.io/assets/models/MetalRoughSpheres.glb",
+                "https://sceneview.github.io/assets/models/Spoons.glb",
+                "https://sceneview.github.io/assets/models/FiatPunto.glb",
+                "https://sceneview.github.io/assets/models/ClearCoat.glb",
+                "https://sceneview.github.io/assets/models/MaterialSuite.glb"
+            )
+        )
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        sheetState = sampleSheetState,
+    ) {
+        // Sheet content
+        samples.forEach {
+            val name = it.substringAfterLast("/")
+            BottomSheetSurface(
+                text = name,
+                onClick = {
+                    onDismissRequest()
+                    onSelect(name, it.toUri())
+                },
+                icon = Icons.Filled.ViewInAr,
+                iconDescription = "image",
+            )
+        }
+        Spacer(Modifier.height(20.dp))
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-fun CreateScreenPreview() {
+private fun CreateScreenPreview() {
     CreateScreen(navController = rememberNavController())
 }

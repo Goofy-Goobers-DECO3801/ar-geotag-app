@@ -1,8 +1,7 @@
 package com.example.deco3801.ui
 
 import android.icu.text.SimpleDateFormat
-import android.location.Geocoder
-import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -33,12 +32,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,11 +50,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -62,35 +62,31 @@ import com.example.deco3801.R
 import com.example.deco3801.ScreenNames
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
+import com.example.deco3801.navigateArt
+import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.ExpandableAsyncImage
+import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.TopBar
+import com.example.deco3801.viewmodel.FollowSheetState
 import com.example.deco3801.viewmodel.ProfileViewModel
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import java.util.Date
 import java.util.Locale
 
-enum class FollowDialogState {
-    HIDDEN,
-    FOLLOWERS,
-    FOLLOWING
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     userId: String,
     navController: NavHostController,
-    modifier: Modifier = Modifier.padding(8.dp),
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val spacerModifier: Modifier = Modifier.height(12.dp)
     val user by viewModel.user.collectAsState()
     val art by viewModel.art.collectAsState()
     val isFollowing by viewModel.isFollowing.collectAsState()
-    val follows by viewModel.follows.collectAsState()
-    val isCurrentUser = userId == Firebase.auth.uid!!
-    var followDialogState by remember { mutableStateOf(FollowDialogState.HIDDEN) }
+    val followSheetState by viewModel.followSheetState.collectAsState()
+    val isCurrentUser = viewModel.isCurrentUser(userId)
 
     DisposableEffect(userId) {
         viewModel.attachListener(userId)
@@ -105,60 +101,65 @@ fun ProfileScreen(
             TopBar(
                 canNavigateBack = false,
                 showSettings = isCurrentUser,
-                navigateUp = { navController.navigate(ScreenNames.Settings.name) }
+                navigateUp = { navController.navigate(ScreenNames.Settings.name) },
+            )
+        },
+    ) { innerPadding ->
+        if (followSheetState != FollowSheetState.HIDDEN) {
+            FollowersBottomSheet(
+                onOpen = { navController.navigateProfile(it.id) },
             )
         }
-    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            if (followDialogState != FollowDialogState.HIDDEN) {
-                FollowersDialog(
-                    open = { navController.navigate(it) },
-                    onClose = { followDialogState = FollowDialogState.HIDDEN },
-                    follows = follows,
-                    followDialogState,
-                )
-            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = modifier
+                modifier = Modifier.padding(start = 25.dp, end = 25.dp),
             ) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(top = 30.dp, bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
+                            horizontalArrangement = Arrangement.Start,
                         ) {
                             ExpandableAsyncImage(
                                 model = user.pictureUri.ifBlank { R.drawable.pfp },
                                 placeholder = painterResource(id = R.drawable.pfp),
                                 contentDescription = "profile",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .size(92.dp)
+                                modifier =
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .size(92.dp),
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 if (user.fullname.isNotEmpty()) {
                                     Text(
                                         text = user.fullname,
-                                        style = MaterialTheme.typography.titleLarge
+                                        style = MaterialTheme.typography.titleLarge,
                                     )
                                 }
 
                                 Text(
                                     text = "@${user.username}",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleMedium,
                                 )
                                 if (isCurrentUser) {
-                                    Button(onClick = { navController.navigate(ScreenNames.EditProfile.name) }) {
+                                    Button(
+                                        onClick = {
+                                            navController.navigate(
+                                                ScreenNames.EditProfile.name,
+                                            )
+                                        },
+                                    ) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
@@ -166,20 +167,19 @@ fun ProfileScreen(
                                         Text(text = if (isFollowing!!) "Unfollow" else "Follow")
                                     }
                                 }
-
                             }
                         }
                         Spacer(modifier = spacerModifier)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                             Text(text = user.bio)
                         }
                         Spacer(modifier = spacerModifier)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                             Text(
                                 text = "${art.count()} posts",
@@ -188,33 +188,36 @@ fun ProfileScreen(
                                 text = AnnotatedString("${user.followerCount} followers"),
                                 onClick = {
                                     viewModel.onFollowersClick()
-                                    followDialogState = FollowDialogState.FOLLOWERS
                                 },
-                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                                style =
+                                    LocalTextStyle.current.copy(
+                                        color = LocalContentColor.current,
+                                    ),
                             )
                             ClickableText(
                                 text = AnnotatedString("${user.followingCount} following"),
                                 onClick = {
                                     viewModel.onFollowingClick()
-                                    followDialogState = FollowDialogState.FOLLOWING
                                 },
-                                style = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                                style =
+                                    LocalTextStyle.current.copy(
+                                        color = LocalContentColor.current,
+                                    ),
                             )
                         }
-
                     }
                 }
                 if (!user.isPrivate || isCurrentUser) {
                     items(art) {
                         ArtworkTile(it) {
-                            navController.navigate("${ScreenNames.ArtworkNav.name}/${it.id}")
+                            navController.navigateArt(it.id)
                         }
                     }
                 } else {
                     item {
                         Text(
                             "Private account.",
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -225,86 +228,101 @@ fun ProfileScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FollowersDialog(
-    open: (String) -> Unit,
-    onClose: () -> Unit,
-    follows: List<User>,
-    followDialogState: FollowDialogState,
+fun FollowersBottomSheet(
+    onOpen: (User) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
+    sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
 
-    Dialog(
-        onDismissRequest = { onClose() }
+    val followSheetState by viewModel.followSheetState.collectAsState()
+    val follows by viewModel.follows.collectAsState()
+
+    ModalBottomSheet(
+        onDismissRequest = viewModel::hideFollowSheet,
+        sheetState = sheetState,
+        modifier = modifier.heightIn(min=400.dp),
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier = Modifier
+
+        Text(
+            text = if (followSheetState == FollowSheetState.FOLLOWING) "Following" else "Followers",
+            modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(
+            modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = if (followDialogState == FollowDialogState.FOLLOWING) "Following" else "Followers",
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(follows) { user ->
-                        Surface(
-                            onClick = { open("${ScreenNames.Profile.name}/${user.id}") },
-                            modifier = Modifier.fillMaxSize(),
-                            color = Color.Transparent
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start,
-                            ) {
-                                AsyncImage(
-                                    model = user.pictureUri.ifBlank { R.drawable.pfp },
-                                    placeholder = painterResource(id = R.drawable.pfp),
-                                    contentDescription = "profile",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .size(82.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    if (user.fullname.isNotEmpty()) {
-                                        Text(
-                                            text = user.fullname,
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                    }
-
-                                    Text(
-                                        text = "@${user.username}",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    // TODO Maybe add unfollow/remove button for the current user
-                                }
-
-                            }
-                        }
-                    }
+                    .height((0.5).dp)
+                    .background(MaterialTheme.colorScheme.onError)
+        )
+        LazyColumn {
+            if (follows.isEmpty()) {
+                item {
+                    Text(
+                        text =
+                        if (followSheetState == FollowSheetState.FOLLOWING)  {
+                            "You are not following anyone!"
+                        } else {
+                            "No one is following you!"
+                        },
+                        modifier = Modifier.padding(10.dp),
+                    )
+                }
+            } else {
+                items(follows) { user ->
+                    FollowerBottomSheetSurface(user = user, onOpen = onOpen)
                 }
             }
+
         }
     }
 }
 
 @Composable
-fun ProfileScreenPreview() {
-    ProfileScreen("", navController = rememberNavController())
-}
+fun FollowerBottomSheetSurface(
+    user: User,
+    onOpen: (User) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = { onOpen(user) },
+        modifier = modifier.fillMaxWidth(),
+        color = Color.Transparent,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.padding(10.dp),
+        ) {
+            AsyncImage(
+                model = user.pictureUri.ifBlank { R.drawable.pfp },
+                placeholder = painterResource(id = R.drawable.pfp),
+                contentDescription = "profile",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .size(82.dp),
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                if (user.fullname.isNotEmpty()) {
+                    Text(
+                        text = user.fullname,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
 
+                Text(
+                    text = "@${user.username}",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                // TODO Maybe add unfollow/remove button for the current user
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -312,78 +330,82 @@ fun ArtworkTile(
     art: Art,
     onClick: () -> Unit,
 ) {
-    val spacerModifier: Modifier = Modifier.height(8.dp)
-    val gcd = Geocoder(LocalContext.current, Locale.getDefault())
+    val spacerModifier: Modifier = Modifier.height(5.dp)
     var locationName by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            gcd.getFromLocation(art.location!!.latitude, art.location!!.longitude, 1) {
-                locationName = "${it[0].locality}, ${it[0].adminArea}"
-            }
-        }
-    }
+    GetLocationName(location = art.location, onLocationName = {locationName = it})
 
     Card(onClick = onClick) {
         Column {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 // TODO: map preview
                 AsyncImage(
                     model = R.drawable.default_img,
                     contentDescription = "post",
-                    modifier = Modifier.size(146.dp)
+                    modifier = Modifier.size(146.dp),
                 )
             }
             Spacer(modifier = spacerModifier)
             Text(
                 text = art.title,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 12.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = formatDate(art.timestamp!!),
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 15.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = spacerModifier)
             Row {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "location",
-                    Modifier
-                        .padding(start = 16.dp)
-                        .size(16.dp)
+                    modifier =
+                        Modifier
+                            .padding(start = 12.dp)
+                            .size(16.dp),
                 )
                 Text(
                     text = locationName,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(end = 12.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Spacer(modifier = spacerModifier)
             Row {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
-                    Modifier
-                        .padding(start = 16.dp)
-                        .size(16.dp)
+                    modifier =
+                        Modifier
+                            .padding(start = 12.dp)
+                            .size(16.dp),
                 )
                 Text(
                     text = "${art.likeCount} likes",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Icon(
                     imageVector = Icons.Outlined.Message,
                     contentDescription = "review",
-                    Modifier.size(16.dp)
+                    Modifier.size(16.dp),
                 )
 
                 Text(
                     text = "${art.reviewCount} reviews",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))
@@ -416,9 +438,13 @@ fun formatDate(date: Date): String {
     }
 }
 
+@Composable
+private fun ProfileScreenPreview() {
+    ProfileScreen("", navController = rememberNavController())
+}
 
-//@Composable
-//fun ProfileGrid (modifier: Modifier = Modifier) {
+// @Composable
+// fun ProfileGrid (modifier: Modifier = Modifier) {
 //    LazyVerticalGrid(
 //        columns = GridCells.Fixed(2),
 //        verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -429,7 +455,4 @@ fun formatDate(date: Date): String {
 //            ArtworkTile(topic)
 //        }
 //    }
-//}
-
-
-
+// }

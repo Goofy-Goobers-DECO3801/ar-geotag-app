@@ -8,7 +8,7 @@ import java.util.Date
 
 data class Art(
     @DocumentId
-    val id: String = "",
+    var id: String = "",
     var title: String = "",
     var description: String = "",
     var altitude: Double = 0.0,
@@ -23,6 +23,8 @@ data class Art(
     var timestamp: Date? = null,
     var userId: String = "",
     var storageUri: String = "",
+    var storageRef: String = "",
     var likeCount: Int = 0,
     var reviewCount: Int = 0,
+
 )

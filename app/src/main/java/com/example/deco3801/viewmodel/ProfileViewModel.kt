@@ -6,12 +6,17 @@ import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.FollowRepository
 import com.example.deco3801.data.repository.UserRepository
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+
+enum class FollowSheetState {
+    HIDDEN,
+    FOLLOWERS,
+    FOLLOWING,
+}
 
 
 @HiltViewModel
@@ -19,6 +24,7 @@ class ProfileViewModel @Inject constructor(
     private val userRepo: UserRepository,
     private val artRepo: ArtRepository,
     private val followRepo: FollowRepository,
+    private val auth: FirebaseAuth,
 ) : AppViewModel() {
     private val _user = MutableStateFlow(User())
     val user: StateFlow<User> = _user
@@ -29,8 +35,17 @@ class ProfileViewModel @Inject constructor(
     private val _isFollowing = MutableStateFlow<Boolean?>(null)
     val isFollowing: StateFlow<Boolean?> = _isFollowing
 
+    private val _followSheetState = MutableStateFlow<FollowSheetState>(FollowSheetState.HIDDEN)
+    val followSheetState: StateFlow<FollowSheetState> = _followSheetState
+
     private val _follows = MutableStateFlow<List<User>>(emptyList())
     val follows: StateFlow<List<User>> = _follows
+
+    fun isCurrentUser(userId: String) = userId == auth.uid
+
+    fun hideFollowSheet() {
+        _followSheetState.value = FollowSheetState.HIDDEN
+    }
 
     fun onFollowersClick() {
         launchCatching {
@@ -38,7 +53,9 @@ class ProfileViewModel @Inject constructor(
             val users = userRepo.getUsers(followers.map { it.followerId })
 //            _follows.value = followers.zip(users)
             _follows.value = users
+            _followSheetState.value = FollowSheetState.FOLLOWERS
         }
+
     }
 
     fun onFollowingClick() {
@@ -47,12 +64,12 @@ class ProfileViewModel @Inject constructor(
             val users = userRepo.getUsers(following.map { it.followingId })
 //            _follows.value = following.zip(users)
             _follows.value = users
-
+            _followSheetState.value = FollowSheetState.FOLLOWING
         }
     }
 
     fun isFollowing(userId: String) {
-        if (userId != Firebase.auth.uid) {
+        if (!isCurrentUser(userId)) {
             launchCatching {
                 _isFollowing.value = followRepo.isFollowing(userId) != null
             }
