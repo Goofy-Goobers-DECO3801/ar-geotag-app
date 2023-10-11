@@ -35,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     fun isCurrentUser(userId: String) = userId == auth.uid
 
     fun onFollowersClick() {
+        _follows.value = emptyList()
         launchCatching {
             val followers = followRepo.getFollowers(_user.value)
             val users = userRepo.getUsers(followers.map { it.followerId })
@@ -44,6 +45,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onFollowingClick() {
+        _follows.value = emptyList()
         launchCatching {
             val following = followRepo.getFollowing(_user.value)
             val users = userRepo.getUsers(following.map { it.followingId })
