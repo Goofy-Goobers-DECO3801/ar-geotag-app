@@ -1,13 +1,19 @@
 package com.example.deco3801
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,6 +44,8 @@ fun AppFunctionality(
     authUser: FirebaseUser?,
     appState: AppState = rememberAppState(),
 ) {
+    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+
     Log.d("AUTH", authUser.toString())
     val startDestination =
         if (authUser == null) {
@@ -130,4 +138,19 @@ fun NavHostController.navigateArt(artId: String) {
 
 fun NavHostController.navigateProfile(userId: String) {
     return this.navigate("${ScreenNames.Profile.name}/$userId")
+}
+
+@Composable
+fun LockScreenOrientation(orientation: Int) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val activity = context.findActivity()
+        activity?.requestedOrientation = orientation
+    }
+}
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
