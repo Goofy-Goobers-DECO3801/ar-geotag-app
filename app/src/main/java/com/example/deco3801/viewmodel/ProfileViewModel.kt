@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+enum class FollowSheetState {
+    HIDDEN,
+    FOLLOWERS,
+    FOLLOWING,
+}
+
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -29,29 +35,36 @@ class ProfileViewModel @Inject constructor(
     private val _isFollowing = MutableStateFlow<Boolean?>(null)
     val isFollowing: StateFlow<Boolean?> = _isFollowing
 
+    private val _followSheetState = MutableStateFlow<FollowSheetState>(FollowSheetState.HIDDEN)
+    val followSheetState: StateFlow<FollowSheetState> = _followSheetState
+
     private val _follows = MutableStateFlow<List<User>>(emptyList())
     val follows: StateFlow<List<User>> = _follows
 
     fun isCurrentUser(userId: String) = userId == auth.uid
 
+    fun hideFollowSheet() {
+        _followSheetState.value = FollowSheetState.HIDDEN
+    }
+
     fun onFollowersClick() {
-        _follows.value = emptyList()
         launchCatching {
             val followers = followRepo.getFollowers(_user.value)
             val users = userRepo.getUsers(followers.map { it.followerId })
 //            _follows.value = followers.zip(users)
             _follows.value = users
+            _followSheetState.value = FollowSheetState.FOLLOWERS
         }
+
     }
 
     fun onFollowingClick() {
-        _follows.value = emptyList()
         launchCatching {
             val following = followRepo.getFollowing(_user.value)
             val users = userRepo.getUsers(following.map { it.followingId })
 //            _follows.value = following.zip(users)
             _follows.value = users
-
+            _followSheetState.value = FollowSheetState.FOLLOWING
         }
     }
 
