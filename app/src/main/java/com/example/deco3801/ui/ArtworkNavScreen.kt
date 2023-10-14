@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,10 +35,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -58,7 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +66,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
 import com.example.deco3801.data.model.Art
+import com.example.deco3801.data.model.Comment
 import com.example.deco3801.data.model.User
 import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
 import com.example.deco3801.navigateAR
@@ -75,12 +74,15 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
-import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.util.LocationUtil
+import com.example.deco3801.util.forEachOrElse
+import com.example.deco3801.util.formatDate
+import com.example.deco3801.util.formatDistance
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
+import com.example.deco3801.viewmodel.CommentViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -105,9 +107,7 @@ fun ArtworkNavScreen(
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
-    val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var comment by remember { mutableStateOf("") }
+    var showComments by remember { mutableStateOf(false) }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
@@ -145,38 +145,18 @@ fun ArtworkNavScreen(
             )
         },
     ) { innerPadding ->
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = sheetState,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState(), true),
-                    verticalArrangement = Arrangement.Top,
-                    content = {
-                        OutlinedTextField(
-                            value = comment,
-                            onValueChange = { newComment -> comment = newComment },
-                            label = {Text("Comment")},
-                            trailingIcon = {
-                                IconButton(onClick = { /*TODO*/ }) {
-                                    Icon(imageVector = Icons.Filled.Send, contentDescription = null)
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(15.dp)
-                                .fillMaxWidth()
-                        )
-                        repeat(10) {
-                            UserComment(user = user, comment = "gdhsvjbnf fsdbfuiuref d fsd f dsf ds fescv s er d  vf ewgrfdsg  fsdzfvf ceeqdfv wsfdvesd frewfewf f ewdfw def we fd ew fvceadcvwer cewdccc e  ccec edcdefsc d dcedecdedcec cede dedced ce dce cd c edc edcedced cde cedc ed cedc ed")
-                        }
-                    }
-                )
-            }
+        if (showComments) {
+           CommentBottomSheet(
+               artId = artId,
+               modifier = Modifier.heightIn(min = 400.dp),
+               onUserClicked = {
+                   navController.navigateProfile(it.id)
+               },
+               onDismissRequest = {
+                   showComments = false
+               },
+               distanceInM = distanceInM,
+           )
         }
 
         Column(
@@ -225,10 +205,88 @@ fun ArtworkNavScreen(
                 art = art,
                 liked = liked,
                 onLikeClicked = viewModel::onLikeClicked,
-                onReviewClicked = {showBottomSheet = true},
+                onCommentClicked = { showComments = true },
                 distanceInM = distanceInM,
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CommentBottomSheet(
+    artId: String,
+    onUserClicked: (User) -> Unit,
+    onDismissRequest: () -> Unit,
+    distanceInM: Double?,
+    modifier: Modifier = Modifier,
+    viewModel: CommentViewModel = hiltViewModel(),
+    sheetState: SheetState = rememberModalBottomSheetState(),
+) {
+    val commentState by viewModel.comments.collectAsState()
+    var comment by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        viewModel.attachListener(artId)
+        onDispose {
+            viewModel.detachListener()
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState(), true)
+                    .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.Top,
+            content = {
+                OutlinedTextField(
+
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = {Text("Comment")},
+                    trailingIcon = {
+                        IconButton(
+                            enabled = atArtLocation(distanceInM) && comment.isNotBlank(),
+                            onClick = {
+                                viewModel.onCommentPosted(artId, comment)
+                                comment = ""
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Send, contentDescription = null)
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .padding(15.dp)
+                            .fillMaxWidth(),
+                    enabled = atArtLocation(distanceInM),
+                    supportingText = {
+                        Text("You must be at the location to comment.")
+                    },
+                )
+                commentState.forEachOrElse(
+                    orElse = {
+                        Text(
+                            "Be the first to comment!",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp))
+                    },
+                ) {
+                    UserComment(user = it.user, comment = it.comment) {
+                        onUserClicked(it.user)
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -463,7 +521,7 @@ fun ArtworkDescription(
     art: Art,
     liked: Boolean?,
     onLikeClicked: () -> Unit,
-    onReviewClicked: () -> Unit,
+    onCommentClicked: () -> Unit,
     distanceInM: Double?,
 ) {
     Column(
@@ -476,9 +534,9 @@ fun ArtworkDescription(
             IconButton(
                 enabled = liked != null && distanceInM != null,
                 onClick = {
-                    if (distanceInM!! > DISTANCE_AWAY_MARGIN) {
+                    if (!atArtLocation(distanceInM)) {
                         SnackbarManager.showMessage(
-                            "You must be at the location to like the geoARt.",
+                            "You must be at the location to like.",
                         )
                         return@IconButton
                     }
@@ -495,15 +553,15 @@ fun ArtworkDescription(
             Text("${art.likeCount} likes")
             Spacer(Modifier.width(10.dp))
             IconButton(
-                onClick = onReviewClicked,
+                onClick = onCommentClicked,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Message,
-                    contentDescription = "reviews",
+                    contentDescription = "comments",
                 )
             }
             Spacer(Modifier.width(5.dp))
-            Text("${art.reviewCount} reviews")
+            Text("${art.commentCount} comments")
         }
         Spacer(Modifier.height(10.dp))
         Text(art.description)
@@ -513,8 +571,8 @@ fun ArtworkDescription(
 @Composable
 fun UserComment(
     user: User,
+    comment: Comment,
     onUserClicked: () -> Unit = {},
-    comment: String
 ) {
     Row(
         modifier = Modifier
@@ -528,24 +586,41 @@ fun UserComment(
                 contentDescription = "profile",
                 contentScale = ContentScale.Crop,
                 modifier =
-                Modifier
-                    .clip(CircleShape)
-                    .size(45.dp)
-                    .clickable {
-                        onUserClicked()
-                    },
+                    Modifier
+                        .clip(CircleShape)
+                        .size(45.dp)
+                        .clickable {
+                            onUserClicked()
+                        },
             )
         }
         Column {
+            Row {
+                Text(
+                    text = "@${user.username}",
+                    fontWeight = FontWeight.W800,
+                    modifier =
+                        Modifier
+                            .clickable {
+                                onUserClicked()
+                            },
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = formatDate(comment.timestamp),
+                )
+            }
+
            Text(
-               text = "@${user.username}",
-               fontWeight = FontWeight.W800,
+               text = comment.text,
            )
-           Text(
-               text = comment,
-           )
+
         }
     }
+}
+
+private fun atArtLocation(distanceInM: Double?): Boolean {
+    return distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN
 }
 
 @Preview

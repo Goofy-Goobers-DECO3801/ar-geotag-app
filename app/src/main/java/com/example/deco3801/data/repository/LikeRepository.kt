@@ -5,8 +5,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class LikeRepository @Inject constructor(
@@ -16,11 +14,7 @@ class LikeRepository @Inject constructor(
 ) : Repository<Like>(Like::class.java) {
 
     suspend fun hasLiked(artId: String): Like? {
-        return getCollectionRef(artId)
-            .document(auth.uid!!)
-            .get()
-            .await()
-            .toObject()
+        return getById(auth.uid!!, subCollectionId = artId)
     }
 
     fun likeArt(artId: String) {
@@ -32,8 +26,6 @@ class LikeRepository @Inject constructor(
         )
         val likeRef = getCollectionRef(artId).document(uid)
         val artRef = artRepo.getCollectionRef().document(artId)
-
-
 
         db.runBatch {
             it.set(likeRef, like)
@@ -52,15 +44,10 @@ class LikeRepository @Inject constructor(
         }
     }
 
-    fun getCollectionRef(artId: String): CollectionReference {
-        return artRepo.getCollectionRef().document(artId).collection(LIKE_COLLECTION)
+    override fun getCollectionRef(id: String?): CollectionReference {
+        assert(id != null)
+        return artRepo.getCollectionRef().document(id!!).collection(LIKE_COLLECTION)
     }
-
-
-    override fun getCollectionRef(): CollectionReference {
-        return artRepo.getCollectionRef()
-    }
-
 
     companion object {
         private const val LIKE_COLLECTION = "likes"

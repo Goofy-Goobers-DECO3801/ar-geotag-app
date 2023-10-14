@@ -25,6 +25,5 @@ data class Art(
     var storageUri: String = "",
     var storageRef: String = "",
     var likeCount: Int = 0,
-    var reviewCount: Int = 0,
-
+    var commentCount: Int = 0,
 )

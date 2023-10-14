@@ -142,7 +142,7 @@ class UserRepository @Inject constructor(
     }
 
 
-    override fun getCollectionRef(): CollectionReference {
+    override fun getCollectionRef(id: String?): CollectionReference {
         return db.collection(USER_COLLECTION)
     }
 
