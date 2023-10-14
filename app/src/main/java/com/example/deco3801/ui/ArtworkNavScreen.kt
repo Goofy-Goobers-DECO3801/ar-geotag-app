@@ -24,16 +24,21 @@ import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -88,7 +93,7 @@ import org.imperiumlabs.geofirestore.util.GeoUtils
 
 private const val DISTANCE_AWAY_MARGIN = 10.0
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ArtworkNavScreen(
     artId: String,
@@ -100,6 +105,9 @@ fun ArtworkNavScreen(
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var comment by remember { mutableStateOf("") }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
@@ -137,6 +145,40 @@ fun ArtworkNavScreen(
             )
         },
     ) { innerPadding ->
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState(), true),
+                    verticalArrangement = Arrangement.Top,
+                    content = {
+                        OutlinedTextField(
+                            value = comment,
+                            onValueChange = { newComment -> comment = newComment },
+                            label = {Text("Comment")},
+                            trailingIcon = {
+                                IconButton(onClick = { /*TODO*/ }) {
+                                    Icon(imageVector = Icons.Filled.Send, contentDescription = null)
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                        )
+                        repeat(10) {
+                            UserComment(user = user, comment = "gdhsvjbnf fsdbfuiuref d fsd f dsf ds fescv s er d  vf ewgrfdsg  fsdzfvf ceeqdfv wsfdvesd frewfewf f ewdfw def we fd ew fvceadcvwer cewdccc e  ccec edcdefsc d dcedecdedcec cede dedced ce dce cd c edc edcedced cde cedc ed cedc ed")
+                        }
+                    }
+                )
+            }
+        }
+
         Column(
             modifier =
             Modifier
@@ -183,6 +225,7 @@ fun ArtworkNavScreen(
                 art = art,
                 liked = liked,
                 onLikeClicked = viewModel::onLikeClicked,
+                onReviewClicked = {showBottomSheet = true},
                 distanceInM = distanceInM,
             )
         }
@@ -208,7 +251,6 @@ fun ArtworkTitle(
                 modifier =
                     Modifier.padding(
                         start = 15.dp,
-                        top = 10.dp,
                     ),
             ) {
                 AsyncImage(
@@ -231,7 +273,6 @@ fun ArtworkTitle(
                     .fillMaxWidth()
                     .padding(
                         start = 10.dp,
-                        top = 10.dp,
                         bottom = 15.dp,
                     ),
             ) {
@@ -261,14 +302,18 @@ fun ArtworkTopBar(
     artworkTitle: String,
     navController: NavHostController,
 ) {
-    Row(modifier = Modifier.fillMaxWidth().background(UnchangingAppColors.main_theme)) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(UnchangingAppColors.main_theme)) {
         Column () {
             IconButton(onClick = navController::popBackStack) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIos,
                     contentDescription = "ArrowBack",
                     tint = Color.White,
-                    modifier = Modifier.size(50.dp).padding(10.dp)
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(10.dp)
                 )
             }
         }
@@ -277,7 +322,7 @@ fun ArtworkTopBar(
             modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, end = 48.dp)) {
+                .padding(top = 20.dp, end = 48.dp, bottom = 10.dp)) {
             Text(
                 text = artworkTitle,
                 style = MaterialTheme.typography.headlineLarge,
@@ -374,9 +419,9 @@ fun ArtworkInteract(
 ) {
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+        Modifier
+            .fillMaxWidth()
+            .background(UnchangingAppColors.main_theme),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN) {
@@ -418,13 +463,14 @@ fun ArtworkDescription(
     art: Art,
     liked: Boolean?,
     onLikeClicked: () -> Unit,
+    onReviewClicked: () -> Unit,
     distanceInM: Double?,
 ) {
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(20.dp, 5.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(20.dp, 5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
@@ -449,7 +495,7 @@ fun ArtworkDescription(
             Text("${art.likeCount} likes")
             Spacer(Modifier.width(10.dp))
             IconButton(
-                onClick = { },
+                onClick = onReviewClicked,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Message,
@@ -464,13 +510,49 @@ fun ArtworkDescription(
     }
 }
 
+@Composable
+fun UserComment(
+    user: User,
+    onUserClicked: () -> Unit = {},
+    comment: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
+    ){
+        Column (Modifier.padding(top = 5.dp, end = 15.dp)) {
+            AsyncImage(
+                model = user.pictureUri.ifBlank { R.drawable.pfp },
+                placeholder = painterResource(id = R.drawable.pfp),
+                contentDescription = "profile",
+                contentScale = ContentScale.Crop,
+                modifier =
+                Modifier
+                    .clip(CircleShape)
+                    .size(45.dp)
+                    .clickable {
+                        onUserClicked()
+                    },
+            )
+        }
+        Column {
+           Text(
+               text = "@${user.username}",
+               fontWeight = FontWeight.W800,
+           )
+           Text(
+               text = comment,
+           )
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun PreviewArtworkNavScreen() {
-    /*
     ArtworkNavScreen(
         "1",
         rememberNavController(),
-    )*/
-    ArtworkTopBar(artworkTitle = "This is a long title that goes 2 line", navController = rememberNavController())
+    )
 }
