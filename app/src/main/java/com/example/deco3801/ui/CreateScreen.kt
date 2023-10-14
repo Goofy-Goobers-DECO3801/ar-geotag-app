@@ -247,6 +247,7 @@ fun CreateScreen(
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange,
                         modifier = textFieldModifier,
+                        singleLine = true,
                     )
                     Spacer(modifier = spacerModifier)
 
