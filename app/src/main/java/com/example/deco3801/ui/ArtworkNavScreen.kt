@@ -225,7 +225,6 @@ fun CommentBottomSheet(
 ) {
     val commentState by viewModel.comments.collectAsState()
     var comment by remember { mutableStateOf("") }
-    val context = LocalContext.current
 
     DisposableEffect(Unit) {
         viewModel.attachListener(artId)
@@ -248,7 +247,6 @@ fun CommentBottomSheet(
             verticalArrangement = Arrangement.Top,
             content = {
                 OutlinedTextField(
-
                     value = comment,
                     onValueChange = { comment = it },
                     label = {Text("Comment")},
