@@ -73,7 +73,7 @@ class ArtRepository @Inject constructor(
         return userRepo.getUser(art.userId)!!
     }
 
-    override fun getCollectionRef(): CollectionReference {
+    override fun getCollectionRef(id: String?): CollectionReference {
         return db.collection(ART_COLLECTION)
     }
 
