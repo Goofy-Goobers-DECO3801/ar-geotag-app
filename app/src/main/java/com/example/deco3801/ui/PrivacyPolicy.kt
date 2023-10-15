@@ -226,14 +226,3 @@ fun PrivacyPolicyText(): MutableList<Unit> {
     return textList
 }
 
-
-//Text(
-//text = stringResource(id = R.string.placeholder),
-//modifier = Modifier.padding(
-//top = 10.dp,
-//start = 25.dp,
-//end = 25.dp,
-//bottom = 30.dp
-//)
-//)
-

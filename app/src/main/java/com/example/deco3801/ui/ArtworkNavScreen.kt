@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
@@ -83,6 +84,7 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
 import com.example.deco3801.viewmodel.CommentViewModel
+import com.example.deco3801.viewmodel.FollowSheetState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -108,6 +110,7 @@ fun ArtworkNavScreen(
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
     var showComments by remember { mutableStateOf(false) }
+    var showEditPost by remember { mutableStateOf(false) }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
@@ -158,7 +161,16 @@ fun ArtworkNavScreen(
                distanceInM = distanceInM,
            )
         }
-
+        if (showEditPost) {
+            EditPostBottomSheet(
+                artId = artId,
+                userId = user,
+                modifier = Modifier.heightIn(min = 100.dp),
+                onDismissRequest = {
+                    showEditPost = false
+                }
+            )
+        }
         Column(
             modifier =
             Modifier
@@ -169,9 +181,12 @@ fun ArtworkNavScreen(
                     columnScrollingEnabled,
                 ),
         ) {
-            ArtworkTitle(art, user) {
-                navController.navigateProfile(user.id)
-            }
+            ArtworkTitle(
+                art,
+                user,
+                onUserClicked = {},
+                onEditProfileClicked = { showEditPost = true }
+            ) //{} //navController.navigateProfile(user.id) }
             ArtworkMap(
                 art = art,
                 userLocation = userLocation,
@@ -240,10 +255,10 @@ fun CommentBottomSheet(
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState(), true)
-                    .padding(bottom = 20.dp),
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState(), true)
+                .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.Top,
             content = {
                 OutlinedTextField(
@@ -262,9 +277,9 @@ fun CommentBottomSheet(
                         }
                     },
                     modifier =
-                        Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth(),
+                    Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth(),
                     enabled = atArtLocation(distanceInM),
                     supportingText = {
                         Text("You must be at the location to comment.")
@@ -293,6 +308,7 @@ fun ArtworkTitle(
     art: Art,
     user: User,
     onUserClicked: () -> Unit = {},
+    onEditProfileClicked: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -326,10 +342,11 @@ fun ArtworkTitle(
             Column(
                 modifier =
                 Modifier
-                    .fillMaxWidth()
+                    //.fillMaxWidth()
                     .padding(
                         start = 10.dp,
                         bottom = 15.dp,
+                        end = 30.dp
                     ),
             ) {
                 Text(
@@ -348,9 +365,92 @@ fun ArtworkTitle(
                     color = Color.White,
                 )
             }
+            Column (
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 15.dp,
+                        end = 15.dp
+                    ),
+                horizontalAlignment = Alignment.End
+            ) {
+                IconButton(onClick = onEditProfileClicked) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreHoriz,
+                        contentDescription = "More",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(10.dp)
+                    )
+                }
+            }
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditPostBottomSheet(
+    artId: String,
+    userId: User,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    //viewModel: CommentViewModel = hiltViewModel(),
+    sheetState: SheetState = rememberModalBottomSheetState(),
+) {
+    val isCurrentUser = true // TODO viewModel.isCurrentUser(userId)
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState(), true)
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = {
+                Text(
+                    text = if (isCurrentUser) "Deleting this post?" else "Reporting this post?",
+                    modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height((0.5).dp)
+                        .background(MaterialTheme.colorScheme.onError)
+                )
+                Text(
+                    text = if(isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
+                    modifier = Modifier.padding(start = 10.dp, bottom = 16.dp)
+                )
+                if (isCurrentUser) {
+                    Button(
+                        onClick = {}/*TODO*/,
+                    ) {
+                        Text(text = "Delete Post")
+                    }
+                } else {
+                    Button(onClick = {} /*TODO*/) {
+                        Text(text = "Report Post")
+                    }
+                }
+                Spacer(
+                    modifier =
+                    Modifier.height(10.dp)
+                )
+            } )
+    }
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -584,12 +684,12 @@ fun UserComment(
                 contentDescription = "profile",
                 contentScale = ContentScale.Crop,
                 modifier =
-                    Modifier
-                        .clip(CircleShape)
-                        .size(45.dp)
-                        .clickable {
-                            onUserClicked()
-                        },
+                Modifier
+                    .clip(CircleShape)
+                    .size(45.dp)
+                    .clickable {
+                        onUserClicked()
+                    },
             )
         }
         Column {
