@@ -106,10 +106,9 @@ fun ArtDisplayScreen(
                     artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=true))
                     // User tapped in the AR view
                     sceneView?.let {
-                        modelNode = onUserTap(it, viewState, artDisplayMode)
+                        modelNode = onUserTap(it, viewState, artDisplayMode, artDisplayViewModel)
 
                     }
-                    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=false))
                 },
                 onTrackingFailureChanged = { trackingFailureReason ->
                     """
@@ -207,33 +206,28 @@ private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) 
 }
 
 private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, navigator: NavHostController) {
-//    modelNode?.destroy()
-//    viewState?.modelPlaced = false
-//    viewState?.downloadingAsset = false
     onRefresh(modelNode, viewState)
     viewState?.readyToPlaceModel = false
     viewState?.modelAsset = null
     navigator.popBackStack()
 }
 
-fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode): ArModelNode {
+fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode, artDisplayViewModel: ArtDisplayViewModel): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
-//    viewState?.downloadingAsset = true
-    return ArModelNode(
+
+    val tmp =  ArModelNode(
         sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
             Log.d("ARMODEL", it)
             loadModelGlbAsync(
                 glbFileLocation = it,
-//                glbFileLocation = "models/bear.glb",
                 scaleToUnits = 1f,
                 centerOrigin = Position(-0.5f),
-//                onLoaded = {
-//                    viewState?.downloadingAsset = false
-//                }
             )
         }
     }
-//    viewState?.downloadingAsset = false
+    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=false))
+    return tmp
+
 }
