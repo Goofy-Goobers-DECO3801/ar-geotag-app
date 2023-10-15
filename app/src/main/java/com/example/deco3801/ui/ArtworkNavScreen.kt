@@ -79,6 +79,7 @@ import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.forEachOrElse
 import com.example.deco3801.util.formatDate
 import com.example.deco3801.util.formatDistance
+import com.example.deco3801.util.getGoogleApiKey
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
@@ -420,11 +421,7 @@ fun ArtworkMap(
         }
 
     LaunchedEffect(Unit) {
-        context.packageManager
-            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-            .apply {
-                apiKey = metaData.getString("com.google.android.geo.API_KEY")
-            }
+        apiKey = context.getGoogleApiKey()
     }
 
     LaunchedEffect(apiKey != null && art.location != null) {

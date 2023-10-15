@@ -1,5 +1,7 @@
 package com.example.deco3801.util
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,4 +47,13 @@ fun formatDate(date: Date?): String {
             }
         }
     }
+}
+
+fun Context.getGoogleApiKey(): String? {
+    return (
+        this.packageManager
+            .getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
+            .metaData
+            .getString("com.google.android.geo.API_KEY")
+        )
 }
