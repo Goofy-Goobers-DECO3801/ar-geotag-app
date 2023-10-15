@@ -39,6 +39,9 @@ import com.google.ar.core.Config
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
 
+// AR screen was modelled after below sample
+// Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ArtDisplayScreen(
@@ -103,16 +106,17 @@ fun ArtDisplayScreen(
                     artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
                 },
                 onTap = { hitResult ->
+                    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=true))
                     // User tapped in the AR view
                     sceneView?.let {
-                        modelNode = onUserTap(it, viewState, artDisplayMode)
+                        modelNode = onUserTap(it, viewState, artDisplayMode, artDisplayViewModel)
 
                     }
                 },
                 onTrackingFailureChanged = { trackingFailureReason ->
                     """
                  You can also show a tracking failure message if needed
-                    
+
                  virtualTryOnViewModel.dispatchEvent(
                       VirtualTryOnUIEvent.OnTrackingFailure(
                             trackingFailureReason
@@ -122,13 +126,6 @@ fun ArtDisplayScreen(
                 }
             )
 
-
-//        FloatingActionButton(
-//            onClick = { onClick(modelNode, viewState) },
-//            shape = CircleShape,
-//        ) {
-//            Icon(Icons.Filled.Refresh, "Large floating action button")
-//        }
 
 
             if (viewState.downloadingAsset) {
@@ -208,29 +205,32 @@ fun ArtDisplayScreen(
 private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     modelNode?.destroy()
     viewState?.modelPlaced = false
+    viewState?.downloadingAsset = false
 }
 
 private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, navigator: NavHostController) {
     onRefresh(modelNode, viewState)
-    viewState?.downloadingAsset = false
     viewState?.readyToPlaceModel = false
     viewState?.modelAsset = null
     navigator.popBackStack()
 }
 
-fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode): ArModelNode {
+fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode, artDisplayViewModel: ArtDisplayViewModel): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
-    return ArModelNode(
+
+    val tmp =  ArModelNode(
         sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
             Log.d("ARMODEL", it)
             loadModelGlbAsync(
                 glbFileLocation = it,
-//                glbFileLocation = "models/bear.glb",
                 scaleToUnits = 1f,
-                centerOrigin = Position(-0.5f)
+                centerOrigin = Position(-0.5f),
             )
         }
     }
+    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=false))
+    return tmp
+
 }
