@@ -69,8 +69,8 @@ class FollowRepository @Inject constructor(
         }
     }
 
-    override fun getCollectionRef(): CollectionReference {
-        return userRepo.getCollectionRef().document(auth.uid!!).collection(FOLLOW_COLLECTION)
+    override fun getCollectionRef(id: String?): CollectionReference {
+        return userRepo.getCollectionRef().document(id ?: auth.uid!!).collection(FOLLOW_COLLECTION)
     }
 
 

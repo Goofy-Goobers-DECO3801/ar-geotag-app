@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,16 +25,19 @@ import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -52,14 +56,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
 import com.example.deco3801.data.model.Art
+import com.example.deco3801.data.model.Comment
 import com.example.deco3801.data.model.User
 import com.example.deco3801.directions.presentation.GooglePlacesInfoViewModel
 import com.example.deco3801.navigateAR
@@ -69,9 +76,13 @@ import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.util.LocationUtil
+import com.example.deco3801.util.forEachOrElse
+import com.example.deco3801.util.formatDate
+import com.example.deco3801.util.formatDistance
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
+import com.example.deco3801.viewmodel.CommentViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -84,7 +95,7 @@ import org.imperiumlabs.geofirestore.util.GeoUtils
 
 private const val DISTANCE_AWAY_MARGIN = 10.0
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ArtworkNavScreen(
     artId: String,
@@ -96,6 +107,7 @@ fun ArtworkNavScreen(
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
+    var showComments by remember { mutableStateOf(false) }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
@@ -133,15 +145,29 @@ fun ArtworkNavScreen(
             )
         },
     ) { innerPadding ->
+        if (showComments) {
+           CommentBottomSheet(
+               artId = artId,
+               modifier = Modifier.heightIn(min = 400.dp),
+               onUserClicked = {
+                   navController.navigateProfile(it.id)
+               },
+               onDismissRequest = {
+                   showComments = false
+               },
+               distanceInM = distanceInM,
+           )
+        }
+
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(
-                        rememberScrollState(),
-                        columnScrollingEnabled,
-                    ),
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(
+                    rememberScrollState(),
+                    columnScrollingEnabled,
+                ),
         ) {
             ArtworkTitle(art, user) {
                 navController.navigateProfile(user.id)
@@ -150,23 +176,23 @@ fun ArtworkNavScreen(
                 art = art,
                 userLocation = userLocation,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                        .pointerInteropFilter(
-                            onTouchEvent = {
-                                when (it.action) {
-                                    MotionEvent.ACTION_DOWN -> {
-                                        columnScroll(false)
-                                        false
-                                    }
-
-                                    else -> {
-                                        true
-                                    }
+                Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .pointerInteropFilter(
+                        onTouchEvent = {
+                            when (it.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    columnScroll(false)
+                                    false
                                 }
-                            },
-                        ),
+
+                                else -> {
+                                    true
+                                }
+                            }
+                        },
+                    ),
                 columnScroll = columnScroll,
             )
 
@@ -179,9 +205,86 @@ fun ArtworkNavScreen(
                 art = art,
                 liked = liked,
                 onLikeClicked = viewModel::onLikeClicked,
+                onCommentClicked = { showComments = true },
                 distanceInM = distanceInM,
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CommentBottomSheet(
+    artId: String,
+    onUserClicked: (User) -> Unit,
+    onDismissRequest: () -> Unit,
+    distanceInM: Double?,
+    modifier: Modifier = Modifier,
+    viewModel: CommentViewModel = hiltViewModel(),
+    sheetState: SheetState = rememberModalBottomSheetState(),
+) {
+    val commentState by viewModel.comments.collectAsState()
+    var comment by remember { mutableStateOf("") }
+
+    DisposableEffect(Unit) {
+        viewModel.attachListener(artId)
+        onDispose {
+            viewModel.detachListener()
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState(), true)
+                    .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.Top,
+            content = {
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = {Text("Comment")},
+                    trailingIcon = {
+                        IconButton(
+                            enabled = atArtLocation(distanceInM) && comment.isNotBlank(),
+                            onClick = {
+                                viewModel.onCommentPosted(artId, comment)
+                                comment = ""
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Send, contentDescription = null)
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .padding(15.dp)
+                            .fillMaxWidth(),
+                    enabled = atArtLocation(distanceInM),
+                    supportingText = {
+                        Text("You must be at the location to comment.")
+                    },
+                )
+                commentState.forEachOrElse(
+                    orElse = {
+                        Text(
+                            "Be the first to comment!",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp))
+                    },
+                ) {
+                    UserComment(user = it.user, comment = it.comment) {
+                        onUserClicked(it.user)
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -194,31 +297,16 @@ fun ArtworkTitle(
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        /*Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme)
-                .padding(bottom = 10.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = artworkTitle,
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }*/
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(UnchangingAppColors.main_theme),
+            Modifier
+                .fillMaxWidth()
+                .background(UnchangingAppColors.main_theme),
         ) {
             Column(
                 modifier =
                     Modifier.padding(
                         start = 15.dp,
-                        top = 10.dp,
                     ),
             ) {
                 AsyncImage(
@@ -227,23 +315,22 @@ fun ArtworkTitle(
                     contentDescription = "profile",
                     contentScale = ContentScale.Crop,
                     modifier =
-                        Modifier
-                            .clip(CircleShape)
-                            .size(45.dp)
-                            .clickable {
-                                onUserClicked()
-                            },
+                    Modifier
+                        .clip(CircleShape)
+                        .size(45.dp)
+                        .clickable {
+                            onUserClicked()
+                        },
                 )
             }
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 10.dp,
-                            top = 10.dp,
-                            bottom = 15.dp,
-                        ),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 10.dp,
+                        bottom = 15.dp,
+                    ),
             ) {
                 Text(
                     text = "@${user.username}",
@@ -271,38 +358,37 @@ fun ArtworkTopBar(
     artworkTitle: String,
     navController: NavHostController,
 ) {
-    TopAppBar(
-        title = {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 30.dp, end = 48.dp),
-            ) {
-                Text(
-                    text = artworkTitle,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        },
-        colors =
-            TopAppBarDefaults.mediumTopAppBarColors(
-                titleContentColor = Color.White,
-                containerColor = UnchangingAppColors.main_theme,
-            ),
-        navigationIcon = {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(UnchangingAppColors.main_theme)) {
+        Column () {
             IconButton(onClick = navController::popBackStack) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIos,
                     contentDescription = "ArrowBack",
                     tint = Color.White,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(10.dp)
                 )
             }
-        },
-    )
+        }
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp, end = 48.dp, bottom = 10.dp)) {
+            Text(
+                text = artworkTitle,
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
 
 @Composable
@@ -389,9 +475,9 @@ fun ArtworkInteract(
 ) {
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+        Modifier
+            .fillMaxWidth()
+            .background(UnchangingAppColors.main_theme),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN) {
@@ -433,21 +519,22 @@ fun ArtworkDescription(
     art: Art,
     liked: Boolean?,
     onLikeClicked: () -> Unit,
+    onCommentClicked: () -> Unit,
     distanceInM: Double?,
 ) {
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(20.dp, 5.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(20.dp, 5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 enabled = liked != null && distanceInM != null,
                 onClick = {
-                    if (distanceInM!! > DISTANCE_AWAY_MARGIN) {
+                    if (!atArtLocation(distanceInM)) {
                         SnackbarManager.showMessage(
-                            "You must be at the location to like the geoARt.",
+                            "You must be at the location to like.",
                         )
                         return@IconButton
                     }
@@ -457,26 +544,81 @@ fun ArtworkDescription(
                 Icon(
                     imageVector = if (liked != null && liked) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "heart",
-                    tint = if (liked != null && liked) Color.Red else Color.Unspecified,
+                    tint = if (liked != null && liked) Color.Red else MaterialTheme.colorScheme.onBackground,
                 )
             }
             Spacer(Modifier.width(5.dp))
             Text("${art.likeCount} likes")
             Spacer(Modifier.width(10.dp))
             IconButton(
-                onClick = { },
+                onClick = onCommentClicked,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Message,
-                    contentDescription = "reviews",
+                    contentDescription = "comments",
                 )
             }
             Spacer(Modifier.width(5.dp))
-            Text("${art.reviewCount} reviews")
+            Text("${art.commentCount} comments")
         }
         Spacer(Modifier.height(10.dp))
         Text(art.description)
     }
+}
+
+@Composable
+fun UserComment(
+    user: User,
+    comment: Comment,
+    onUserClicked: () -> Unit = {},
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
+    ){
+        Column (Modifier.padding(top = 5.dp, end = 15.dp)) {
+            AsyncImage(
+                model = user.pictureUri.ifBlank { R.drawable.pfp },
+                placeholder = painterResource(id = R.drawable.pfp),
+                contentDescription = "profile",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .size(45.dp)
+                        .clickable {
+                            onUserClicked()
+                        },
+            )
+        }
+        Column {
+            Row {
+                Text(
+                    text = "@${user.username}",
+                    fontWeight = FontWeight.W800,
+                    modifier =
+                        Modifier
+                            .clickable {
+                                onUserClicked()
+                            },
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = formatDate(comment.timestamp),
+                )
+            }
+
+           Text(
+               text = comment.text,
+           )
+
+        }
+    }
+}
+
+private fun atArtLocation(distanceInM: Double?): Boolean {
+    return distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN
 }
 
 @Preview

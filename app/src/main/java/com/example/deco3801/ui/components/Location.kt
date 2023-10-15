@@ -2,6 +2,7 @@ package com.example.deco3801.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Build
@@ -80,34 +81,47 @@ fun GetUserLocation(
     }
 }
 
+@Suppress("DEPRECATION") // Need to support older APIs
 @Composable
 fun GetLocationName(
     location: GeoPoint?,
     onLocationName: (String) -> Unit,
     fullAddress: Boolean = false,
 ) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        return
+    fun getLocationName(address: Address?) {
+        if (address == null) {
+            return
+        }
+        onLocationName(
+            if (fullAddress) {
+                address.getAddressLine(0)
+            } else {
+                "${address.locality}, ${address.adminArea}"
+            }
+        )
+
     }
 
     val context = LocalContext.current
     val gcd = Geocoder(context, Locale.getDefault())
 
     LaunchedEffect(location) {
-        if (location != null) {
+        if (location == null) {
+            return@LaunchedEffect
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             gcd.getFromLocation(location.latitude, location.longitude, 1) {
-                if (it.size == 0) {
-                    return@getFromLocation
-                }
-
-                onLocationName(
-                    if (fullAddress) {
-                        it[0].getAddressLine(0)
-                    } else {
-                        "${it[0].locality}, ${it[0].adminArea}"
-                    }
-                )
+                getLocationName(it.firstOrNull())
             }
+            return@LaunchedEffect
+        }
+        try {
+            getLocationName(
+                gcd.getFromLocation(location.latitude, location.longitude, 1)
+                    ?.firstOrNull()
+            )
+        } catch (e: Exception) {
+            SnackbarManager.showError(e)
         }
     }
 }

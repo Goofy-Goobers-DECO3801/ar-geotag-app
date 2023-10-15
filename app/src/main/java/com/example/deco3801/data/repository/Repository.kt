@@ -9,26 +9,26 @@ import kotlinx.coroutines.tasks.await
 abstract class Repository<T>(private val clazz: Class<T>) {
     private var listener: ListenerRegistration? = null
 
-    suspend fun getAll(): List<T> {
-        return getCollectionRef()
+    suspend fun getAll(subCollectionId: String? = null): List<T> {
+        return getCollectionRef(subCollectionId)
             .get()
             .await()
             .toObjects(clazz)
     }
-    suspend fun getById(id: String): T? {
-        return getCollectionRef()
+    suspend fun getById(id: String, subCollectionId: String? = null): T? {
+        return getCollectionRef(subCollectionId)
             .document(id)
             .get()
             .await()
             .toObject(clazz)
     }
 
-    fun attachListenerById(id: String, callback: (T) -> Unit) {
+    fun attachListenerById(id: String, subCollectionId: String? = null, callback: (T) -> Unit) {
         if (listener != null) {
             detachListener()
         }
 
-        listener = getCollectionRef().document(id).addSnapshotListener { snapshot, e ->
+        listener = getCollectionRef(subCollectionId).document(id).addSnapshotListener { snapshot, e ->
             if (e != null) {
                 Log.w("LISTENER", "Listen failed.", e)
                 return@addSnapshotListener
@@ -42,11 +42,11 @@ abstract class Repository<T>(private val clazz: Class<T>) {
         }
     }
 
-    fun attachListenerWithQuery(callback: (List<T>) -> Unit, queryBuilder: (Query) -> Query) {
+    fun attachListenerWithQuery(callback: (List<T>) -> Unit, subCollectionId: String? = null, queryBuilder: (Query) -> Query) {
         if (listener != null) {
             detachListener()
         }
-        val ref = getCollectionRef()
+        val ref = getCollectionRef(subCollectionId)
         val query = queryBuilder(ref)
 
         listener = query.addSnapshotListener { querySnapshot, e ->
@@ -63,5 +63,5 @@ abstract class Repository<T>(private val clazz: Class<T>) {
         listener = null
     }
 
-    abstract fun getCollectionRef(): CollectionReference
+    abstract fun getCollectionRef(id: String? = null): CollectionReference
 }

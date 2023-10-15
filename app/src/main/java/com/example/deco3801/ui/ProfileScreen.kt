@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -67,11 +66,9 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.TopBar
+import com.example.deco3801.util.formatDate
 import com.example.deco3801.viewmodel.FollowSheetState
 import com.example.deco3801.viewmodel.ProfileViewModel
-import java.util.Date
-import java.util.Locale
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -358,7 +355,7 @@ fun ArtworkTile(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = formatDate(art.timestamp!!),
+                text = formatDate(art.timestamp),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 15.dp),
                 maxLines = 1,
@@ -404,36 +401,11 @@ fun ArtworkTile(
                 )
 
                 Text(
-                    text = "${art.reviewCount} reviews",
+                    text = "${art.commentCount} comments",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))
-        }
-    }
-}
-
-fun formatDate(date: Date): String {
-    val now = Date()
-    val diff = now.time - date.time
-    val seconds = diff / 1000
-    val minutes = seconds / 60
-    val hours = minutes / 60
-    val days = hours / 24
-
-    return when {
-        seconds < 60 -> "just now"
-        minutes < 60 -> "$minutes ${if (minutes.toInt() == 1) "minute" else "minutes"} ago"
-        hours < 24 -> "$hours ${if (hours.toInt() == 1) "hour" else "hours"} ago"
-        days < 7 -> "$days ${if (days.toInt() == 1) "day" else "days"} ago"
-        else -> {
-            val currentYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(now)
-            val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
-            if (currentYear == year) {
-                SimpleDateFormat("dd MMMM", Locale.getDefault()).format(date)
-            } else {
-                SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(date)
-            }
         }
     }
 }

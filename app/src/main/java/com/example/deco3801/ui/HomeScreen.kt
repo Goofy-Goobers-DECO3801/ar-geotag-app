@@ -44,6 +44,8 @@ import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.LocationUtil.getCurrentLocation
+import com.example.deco3801.util.formatDate
+import com.example.deco3801.util.formatDistance
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.HomeViewModel
@@ -214,7 +216,7 @@ fun ArtMarker(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(20.dp),
             ) {
                 Row {
                     Icon(
@@ -229,18 +231,9 @@ fun ArtMarker(
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Text("@${artist.username}")
-                Text(art.timestamp?.let { formatDate(it) } ?: "")
+                Text(formatDate(art.timestamp))
                 Spacer(Modifier.height(20.dp))
             }
-        }
-    }
-}
-
-fun formatDistance(distanceInM: Double): String {
-    return when {
-        distanceInM >= 1000 -> String.format("%.2fkm", distanceInM / 1000)
-        else -> {
-            String.format("%.0fm", distanceInM)
         }
     }
 }

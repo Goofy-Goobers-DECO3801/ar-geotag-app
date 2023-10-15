@@ -166,7 +166,7 @@ fun CreateScreen(
                     text = "Select 3D model",
                     onClick = {
                         showBottomSheet = false
-                        filePicker.launch("model/gltf-binary")
+                        filePicker.launch("application/octet-stream")
 //                        filePicker.launch("*/*")
                     },
                     icon = Icons.Filled.ViewInAr,
@@ -247,6 +247,7 @@ fun CreateScreen(
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange,
                         modifier = textFieldModifier,
+                        singleLine = true,
                     )
                     Spacer(modifier = spacerModifier)
 
