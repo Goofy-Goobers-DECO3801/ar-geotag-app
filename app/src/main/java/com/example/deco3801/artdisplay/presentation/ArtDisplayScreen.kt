@@ -39,6 +39,9 @@ import com.google.ar.core.Config
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
 
+// AR screen was modelled after below sample
+// Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ArtDisplayScreen(
