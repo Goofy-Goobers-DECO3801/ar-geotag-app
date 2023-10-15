@@ -1,5 +1,6 @@
 package com.example.deco3801.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,8 +70,12 @@ import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.util.formatDate
+import com.example.deco3801.util.getGoogleApiKey
 import com.example.deco3801.viewmodel.FollowSheetState
 import com.example.deco3801.viewmodel.ProfileViewModel
+import com.google.firebase.firestore.GeoPoint
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -339,12 +346,7 @@ fun ArtworkTile(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                // TODO: map preview
-                AsyncImage(
-                    model = R.drawable.default_img,
-                    contentDescription = "post",
-                    modifier = Modifier.size(146.dp),
-                )
+                StaticMap(art.location)
             }
             Spacer(modifier = spacerModifier)
             Text(
@@ -408,6 +410,42 @@ fun ArtworkTile(
             Spacer(modifier = Modifier.height(14.dp))
         }
     }
+}
+
+@Composable
+fun StaticMap(
+    geoPoint: GeoPoint?
+) {
+    var apiKey by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val markerIconUrl by remember {
+        mutableStateOf(
+            URLEncoder.encode(
+                context.getString(R.string.map_marker_url),
+                StandardCharsets.UTF_8.toString()
+            )
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        apiKey = context.getGoogleApiKey()
+    }
+
+    val model =
+        if (apiKey != null && geoPoint != null) {
+            "https://maps.googleapis.com/maps/api/staticmap?size=146x146" +
+                "&markers=icon:${markerIconUrl}|${geoPoint.latitude},${geoPoint.longitude}" +
+                "&key=${apiKey!!}"
+        } else {
+            R.drawable.default_img
+        }
+
+    Log.d("MODEL", model.toString())
+    AsyncImage(
+        model = model,
+        contentDescription = "minimap",
+        modifier = Modifier.size(146.dp),
+    )
 }
 
 @Composable
