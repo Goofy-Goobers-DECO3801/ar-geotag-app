@@ -24,11 +24,13 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -103,10 +105,21 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopBar(
-                canNavigateBack = false,
-                showSettings = isCurrentUser,
-                navigateUp = { navController.navigate(ScreenNames.Settings.name) },
-            )
+                navController = navController,
+                canNavigateBack = !isCurrentUser,
+            ) {
+                if (isCurrentUser) {
+                    IconButton(onClick = {navController.navigate(ScreenNames.Settings.name)}) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+
+            }
         },
     ) { innerPadding ->
         if (followSheetState != FollowSheetState.HIDDEN) {
