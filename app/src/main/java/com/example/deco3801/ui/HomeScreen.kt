@@ -161,7 +161,7 @@ fun HomeScreen(
                     if (it.location == null) {
                         return@forEach
                     }
-                    Log.d("MARKER", art.toString())
+                    Log.d("MARKER", it.toString())
                     Marker(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,
@@ -173,7 +173,8 @@ fun HomeScreen(
             }
         }
 
-        if (uiState.selectedArt != null) {
+        if (uiState.selectedArt != null && uiState.selectArtUser != null) {
+
             ArtMarker(
                 art = uiState.selectedArt!!,
                 artist = uiState.selectArtUser!!,
