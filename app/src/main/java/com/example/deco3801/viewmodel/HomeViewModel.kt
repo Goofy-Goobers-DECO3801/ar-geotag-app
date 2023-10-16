@@ -93,7 +93,7 @@ class HomeViewModel @Inject constructor(
 
     private var _geoQuery: GeoQuery? = null
 
-    private val STORE_ART_FILTER = "artFilter"
+    private var _filterLoading = false
 
     fun onArtUnselect() {
         _uiState.value = _uiState.value.copy(selectedArt = null, selectArtUser = null)
@@ -109,18 +109,17 @@ class HomeViewModel @Inject constructor(
     }
 
     fun readFilterStateFromStore(store: SharedPreferences) {
-        try {
+        launchCatching(onFailure = { _filterState.value = ArtFilterState() }) {
             _filterState.value = Json.decodeFromString(store.getString(STORE_ART_FILTER, "")!!)
-        } catch (e: Exception) {
-            Log.d("STORE", e.toString())
-            _filterState.value = ArtFilterState()
         }
     }
 
     fun updateFilterStateInStore(store: SharedPreferences) {
-        store.edit(commit = true) {
-            putString(STORE_ART_FILTER, Json.encodeToString(_filterState.value))
-            Log.d("STORE", Json.encodeToString(_filterState.value))
+        launchCatching {
+            store.edit(commit = true) {
+                putString(STORE_ART_FILTER, Json.encodeToString(_filterState.value))
+                Log.d("STORE", Json.encodeToString(_filterState.value))
+            }
         }
     }
 
@@ -273,5 +272,9 @@ class HomeViewModel @Inject constructor(
 
     fun stopListen() {
         _geoQuery?.removeAllListeners()
+    }
+
+    companion object {
+        private const val STORE_ART_FILTER = "artFilter"
     }
 }
