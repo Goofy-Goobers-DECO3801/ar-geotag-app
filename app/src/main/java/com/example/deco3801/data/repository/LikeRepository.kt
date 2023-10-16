@@ -44,13 +44,9 @@ class LikeRepository @Inject constructor(
         }
     }
 
-    override fun getCollectionRef(id: String?): CollectionReference {
-        assert(id != null)
-        return artRepo.getCollectionRef().document(id!!).collection(LIKE_COLLECTION)
-    }
-
-    companion object {
-        private const val LIKE_COLLECTION = "likes"
+    override fun getCollectionRef(docId: String?): CollectionReference {
+        assert(docId != null)
+        return artRepo.getLikeSubCollectionRef(docId!!)
     }
 }
 

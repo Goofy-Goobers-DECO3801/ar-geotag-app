@@ -142,8 +142,12 @@ class UserRepository @Inject constructor(
     }
 
 
-    override fun getCollectionRef(id: String?): CollectionReference {
+    override fun getCollectionRef(docId: String?): CollectionReference {
         return db.collection(USER_COLLECTION)
+    }
+
+    fun getFollowSubCollectionRef(userId: String = auth.uid!!): CollectionReference {
+        return getCollectionRef().document(userId).collection(FOLLOW_COLLECTION)
     }
 
 
@@ -151,6 +155,7 @@ class UserRepository @Inject constructor(
         private const val USER_COLLECTION = "user"
         private const val INDEX_COLLECTION = "index"
         private const val USERNAME_INDEX = "user/username"
+        private const val FOLLOW_COLLECTION = "following"
     }
 }
 

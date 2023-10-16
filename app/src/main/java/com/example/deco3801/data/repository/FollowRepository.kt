@@ -20,13 +20,12 @@ class FollowRepository @Inject constructor(
         return getById(userId)
     }
 
+    suspend fun isFollowing(user: User): Follow? {
+        return isFollowing(user.id)
+    }
+
     suspend fun getFollowing(user: User): List<Follow> {
-        return userRepo.getCollectionRef()
-            .document(user.id)
-            .collection(FOLLOW_COLLECTION)
-            .get()
-            .await()
-            .toObjects()
+        return getAll(subCollectionId = user.id)
     }
 
     suspend fun getFollowers(user: User): List<Follow> {
@@ -35,10 +34,6 @@ class FollowRepository @Inject constructor(
             .get()
             .await()
             .toObjects()
-    }
-
-    suspend fun isFollowing(user: User): Follow? {
-        return isFollowing(user.id)
     }
 
     fun followUser(user: User) {
@@ -69,13 +64,8 @@ class FollowRepository @Inject constructor(
         }
     }
 
-    override fun getCollectionRef(id: String?): CollectionReference {
-        return userRepo.getCollectionRef().document(id ?: auth.uid!!).collection(FOLLOW_COLLECTION)
-    }
-
-
-    companion object {
-        private const val FOLLOW_COLLECTION = "following"
+    override fun getCollectionRef(docId: String?): CollectionReference {
+        return userRepo.getFollowSubCollectionRef(docId ?: auth.uid!!)
     }
 }
 
