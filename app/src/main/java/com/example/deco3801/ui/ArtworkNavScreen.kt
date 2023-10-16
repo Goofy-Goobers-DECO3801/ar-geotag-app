@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
 import android.view.MotionEvent
@@ -21,13 +20,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -57,10 +59,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -86,7 +86,6 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
 import com.example.deco3801.viewmodel.CommentViewModel
-import com.example.deco3801.viewmodel.FollowSheetState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -149,7 +148,7 @@ fun ArtworkNavScreen(
                  navController = navController,
                  canNavigateBack = true
              ) {
-                 IconButton(onClick = { }) {
+                 IconButton(onClick = { showEditPost = true }) {
                      Icon(
                          imageVector = Icons.Filled.MoreHoriz,
                          contentDescription = "More",
@@ -172,14 +171,18 @@ fun ArtworkNavScreen(
                distanceInM = distanceInM,
            )
         }
-        if (showEditPost) {
+        if (showEditPost && art.id.isNotBlank()) {
             EditPostBottomSheet(
-                artId = artId,
-                userId = user,
-                modifier = Modifier.heightIn(min = 100.dp),
+                isCurrentUser = viewModel.isCurrentUser(art.userId),
+                modifier = Modifier.heightIn(min = 400.dp),
                 onDismissRequest = {
                     showEditPost = false
-                }
+                },
+                onDelete = {
+                    viewModel.onDeleteClicked()
+                    navController.popBackStack()
+                },
+                onReport = viewModel::onReportClicked,
             )
         }
         Column(
@@ -195,9 +198,7 @@ fun ArtworkNavScreen(
             ArtworkTitle(
                 art,
                 user,
-                onUserClicked = {},
-                onEditProfileClicked = { showEditPost = true }
-            ) //{} //navController.navigateProfile(user.id) }
+            ) { navController.navigateProfile(user.id) }
             ArtworkMap(
                 art = art,
                 userLocation = userLocation,
@@ -319,7 +320,6 @@ fun ArtworkTitle(
     art: Art,
     user: User,
     onUserClicked: () -> Unit = {},
-    onEditProfileClicked: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -353,7 +353,7 @@ fun ArtworkTitle(
             Column(
                 modifier =
                 Modifier
-                    //.fillMaxWidth()
+                    .fillMaxWidth()
                     .padding(
                         start = 10.dp,
                         bottom = 15.dp,
@@ -383,14 +383,13 @@ fun ArtworkTitle(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPostBottomSheet(
-    artId: String,
-    userId: User,
+    isCurrentUser: Boolean,
     onDismissRequest: () -> Unit,
+    onDelete: () -> Unit,
+    onReport: () -> Unit,
     modifier: Modifier = Modifier,
-    //viewModel: CommentViewModel = hiltViewModel(),
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    val isCurrentUser = true // TODO viewModel.isCurrentUser(userId)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -404,39 +403,42 @@ fun EditPostBottomSheet(
                 .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            content = {
-                Text(
-                    text = if (isCurrentUser) "Deleting this post?" else "Reporting this post?",
-                    modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Spacer(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height((0.5).dp)
-                        .background(MaterialTheme.colorScheme.onError)
-                )
-                Text(
-                    text = if(isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
-                    modifier = Modifier.padding(start = 10.dp, bottom = 16.dp)
-                )
-                if (isCurrentUser) {
-                    Button(
-                        onClick = {}/*TODO*/,
-                    ) {
-                        Text(text = "Delete Post")
+        ) {
+            Text(
+                text = if (isCurrentUser) "Deleting this post?" else "Reporting this post?",
+                modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height((0.5).dp)
+                    .background(MaterialTheme.colorScheme.onError)
+            )
+            Text(
+                text = if (isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
+                modifier = Modifier.padding(start = 10.dp, bottom = 16.dp)
+            )
+            if (isCurrentUser) {
+                Button(
+                    onClick = {
+                        onDismissRequest()
+                        onDelete()
                     }
-                } else {
-                    Button(onClick = {} /*TODO*/) {
-                        Text(text = "Report Post")
-                    }
+                ) {
+                    Text(text = "Delete Post")
                 }
-                Spacer(
-                    modifier =
-                    Modifier.height(10.dp)
-                )
-            } )
+            } else {
+                Button(onClick = {
+                    onDismissRequest()
+                    onReport()
+                } ) {
+                    Text(text = "Report Post")
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
     }
 }
 
