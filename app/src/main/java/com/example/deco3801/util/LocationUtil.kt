@@ -32,8 +32,13 @@ object LocationUtil {
     }
 }
 
+/**
+ * @reference
+ * G. Mayani, "What ratio scales do Google Maps zoom levels correspond to?,"
+ * Geographic Information Systems Stack Exchange, Aug. 19, 2020.
+ * https://gis.stackexchange.com/a/127949 (accessed Oct. 16, 2023).
+ */
 fun CameraPosition.toRadius(): Double {
-    // From the stackoverflow gods https://gis.stackexchange.com/a/127949
     return 156543.03392 * cos(this.target.latitude * PI / 180) / 2f.pow(this.zoom)
 }
 

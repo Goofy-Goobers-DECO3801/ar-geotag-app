@@ -27,6 +27,12 @@ import java.util.concurrent.TimeUnit
 
 private const val LOCATION_TAG = "LOCATION"
 
+/**
+ * @reference
+ * The Android Open Source Project, "LocationUpdateScreen.kt," Github, May 16, 2023.
+ * https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt
+ * (accessed Oct. 16, 2023).
+ */
 @Composable
 fun GetUserLocation(
     onChange: (Location?) -> Unit,
@@ -81,6 +87,11 @@ fun GetUserLocation(
     }
 }
 
+/**
+ * @reference
+ * E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, Oct. 25, 2022.
+ * https://stackoverflow.com/a/74160903 (accessed Oct. 16, 2023).
+ */
 @Suppress("DEPRECATION") // Need to support older APIs
 @Composable
 fun GetLocationName(
