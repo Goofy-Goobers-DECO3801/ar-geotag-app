@@ -134,11 +134,7 @@ fun CreateScreen(
 
     Scaffold(
         topBar = {
-            TopBar(
-                canNavigateBack = false,
-                showSettings = false,
-                navigateUp = {},
-            )
+            TopBar(navController)
         },
     ) { innerPadding ->
         if (showBottomSheet) {

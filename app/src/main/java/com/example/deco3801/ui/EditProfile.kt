@@ -90,16 +90,11 @@ fun EditProfileScreen(
             viewModel.onPictureChange(takePhotoUri!!)
         }
 
-
-    val back = remember {
-        { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") }
-    }
-
     Scaffold(
         topBar = {
             TopBar(
+                navController = navController,
                 canNavigateBack = true,
-                navigateUp = back
             )
         }
     ) { innerPadding ->
@@ -280,7 +275,7 @@ fun EditProfileScreen(
                         .padding(12.dp)
                 ) {
                     Button(onClick = {
-                        viewModel.onSave(back)
+                        viewModel.onSave(navController::popBackStack)
                     }) {
                         Text(text = "Save Changes")
                     }

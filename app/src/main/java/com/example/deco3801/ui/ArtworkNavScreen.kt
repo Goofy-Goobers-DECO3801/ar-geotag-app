@@ -75,6 +75,7 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
+import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.forEachOrElse
@@ -143,10 +144,19 @@ fun ArtworkNavScreen(
 
     Scaffold(
         topBar = {
-            ArtworkTopBar(
-                navController = navController,
-                artworkTitle = art.title,
-            )
+             TopBar(
+                 title = art.title,
+                 navController = navController,
+                 canNavigateBack = true
+             ) {
+                 IconButton(onClick = { }) {
+                     Icon(
+                         imageVector = Icons.Filled.MoreHoriz,
+                         contentDescription = "More",
+                         tint = Color.White,
+                     )
+                 }
+             }
         },
     ) { innerPadding ->
         if (showComments) {
@@ -366,27 +376,6 @@ fun ArtworkTitle(
                     color = Color.White,
                 )
             }
-            Column (
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 15.dp,
-                        end = 15.dp
-                    ),
-                horizontalAlignment = Alignment.End
-            ) {
-                IconButton(onClick = onEditProfileClicked) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreHoriz,
-                        contentDescription = "More",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(10.dp)
-                    )
-                }
-            }
         }
     }
 }
@@ -448,47 +437,6 @@ fun EditPostBottomSheet(
                     Modifier.height(10.dp)
                 )
             } )
-    }
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ArtworkTopBar(
-    artworkTitle: String,
-    navController: NavHostController,
-) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(UnchangingAppColors.main_theme)) {
-        Column () {
-            IconButton(onClick = navController::popBackStack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIos,
-                    contentDescription = "ArrowBack",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(10.dp)
-                )
-            }
-        }
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, end = 48.dp, bottom = 10.dp)) {
-            Text(
-                text = artworkTitle,
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
 

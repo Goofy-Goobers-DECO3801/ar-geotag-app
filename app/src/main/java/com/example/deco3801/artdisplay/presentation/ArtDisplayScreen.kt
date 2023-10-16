@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -62,6 +64,12 @@ fun ArtDisplayScreen(
     val uiAction by artDisplayViewModel.uiAction.collectAsState()
     var modelNode by remember { mutableStateOf<ArModelNode?>(null) }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            onReturn(modelNode, viewState)
+        }
+    }
+
     when (uiAction) {
         is ArtDisplayUIAction.ShowModalPlaced -> {
             LaunchedEffect(Unit) {
@@ -75,12 +83,18 @@ fun ArtDisplayScreen(
     Scaffold(
         topBar = {
             TopBar(
-                canNavigateBack = true,
-                navigateUp = { onReturn(modelNode, viewState, navigator) },
-                showRefresh = true,
-                refresh = { onRefresh(modelNode, viewState) }
-
-            )
+                navController = navigator,
+                canNavigateBack = true
+            ) {
+                IconButton(onClick = { onRefresh(modelNode, viewState) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -208,11 +222,10 @@ private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) 
     viewState?.downloadingAsset = false
 }
 
-private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, navigator: NavHostController) {
+private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     onRefresh(modelNode, viewState)
     viewState?.readyToPlaceModel = false
     viewState?.modelAsset = null
-    navigator.popBackStack()
 }
 
 fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode, artDisplayViewModel: ArtDisplayViewModel): ArModelNode {

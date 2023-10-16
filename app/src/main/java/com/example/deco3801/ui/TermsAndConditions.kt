@@ -34,9 +34,8 @@ fun TandCScreen (navController: NavHostController) {
     Scaffold (
         topBar = {
             TopBar(
+                navController = navController,
                 canNavigateBack = true,
-                showSettings = false,
-                navigateUp = {navController.navigate(ScreenNames.Settings.name)}
             )
         }
     ){ innerPadding ->
