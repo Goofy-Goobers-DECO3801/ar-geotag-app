@@ -8,7 +8,6 @@ import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.FollowRepository
-import com.example.deco3801.data.repository.UserRepository
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.util.toGeoPoint
 import com.example.deco3801.util.toLatLng
@@ -83,13 +82,10 @@ class HomeViewModel @Inject constructor(
     private val _filterState = MutableStateFlow(ArtFilterState())
     val filterState: StateFlow<ArtFilterState> = _filterState
 
-    private val _filterAction = MutableStateFlow<ArtFilterAction?>(null)
-    val filterAction: StateFlow<ArtFilterAction?> = _filterAction
+    private val _activeArt = MutableStateFlow<Map<String, Art>>(emptyMap())
+    val activeArt: StateFlow<Map<String, Art>> = _activeArt
 
-    private val _activeArt = MutableStateFlow<MutableMap<String, Art>>(HashMap())
-    val activeArt: StateFlow<MutableMap<String, Art>> = _activeArt
-
-    private var _inactiveArt: MutableMap<String, Art> = HashMap()
+    private var _inactiveArt = mutableMapOf<String, Art>()
 
     private var _geoQuery: GeoQuery? = null
 
@@ -124,6 +120,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFilterAction(action: ArtFilterAction?, store: SharedPreferences) {
+        if (_filterLoading) {
+            return
+        }
+
+        _filterLoading = true
         when (action) {
             is ArtFilterAction.DateCreated -> {
                 _filterState.value = _filterState.value.copy(dateCreated = action.date)
@@ -164,6 +165,7 @@ class HomeViewModel @Inject constructor(
 
             _inactiveArt = newInactiveArt
             _activeArt.value = newActiveArt
+            _filterLoading = false
         }
     }
 
@@ -214,7 +216,7 @@ class HomeViewModel @Inject constructor(
                 launchCatching {
                     if (!isArtInFilter(art)) {
                         // add to inactive
-                        _inactiveArt.put(art.id, art)
+                        _inactiveArt[art.id] = art
                         return@launchCatching
                     }
                     _activeArt.value = _activeArt.value.toMutableMap().apply { put(art.id, art) }
