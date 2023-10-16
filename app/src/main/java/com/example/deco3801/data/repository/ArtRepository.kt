@@ -10,6 +10,7 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
@@ -54,12 +55,24 @@ class ArtRepository @Inject constructor(
 
         Log.d(ART_COLLECTION, art.toString())
 
-        db.collection(ART_COLLECTION).add(art).addOnFailureListener {
+        getCollectionRef().add(art).addOnFailureListener {
             storageRef?.delete()
         }.addOnSuccessListener {
             art.id = it.id
         }.await()
         return art
+    }
+
+    suspend fun deleteArt(art: Art) {
+        getCollectionRef().document(art.id).delete().addOnSuccessListener {
+            if(art.storageRef.isNotBlank()) {
+                storage.reference.child(art.storageRef).delete()
+            }
+        }.await()
+    }
+
+    suspend fun reportArt(art: Art) {
+        getCollectionRef().document(art.id).update("reportCount", FieldValue.increment(1)).await()
     }
 
     fun attachListenerByUserId(userId: String, callback: (List<Art>) -> Unit) {
