@@ -71,7 +71,9 @@ fun ArtFilterMenu(
             Text(text = "Following Only")
             Switch(
                 checked = filterState.following,
-                onCheckedChange = {viewModel.onFilterAction(ArtFilterAction.Following(it), store)}
+                onCheckedChange = {
+                    viewModel.onFilterAction(ArtFilterAction.Following(it), store)
+                }
             )
 
         }
