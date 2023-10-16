@@ -34,9 +34,10 @@ class ArtRepository @Inject constructor(
     ): Art {
         val uid = auth.uid!!
         var storageRef: StorageReference? = null
+        var storagePath = ""
 
         if (uri.scheme != "https" ) {
-            val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+            storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
             storageRef = storage.reference.child(storagePath)
             storageRef.putFile(uri).addOnProgressListener {
                 val progress = it.bytesTransferred.toFloat() / it.totalByteCount
@@ -51,6 +52,7 @@ class ArtRepository @Inject constructor(
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
             storageUri = storageRef?.downloadUrl?.await()?.toString() ?: uri.toString(),
+            storageRef = storagePath
         )
 
         Log.d(ART_COLLECTION, art.toString())
