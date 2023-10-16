@@ -51,7 +51,9 @@ sealed class ArtFilterAction {
     data class Mine(val boolean: Boolean) : ArtFilterAction()
 }
 
+// R. Elizarov and V. Tolstopyatov, “Serializing 3rd Party Classes,” GitHub, Aug. 11, 2020.
 // https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes
+// (accessed Oct. 16, 2023).
 object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
