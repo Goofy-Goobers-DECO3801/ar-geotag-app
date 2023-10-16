@@ -2,6 +2,8 @@ package com.example.deco3801.directions.data.remote.dto
 
 import com.example.deco3801.directions.domain.model.GeocodedWaypoints
 
+// Directions was created using below
+// Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
 data class GeocodedWaypointsDto(
     val geocoder_status: String,
     val place_id: String,
