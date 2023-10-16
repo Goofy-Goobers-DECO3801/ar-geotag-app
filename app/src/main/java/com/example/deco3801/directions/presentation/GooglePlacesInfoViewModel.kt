@@ -10,26 +10,30 @@ import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
 import com.example.deco3801.directions.util.Resource
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+// Directions was created using below
+// Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
 @HiltViewModel
 class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo: GetDirectionInfo): ViewModel() {
 
     private val _googlePlacesInfoState = mutableStateOf(GooglePlacesInfoState())
-    val googlePlacesInfoState: State<GooglePlacesInfoState> = _googlePlacesInfoState
+    private val googlePlacesInfoState: State<GooglePlacesInfoState> = _googlePlacesInfoState
 
-//    private var _polyLinesPoints = MutableSharedFlow<List<LatLng>>()
-//    val polyLinesPoints = _polyLinesPoints.asSharedFlow()
 
     private val _polyLinesPoints = MutableStateFlow<List<LatLng>>(emptyList())
     val polyLinesPoints: StateFlow<List<LatLng>>
         get() = _polyLinesPoints
 
     private val _eventFlow = MutableSharedFlow<UIEvent>()
-    val evenFlow = _eventFlow.asSharedFlow()
+
 
     fun getDirection(origin: String, destination: String, key: String){
         viewModelScope.launch {
@@ -41,20 +45,16 @@ class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo
                             isLoading = false
                         )
                         _eventFlow.emit(UIEvent.ShowSnackBar(message = "Direction Loaded"))
-//                        _eventFlow.emit(
-//                            UIEvent.ShowSnackBar(
-//                            message = googlePlacesInfoState.value.direction?.routes?.get(0)?.overview_polyline?.points.toString()
-//                            )
-//                        )
+
                         val routes = googlePlacesInfoState.value.direction?.routes
                         if (!routes.isNullOrEmpty()) {
                             val overviewPolyline = routes[0].overview_polyline
-                            val polylinePoints = overviewPolyline?.points
-                            if (!polylinePoints.isNullOrEmpty()) {
+                            val polylinePoints = overviewPolyline.points
+                            if (polylinePoints.isNotEmpty()) {
                                 decoPoints(points = polylinePoints)
                                 Log.d(TAG, "POLYLINE: $polylinePoints")
                             } else {
-                                //Pass
+                                // Pass
                             }
                         } else {
                             // Pass
@@ -85,7 +85,7 @@ class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo
 
     private fun decoPoints(points: String): List<LatLng>{
         _polyLinesPoints.value = decodePoly(points)
-        return decodePoly(points);
+        return decodePoly(points)
     }
 
     /**
