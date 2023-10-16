@@ -390,6 +390,8 @@ fun EditPostBottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
+    var showDeleteConfirmButton by remember { mutableStateOf(false)}
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -421,13 +423,23 @@ fun EditPostBottomSheet(
                 modifier = Modifier.padding(start = 10.dp, bottom = 16.dp)
             )
             if (isCurrentUser) {
-                Button(
-                    onClick = {
-                        onDismissRequest()
-                        onDelete()
+                if (showDeleteConfirmButton) {
+                    Button(
+                        onClick = {
+                            onDismissRequest()
+                            onDelete()
+                        }
+                    ) {
+                        Text(text = "Are you sure?")
                     }
-                ) {
-                    Text(text = "Delete Post")
+                } else {
+                    Button(
+                        onClick = {
+                            showDeleteConfirmButton = true
+                        }
+                    ) {
+                        Text(text = "Delete Post")
+                    }
                 }
             } else {
                 Button(onClick = {
