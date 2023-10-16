@@ -40,6 +40,7 @@ import com.example.deco3801.R
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
 import com.example.deco3801.navigateArt
+import com.example.deco3801.ui.components.ArtFilterMenu
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
@@ -70,11 +71,10 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopBar(
-                canNavigateBack = false,
-                showSettings = false,
-                navigateUp = {},
-                showArtFilter = true,
-            )
+                navController = navController
+            ) {
+                ArtFilterMenu()
+            }
         },
     ) { innerPadding ->
 

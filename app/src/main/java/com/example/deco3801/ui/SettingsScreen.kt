@@ -52,9 +52,8 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopBar(
+                navController = navController,
                 canNavigateBack = true,
-                showSettings = false,
-                navigateUp = { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") }
             )
         }
     ) { innerPadding ->

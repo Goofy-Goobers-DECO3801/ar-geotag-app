@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
 import com.example.deco3801.directions.util.Resource
-import com.example.jetmap.feature_google_places.presentation.GooglePlacesInfoState
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

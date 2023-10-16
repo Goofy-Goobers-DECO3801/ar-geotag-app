@@ -1,4 +1,4 @@
-package com.example.jetmap.feature_google_places.data.remote
+package com.example.deco3801.directions.data.remote
 
 import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 import retrofit2.http.GET

@@ -3,7 +3,7 @@ package com.example.deco3801.directions.di
 import com.example.deco3801.directions.data.repository.GooglePlacesInfoRepositoryImplementation
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
 import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
-import com.example.jetmap.feature_google_places.data.remote.GooglePlacesApi
+import com.example.deco3801.directions.data.remote.GooglePlacesApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,7 +32,7 @@ object GooglePlacesModule {
 
     @Provides
     @Singleton
-    fun provideGooglePlacesApi(): GooglePlacesApi{
+    fun provideGooglePlacesApi(): GooglePlacesApi {
         return Retrofit.Builder()
             .baseUrl(GooglePlacesApi.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

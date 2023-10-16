@@ -63,7 +63,7 @@ service cloud.firestore {
       allow delete: if isOwner(getArtBefore(art).data.userId);
       // Other users are allowed to like
       allow update: if isAuth() && (request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(["likeCount", "commentCount"]));
+        .hasOnly(["likeCount", "commentCount", "reportCount"]));
     }
 
     match /art/{art}/likes/{userId} {
