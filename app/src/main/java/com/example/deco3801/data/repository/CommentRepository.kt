@@ -1,6 +1,5 @@
 package com.example.deco3801.data.repository
 
-import android.util.Log
 import com.example.deco3801.data.model.Comment
 import com.example.deco3801.data.model.User
 import com.google.firebase.auth.FirebaseAuth
@@ -45,12 +44,8 @@ class CommentRepository @Inject constructor(
     }
 
 
-    override fun getCollectionRef(id: String?): CollectionReference {
-        assert(id != null)
-        return artRepo.getCollectionRef().document(id!!).collection(COMMENT_COLLECTION)
-    }
-
-    companion object {
-        private const val COMMENT_COLLECTION = "comments"
+    override fun getCollectionRef(docId: String?): CollectionReference {
+        assert(docId != null)
+        return artRepo.getCommentSubCollectionRef(docId!!)
     }
 }
