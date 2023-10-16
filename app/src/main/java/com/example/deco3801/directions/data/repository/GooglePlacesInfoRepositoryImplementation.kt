@@ -3,7 +3,7 @@ package com.example.deco3801.directions.data.repository
 import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
 import com.example.deco3801.directions.util.Resource
-import com.example.jetmap.feature_google_places.data.remote.GooglePlacesApi
+import com.example.deco3801.directions.data.remote.GooglePlacesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
