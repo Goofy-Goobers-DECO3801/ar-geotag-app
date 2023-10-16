@@ -1,4 +1,4 @@
-package com.example.jetmap.feature_google_places.presentation
+package com.example.deco3801.directions.presentation
 
 import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 
