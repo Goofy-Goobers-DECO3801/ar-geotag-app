@@ -1,6 +1,7 @@
 package com.example.deco3801.ui.components
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
@@ -15,6 +16,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.example.deco3801.util.getCurrentLocation
+import com.example.deco3801.util.hasLocationPermissions
 import com.example.deco3801.util.toGeoPoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -33,6 +36,7 @@ private const val LOCATION_TAG = "LOCATION"
  * https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt
  * (accessed Oct. 16, 2023).
  */
+@SuppressLint("MissingPermission")
 @Composable
 fun GetUserLocation(
     onChange: (Location?) -> Unit,
@@ -40,16 +44,11 @@ fun GetUserLocation(
 ) {
     val context = LocalContext.current
     val currentOnChange by rememberUpdatedState(newValue = onChange)
+    LaunchedEffect(Unit) { // This is much faster for the first time
+        currentOnChange(context.getCurrentLocation())
+    }
 
-    // Check for permissions
-    if (ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-        ) != PackageManager.PERMISSION_GRANTED
-    ) {
+    if (!context.hasLocationPermissions()) {
         return
     }
 

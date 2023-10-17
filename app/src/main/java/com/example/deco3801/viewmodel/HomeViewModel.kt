@@ -20,6 +20,7 @@ import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -102,7 +103,8 @@ class HomeViewModel @Inject constructor(
         launchCatching {
             val selectedArt = _activeArt.value[artId] ?: return@launchCatching
             val selectedArtUser = artRepo.getArtist(selectedArt)
-            _uiState.value = _uiState.value.copy(selectedArt = selectedArt, selectArtUser =  selectedArtUser)
+            _uiState.value =
+                _uiState.value.copy(selectedArt = selectedArt, selectArtUser = selectedArtUser)
         }
 
     }
@@ -203,18 +205,28 @@ class HomeViewModel @Inject constructor(
     }
 
     fun listenForArt() {
-        if (_uiState.value.currentLocation == null) {
-            Log.w("GEOQUERY", "No location")
-            return
+        launchCatching {
+            _uiState.first { it.currentLocation != null }.currentLocation
+
+            _geoQuery = GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
+                _uiState.value.currentLocation!!.toGeoPoint(),
+                _uiState.value.distanceInKm
+            )
+
+            _geoQuery?.addGeoQueryDataEventListener()
         }
+    }
 
-        _geoQuery = GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
-            _uiState.value.currentLocation!!.toGeoPoint(),
-            _uiState.value.distanceInKm
-        )
+    fun stopListen() {
+        _geoQuery?.removeAllListeners()
+    }
 
-        _geoQuery?.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
-            override fun onDocumentEntered(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+    private fun GeoQuery.addGeoQueryDataEventListener() {
+        return this.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
+            override fun onDocumentEntered(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -222,7 +234,8 @@ class HomeViewModel @Inject constructor(
                         _inactiveArt[art.id] = art
                         return@launchCatching
                     }
-                    _activeArt.value = _activeArt.value.toMutableMap().apply { put(art.id, art) }
+                    _activeArt.value =
+                        _activeArt.value.toMutableMap().apply { put(art.id, art) }
                     Log.d("GEOQUERY", "ENTER $art")
                 }
 
@@ -236,7 +249,10 @@ class HomeViewModel @Inject constructor(
                 Log.d("GEOQUERY", "EXIT $art")
             }
 
-            override fun onDocumentMoved(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+            override fun onDocumentMoved(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -251,7 +267,10 @@ class HomeViewModel @Inject constructor(
 
             }
 
-            override fun onDocumentChanged(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+            override fun onDocumentChanged(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -273,10 +292,6 @@ class HomeViewModel @Inject constructor(
                 SnackbarManager.showError(exception)
             }
         })
-    }
-
-    fun stopListen() {
-        _geoQuery?.removeAllListeners()
     }
 
     companion object {
