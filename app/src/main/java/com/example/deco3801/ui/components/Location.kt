@@ -32,9 +32,9 @@ private const val LOCATION_TAG = "LOCATION"
 
 /**
  * @reference
- * The Android Open Source Project, "LocationUpdateScreen.kt," Github, May 16, 2023.
- * https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt
- * (accessed Oct. 16, 2023).
+ * The Android Open Source Project, "LocationUpdateScreen.kt," Android, 16 May 2023. \[Online].
+ * Available: https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt.
+ * [Accessed 10 September 2023].
  */
 @SuppressLint("MissingPermission")
 @Composable
@@ -88,8 +88,8 @@ fun GetUserLocation(
 
 /**
  * @reference
- * E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, Oct. 25, 2022.
- * https://stackoverflow.com/a/74160903 (accessed Oct. 16, 2023).
+ * E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, 25 October 2022. \[Online].
+ * Available: https://stackoverflow.com/a/74160903. [Accessed 11 October 2023].
  */
 @Suppress("DEPRECATION") // Need to support older APIs
 @Composable

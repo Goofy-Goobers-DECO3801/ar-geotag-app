@@ -31,9 +31,9 @@ data class CreateUiState(
 
 /**
  * @reference
- * "Retrieving File Information," Android Developers, Oct. 27, 2021.
- * https://developer.android.com/training/secure-file-sharing/retrieve-info
- * (accessed Oct. 16, 2023).
+ * "Retrieving File Information," Android Developers, 27 October 2021. \[Online].
+ * Available: https://developer.android.com/training/secure-file-sharing/retrieve-info.
+ * [Accessed 15 September 2023].
  */
 fun Uri.getFileName(context: Context): String {
     var result = ""

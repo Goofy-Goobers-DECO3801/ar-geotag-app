@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -43,10 +44,15 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -66,35 +72,21 @@ fun TopBar(
     canNavigateBack: Boolean = false,
     actions:  @Composable() (RowScope.() -> Unit)= {},
 ) {
-    val textStyleHeadline = MaterialTheme.typography.headlineLarge
-    var textStyle by remember { mutableStateOf(textStyleHeadline) }
-    var readyToDraw by remember { mutableStateOf(false) }
-
     TopAppBar(
         title = {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                AutoSizeText(
                     text = title,
-                    style = textStyle,
+                    style = MaterialTheme.typography.headlineLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Clip,
-                    modifier = modifier.drawWithContent {
-                        if (readyToDraw) drawContent()
-                    },
-                    onTextLayout = { textLayoutResult ->
-                        if (textLayoutResult.didOverflowWidth) {
-                            textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
-                        } else {
-                            readyToDraw = true
-                        }
-                    }
                 )
             }
         },
@@ -123,6 +115,62 @@ fun TopBar(
             }
         },
         actions = actions,
+        modifier = modifier,
+    )
+}
+
+/**
+ * @reference
+ * B. Hoffmann, "android:autoSizeTextType in Jetpack Compose," Stackoverflow, 7 July 2021.
+ * \[Online]. Available: https://stackoverflow.com/a/66090448. [Accessed 16 October 2023].
+ */
+@Composable
+fun AutoSizeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    style: TextStyle = LocalTextStyle.current
+) {
+    var textStyle by remember { mutableStateOf(style) }
+    var readyToDraw by remember { mutableStateOf(false) }
+    Text(
+        text = text,
+        color = color,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        minLines = minLines,
+        style = textStyle,
+        modifier = modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        },
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.didOverflowWidth) {
+                textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
+            } else {
+                readyToDraw = true
+            }
+        }
     )
 }
 

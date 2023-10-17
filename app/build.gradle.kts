@@ -1,4 +1,5 @@
 import org.gradle.internal.os.OperatingSystem
+import java.io.ByteArrayInputStream
 import java.nio.file.Paths
 
 plugins {
@@ -78,6 +79,13 @@ val npx =
         "npx"
     }
 
+val npm =
+    if (OperatingSystem.current().isWindows) {
+        "npm.cmd"
+    } else {
+        "npm"
+    }
+
 val installFirebaseEmulators by tasks.registering {
     doLast {
         exec {
@@ -119,6 +127,31 @@ val stopFirebaseEmulators by tasks.registering {
         }
     }
 }
+val configureFirebase by tasks.registering {
+    doLast {
+        val projectId = properties["projectId"] as? String
+            ?: error("Please rerun with the project id, ./gradlew configureFirebase -PprojectId=yourProjectId")
+
+        println("Installing NPM packages...")
+        exec {
+            commandLine(npm, "install", "--no-fund", "--no-audit", "--loglevel", "error")
+        }
+
+        exec {
+            commandLine(npx, "firebase", "login", "--interactive")
+            standardInput = ByteArrayInputStream("n\n".toByteArray())
+        }
+
+        exec {
+            commandLine(npx, "firebase", "use", "--add", projectId)
+        }
+
+        exec {
+            commandLine(npx, "firebase", "deploy")
+        }
+    }
+}
+
 
 gradle.projectsEvaluated {
     tasks.getByName("preDebugAndroidTestBuild") {

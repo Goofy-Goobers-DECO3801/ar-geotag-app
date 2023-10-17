@@ -53,9 +53,9 @@ sealed class ArtFilterAction {
 
 /**
  * @reference
- * R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," GitHub, Aug. 11, 2020.
- * https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes
- * (accessed Oct. 16, 2023).
+ * R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," Kotlin, 11 August 2020. \[Online].
+ * Available: https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes.
+ * [Accessed 26 September 2023].
  */
 object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor =
