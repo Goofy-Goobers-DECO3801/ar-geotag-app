@@ -9,13 +9,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 open class AppViewModel : ViewModel() {
-    fun launchCatching(onFailure: () -> Unit = {}, block: suspend CoroutineScope.() -> Unit) =
+    fun launchCatching(onFailure: () -> Unit = {}, showErrorMsg: Boolean = true, block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch {
             try {
                 block()
             } catch (e: Exception) {
                 Log.e("ERROR", e.toString())
-                SnackbarManager.showError(e)
+                if (showErrorMsg){
+                    SnackbarManager.showError(e)
+                }
                 onFailure()
             } finally {
                 ProgressbarState.resetProgressbar()

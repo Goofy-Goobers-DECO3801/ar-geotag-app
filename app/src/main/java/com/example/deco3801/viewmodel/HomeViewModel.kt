@@ -110,7 +110,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun readFilterStateFromStore(store: SharedPreferences) {
-        launchCatching(onFailure = { _filterState.value = ArtFilterState() }) {
+        launchCatching(
+            onFailure = { _filterState.value = ArtFilterState() },
+            showErrorMsg = false,
+        ) {
             _filterState.value = Json.decodeFromString(store.getString(STORE_ART_FILTER, "")!!)
         }
     }
