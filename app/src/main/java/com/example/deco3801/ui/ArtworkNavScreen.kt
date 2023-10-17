@@ -21,14 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CenterFocusWeak
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,7 +36,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -77,7 +73,6 @@ import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
-import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.forEachOrElse
 import com.example.deco3801.util.formatDate
 import com.example.deco3801.util.formatDistance
@@ -88,6 +83,7 @@ import com.example.deco3801.viewmodel.ArtworkNavViewModel
 import com.example.deco3801.viewmodel.CommentViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -105,7 +101,6 @@ fun ArtworkNavScreen(
     navController: NavHostController,
     viewModel: ArtworkNavViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
@@ -117,10 +112,16 @@ fun ArtworkNavScreen(
     val columnScroll: (Boolean) -> Unit = {
         columnScrollingEnabled = it
     }
+    val cameraPositionState = rememberCameraPositionState()
+    var mapProperties by remember { mutableStateOf(MapProperties()) }
+
 
     GetUserLocation(onChange = { userLocation = it })
-    LaunchedEffect(Unit) { // This is much quicker for the first time
-        userLocation = LocationUtil.getCurrentLocation(context)
+    LaunchedEffect(userLocation != null) {
+        if (userLocation != null) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(userLocation!!.toLatLng(), 15f)
+            mapProperties = mapProperties.copy(isMyLocationEnabled = true)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -221,6 +222,8 @@ fun ArtworkNavScreen(
                         },
                     ),
                 columnScroll = columnScroll,
+                cameraPositionState = cameraPositionState,
+                mapProperties = mapProperties,
             )
 
             ArtworkInteract(
@@ -460,6 +463,8 @@ fun ArtworkMap(
     userLocation: Location?,
     modifier: Modifier = Modifier,
     columnScroll: (Boolean) -> Unit,
+    cameraPositionState: CameraPositionState = rememberCameraPositionState(),
+    mapProperties: MapProperties = MapProperties(),
     googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
@@ -469,28 +474,19 @@ fun ArtworkMap(
         }
     }
 
-    if (userLocation == null) {
-        return
-    }
-
     val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
     val context = LocalContext.current
     var apiKey by remember { mutableStateOf<String?>(null) }
-    val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
-    val cameraPositionState =
-        rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(userLocation.toLatLng(), 15f)
-        }
 
     LaunchedEffect(Unit) {
         apiKey = context.getGoogleApiKey()
     }
 
-    LaunchedEffect(apiKey != null && art.location != null) {
+    LaunchedEffect(apiKey != null && art.location != null && userLocation != null) {
         if (apiKey != null && art.location != null) {
             googlePlacesViewModel.getDirection(
                 // Modify this to get the actual origin
-                origin = "${userLocation.latitude}, ${userLocation.longitude}",
+                origin = "${userLocation!!.latitude}, ${userLocation.longitude}",
                 // Use the marker's location as the destination
                 destination = "${art.location!!.latitude}, ${art.location!!.longitude}",
                 key = apiKey!!,

@@ -1,6 +1,7 @@
 package com.example.deco3801.util
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -15,22 +16,20 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.pow
 
-object LocationUtil {
-    suspend fun getCurrentLocation(context: Context): Location? {
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return null
-        }
-        return fusedLocationClient.lastLocation.await()
-    }
+@SuppressLint("MissingPermission")
+suspend fun Context.getCurrentLocation(): Location? {
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    return if (this.hasLocationPermissions()) fusedLocationClient.lastLocation.await() else null
 }
+
+fun Context.hasLocationPermissions() = ActivityCompat.checkSelfPermission(
+    this,
+    Manifest.permission.ACCESS_FINE_LOCATION,
+) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+    this,
+    Manifest.permission.ACCESS_COARSE_LOCATION,
+) == PackageManager.PERMISSION_GRANTED
+
 
 /**
  * @reference

@@ -44,15 +44,16 @@ import com.example.deco3801.ui.components.ArtFilterMenu
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.RequestPermissions
 import com.example.deco3801.ui.components.TopBar
-import com.example.deco3801.util.LocationUtil.getCurrentLocation
 import com.example.deco3801.util.formatDate
 import com.example.deco3801.util.formatDistance
+import com.example.deco3801.util.getCurrentLocation
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -79,6 +80,12 @@ fun HomeScreen(
     ) { innerPadding ->
 
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+
+        val uiState by viewModel.uiState.collectAsState()
+        val art by viewModel.activeArt.collectAsState()
+        val cameraPositionState = rememberCameraPositionState()
+        var mapProperties by remember { mutableStateOf(MapProperties()) }
 
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
@@ -97,27 +104,22 @@ fun HomeScreen(
             description =
                 "This app functions best when we can use your precise location.\n" +
                     "You can opt out of this at anytime.",
+            onRevoked = {
+                // Set default location when location services are disabled to brisbane
+                val currentLocation = LatLng(-27.4975, 153.0137)
+                viewModel.onLocationChange(currentLocation)
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLocation, 10f)
+            }
         ) {
             LaunchedEffect(Unit) {
-                viewModel.onLocationChange(getCurrentLocation(context))
+                val currentLocation = context.getCurrentLocation()
+                viewModel.onLocationChange(currentLocation)
+                if (currentLocation != null) {
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLocation.toLatLng(), 10f)
+                }
+                mapProperties = mapProperties.copy(isMyLocationEnabled = true)
             }
         }
-
-        val uiState by viewModel.uiState.collectAsState()
-        val art by viewModel.activeArt.collectAsState()
-
-        // TODO: What do we display if we cannot get the users location?
-        if (uiState.currentLocation == null) {
-            return@Scaffold
-        }
-
-        val scope = rememberCoroutineScope()
-        val cameraPositionState =
-            rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(uiState.currentLocation!!, 10f)
-            }
-
-        val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
 
         /* XXX:
         This gets run way to much and lags the map since everytime it triggers it the
@@ -161,7 +163,6 @@ fun HomeScreen(
                     if (it.location == null) {
                         return@forEach
                     }
-                    Log.d("MARKER", it.toString())
                     Marker(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,
@@ -174,7 +175,6 @@ fun HomeScreen(
         }
 
         if (uiState.selectedArt != null && uiState.selectArtUser != null) {
-
             ArtMarker(
                 art = uiState.selectedArt!!,
                 artist = uiState.selectArtUser!!,
@@ -194,11 +194,11 @@ fun ArtMarker(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var distanceAway by remember { mutableDoubleStateOf(0.0) }
+    var distanceAway by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val currentLocation = getCurrentLocation(context)?.toGeoLocation()
+        val currentLocation = context.getCurrentLocation()?.toGeoLocation()
         val artLocation = art.location?.toGeoLocation()
         if (artLocation != null && currentLocation != null) {
             distanceAway = GeoUtils.distance(artLocation, currentLocation)
@@ -225,7 +225,7 @@ fun ArtMarker(
                         contentDescription = "distance",
                     )
                     Spacer(Modifier.width(5.dp))
-                    Text("${formatDistance(distanceAway)} away")
+                    Text("${distanceAway?.let { formatDistance(it) } ?: "??"} away")
                 }
                 Text(
                     art.title,
