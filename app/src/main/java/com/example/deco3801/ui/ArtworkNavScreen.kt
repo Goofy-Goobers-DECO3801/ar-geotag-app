@@ -423,7 +423,7 @@ fun EditPostBottomSheet(
             )
             Text(
                 text = if (isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
-                modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 16.dp, )
+                modifier = Modifier.padding(top = 16.dp, start = 25.dp, end = 25.dp, bottom = 16.dp, )
             )
             if (isCurrentUser) {
                 if (showDeleteConfirmButton) {
