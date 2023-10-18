@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.ArSceneView
@@ -38,10 +39,15 @@ import com.example.deco3801.ui.components.TopBar
 import com.google.ar.core.Config
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // AR screen was modelled after below sample
 // Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
 
+/*
+ * The AR screen composable
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ArtDisplayScreen(
@@ -65,7 +71,7 @@ fun ArtDisplayScreen(
     when (uiAction) {
         is ArtDisplayUIAction.ShowModalPlaced -> {
             LaunchedEffect(Unit) {
-                Toast.makeText(context, "Placed model!", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Placed model!", Toast.LENGTH_SHORT).show()
                 artDisplayViewModel.onConsumedUiAction()
             }
         }
@@ -106,7 +112,7 @@ fun ArtDisplayScreen(
                     artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
                 },
                 onTap = { hitResult ->
-                    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=true))
+                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = true))
                     // User tapped in the AR view
                     sceneView?.let {
                         modelNode = onUserTap(it, viewState, artDisplayMode, artDisplayViewModel)
@@ -202,12 +208,19 @@ fun ArtDisplayScreen(
 
     }
 }
+
+/*
+ * Removes and destroys any placed model and resets the state for replacing
+ */
 private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
     modelNode?.destroy()
     viewState?.modelPlaced = false
     viewState?.downloadingAsset = false
 }
 
+/*
+ * Updates the state of view model and returns to previous screen
+ */
 private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, navigator: NavHostController) {
     onRefresh(modelNode, viewState)
     viewState?.readyToPlaceModel = false
@@ -215,6 +228,10 @@ private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?, n
     navigator.popBackStack()
 }
 
+
+/*
+ * Return the AR model to be placed
+ */
 fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode, artDisplayViewModel: ArtDisplayViewModel): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
 
@@ -227,10 +244,13 @@ fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplay
                 glbFileLocation = it,
                 scaleToUnits = 1f,
                 centerOrigin = Position(-0.5f),
+                onLoaded = {
+                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = false))
+                }
             )
         }
     }
-    artDisplayViewModel.setState(artDisplayViewModel.state.value.copy(downloadingAsset=false))
+    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = false))
     return tmp
 
 }
