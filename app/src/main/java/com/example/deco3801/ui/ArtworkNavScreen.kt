@@ -95,7 +95,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import org.imperiumlabs.geofirestore.util.GeoUtils
 
-private const val DISTANCE_AWAY_MARGIN = 10.0
+private const val DISTANCE_AWAY_MARGIN = 50.0
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
