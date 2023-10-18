@@ -151,6 +151,7 @@ fun HomeScreen(
         }
 
         Column(modifier = Modifier.padding(innerPadding)) {
+            // Creates and displays the map interface
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
@@ -163,6 +164,8 @@ fun HomeScreen(
                     if (it.location == null) {
                         return@forEach
                     }
+
+                    // Retrieves and displays the custom marker
                     Marker(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,

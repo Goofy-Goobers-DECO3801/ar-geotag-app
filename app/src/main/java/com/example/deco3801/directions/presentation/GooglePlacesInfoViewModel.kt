@@ -21,6 +21,8 @@ import javax.inject.Inject
 
 // Directions was created using below
 // Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
+
+// This is a ViewModel class for handling Google Places information and directions.
 @HiltViewModel
 class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo: GetDirectionInfo): ViewModel() {
 
@@ -79,10 +81,12 @@ class GooglePlacesInfoViewModel @Inject constructor(private val getDirectionInfo
         }
     }
 
+    // Sealed class for UI events.
     sealed class UIEvent{
         data class ShowSnackBar(val message: String): UIEvent()
     }
 
+    // Function for decoding polyline points.
     private fun decoPoints(points: String): List<LatLng>{
         _polyLinesPoints.value = decodePoly(points)
         return decodePoly(points)

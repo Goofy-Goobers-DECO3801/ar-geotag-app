@@ -14,6 +14,8 @@ import javax.inject.Singleton
 
 // Directions was created using below
 // Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
+
+// This module provides dependencies related to Google Places.
 @Module
 @InstallIn(SingletonComponent::class)
 object GooglePlacesModule {
