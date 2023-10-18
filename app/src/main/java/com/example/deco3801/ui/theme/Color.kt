@@ -1,7 +1,13 @@
+/**
+ * This file contains all the colors used in the app.
+ */
 package com.example.deco3801.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Object containing all the colors that do not change whether the app is in light or dark mode.
+ */
 object UnchangingAppColors {
     val main_theme = Color(0xFFDD6841)
     val darker_main_theme = Color(0xFFA33E1A)
@@ -9,6 +15,7 @@ object UnchangingAppColors {
     val lighter_secondary = Color(0xFFF5F5F5)
 }
 
+// Light mode colors
 val md_theme_light_primary = Color(0xFFA33E1A)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFFFDBD0)
@@ -40,6 +47,7 @@ val md_theme_light_surfaceTint = Color(0xFFA33E1A)
 val md_theme_light_outlineVariant = Color(0xFFD8C2BC)
 val md_theme_light_scrim = Color(0xFF000000)
 
+// Dark mode colors
 val md_theme_dark_primary = Color(0xFFFFB59E)
 val md_theme_dark_onPrimary = Color(0xFF5D1800)
 val md_theme_dark_primaryContainer = Color(0xFF832703)

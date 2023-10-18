@@ -1,3 +1,6 @@
+/**
+ * Composable components for text fields.
+ */
 package com.example.deco3801.ui.components
 
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,6 +23,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
 
+/**
+ * Composable function for a password text field.
+ * The password is hidden by default, with an icon on the right to toggle visibility.
+ *
+ * @param value The value of the text field.
+ * @param onValueChange The callback to run when the value of the text field changes.
+ * @param modifier The modifier to apply to the text field.
+ * @param label The label of the text field.
+ *
+ * @see [TextField]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordField(
@@ -50,6 +64,15 @@ fun PasswordField(
     )
 }
 
+/**
+ * Composable function for an email text field.
+ *
+ * @param value The value of the text field.
+ * @param onValueChange The callback to run when the value of the text field changes.
+ * @param modifier The modifier to apply to the text field.
+ *
+ * @see [TextField]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailField(
@@ -69,6 +92,16 @@ fun EmailField(
     )
 }
 
+/**
+ * Composable function for a name text field.
+ *
+ * @param value The value of the text field.
+ * @param onValueChange The callback to run when the value of the text field changes.
+ * @param modifier The modifier to apply to the text field.
+ * @param label The label of the text field.
+ *
+ * @see [TextField]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NameField(
@@ -87,6 +120,16 @@ fun NameField(
     )
 }
 
+/**
+ * Composable function for a bio text field.
+ *
+ * @param value The value of the text field.
+ * @param onValueChange The callback to run when the value of the text field changes.
+ * @param modifier The modifier to apply to the text field.
+ * @param label The label of the text field.
+ *
+ * @see [TextField]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BioField(

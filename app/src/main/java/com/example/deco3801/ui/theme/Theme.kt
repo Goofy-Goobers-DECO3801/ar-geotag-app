@@ -1,3 +1,6 @@
+/**
+ * Contains the themes for the app.
+ */
 package com.example.deco3801.ui.theme
 
 import android.app.Activity
@@ -15,6 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+/**
+ * The light theme colour scheme.
+ */
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
@@ -47,7 +53,9 @@ private val LightColorScheme = lightColorScheme(
     scrim = md_theme_light_scrim,
 )
 
-
+/**
+ * The dark theme colour scheme.
+ */
 private val DarkColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
@@ -80,6 +88,15 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+/**
+ * Composable function to set the app theme.
+ *
+ * @param useDarkTheme Whether to use the dark theme.
+ * @param content The content of the app.
+ *
+ * @see [MaterialTheme]
+ * @see [isSystemInDarkTheme]
+ */
 @Composable
 fun DECO3801Theme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),

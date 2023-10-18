@@ -1,3 +1,6 @@
+/**
+ * General utility functions.
+ */
 package com.example.deco3801.util
 
 import android.content.Context
@@ -6,6 +9,11 @@ import android.icu.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * If the iterable is empty, run the [orElse] function, otherwise run the [action] function.
+ *
+ * @see [forEach]
+ */
 inline fun <T> Iterable<T>.forEachOrElse(
     orElse: () -> Unit = {},
     action: (T) -> Unit,
@@ -13,6 +21,12 @@ inline fun <T> Iterable<T>.forEachOrElse(
     return if (this.none()) orElse() else this.forEach(action)
 }
 
+
+/**
+ * Applies the [action] function to each element in the iterable.
+ *
+ * @see [forEach]
+ */
 inline fun <T> Iterable<T>.forEachApply(
     action: T.() -> Unit,
 ) {
@@ -21,6 +35,9 @@ inline fun <T> Iterable<T>.forEachApply(
     }
 }
 
+/**
+ * Formats a [distanceInM] in meters to a human readable format.
+ */
 fun formatDistance(distanceInM: Double): String {
     return when {
         distanceInM >= 1000 -> String.format("%.2fkm", distanceInM / 1000)
@@ -30,6 +47,9 @@ fun formatDistance(distanceInM: Double): String {
     }
 }
 
+/**
+ * Formats a [date] to a human readable format.
+ */
 fun formatDate(date: Date?): String {
     date ?: return ""
 
@@ -57,6 +77,9 @@ fun formatDate(date: Date?): String {
     }
 }
 
+/**
+ * Gets the Google API key from the manifest.
+ */
 fun Context.getGoogleApiKey(): String? {
     return (
         this.packageManager

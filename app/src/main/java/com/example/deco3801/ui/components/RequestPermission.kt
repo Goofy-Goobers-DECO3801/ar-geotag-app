@@ -1,3 +1,6 @@
+/**
+ * This file contains the code for the permission requester component.
+ */
 package com.example.deco3801.ui.components
 
 import androidx.compose.material3.AlertDialog
@@ -11,7 +14,14 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 /**
- * Permission requester
+ * Composable function for requesting permissions from the user and prompts them
+ * with the rationale behind the permission request.
+ *
+ * @param permissions The list of permissions to request.
+ * @param title The title of the dialog.
+ * @param description The description of the dialog.
+ * @param onRevoked The callback to run when the user revokes the permission.
+ * @param onGranted The callback to run when the user grants the permission.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

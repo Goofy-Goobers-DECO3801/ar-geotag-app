@@ -1,3 +1,6 @@
+/**
+ * Composable components for the Create screen.
+ */
 package com.example.deco3801.ui
 
 import android.net.Uri
@@ -64,6 +67,14 @@ import com.example.deco3801.viewmodel.CreateViewModel
 import com.example.deco3801.viewmodel.getFileName
 import java.io.File
 
+/**
+ * Displays the create screen.
+ * This screen allows the user to create a new artwork with a title, description,
+ * and image ,photo or 3D model.
+ *
+ * @param navController The navigation controller.
+ * @param viewModel The create view model injected by Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
@@ -355,6 +366,16 @@ fun CreateScreen(
     }
 }
 
+/**
+ * Display a clickable surface with an icon and text.
+ *
+ * @param text The text to display.
+ * @param onClick The callback to run when the surface is clicked.
+ * @param icon The icon to display.
+ * @param iconDescription The description of the icon.
+ * @param color The background color of the surface.
+ * @param contentColor The content color of the surface.
+ */
 @Composable
 fun BottomSheetSurface(
     text: String,
@@ -384,6 +405,15 @@ fun BottomSheetSurface(
     }
 }
 
+/**
+ * Display a list of sample 3D models.
+ *
+ * @param onDismissRequest The callback to run when the sheet is dismissed.
+ * @param onSelect The callback to run when a model is selected.
+ *
+ * @see [ModalBottomSheet]
+ * @reference "Assets," Sceneview, \[Online]. Available: https://sceneview.github.io/assets/. [Accessed 10 October 2023].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SampleModelList(
