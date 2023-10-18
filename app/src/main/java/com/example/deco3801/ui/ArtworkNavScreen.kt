@@ -1,6 +1,5 @@
 package com.example.deco3801.ui
 
-import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
 import android.view.MotionEvent
@@ -21,10 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CenterFocusWeak
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
@@ -56,10 +55,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -74,17 +71,19 @@ import com.example.deco3801.navigateProfile
 import com.example.deco3801.ui.components.GetUserLocation
 import com.example.deco3801.ui.components.ProgressbarState
 import com.example.deco3801.ui.components.SnackbarManager
+import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.ui.theme.UnchangingAppColors
-import com.example.deco3801.util.LocationUtil
 import com.example.deco3801.util.forEachOrElse
 import com.example.deco3801.util.formatDate
 import com.example.deco3801.util.formatDistance
+import com.example.deco3801.util.getGoogleApiKey
 import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.ArtworkNavViewModel
 import com.example.deco3801.viewmodel.CommentViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -102,21 +101,27 @@ fun ArtworkNavScreen(
     navController: NavHostController,
     viewModel: ArtworkNavViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
     val liked by viewModel.liked.collectAsState()
     var showComments by remember { mutableStateOf(false) }
+    var showEditPost by remember { mutableStateOf(false) }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
         columnScrollingEnabled = it
     }
+    val cameraPositionState = rememberCameraPositionState()
+    var mapProperties by remember { mutableStateOf(MapProperties()) }
+
 
     GetUserLocation(onChange = { userLocation = it })
-    LaunchedEffect(Unit) { // This is much quicker for the first time
-        userLocation = LocationUtil.getCurrentLocation(context)
+    LaunchedEffect(userLocation != null) {
+        if (userLocation != null) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(userLocation!!.toLatLng(), 15f)
+            mapProperties = mapProperties.copy(isMyLocationEnabled = true)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -139,10 +144,19 @@ fun ArtworkNavScreen(
 
     Scaffold(
         topBar = {
-            ArtworkTopBar(
-                navController = navController,
-                artworkTitle = art.title,
-            )
+             TopBar(
+                 title = art.title,
+                 navController = navController,
+                 canNavigateBack = true
+             ) {
+                 IconButton(onClick = { showEditPost = true }) {
+                     Icon(
+                         imageVector = Icons.Filled.MoreHoriz,
+                         contentDescription = "More",
+                         tint = Color.White,
+                     )
+                 }
+             }
         },
     ) { innerPadding ->
         if (showComments) {
@@ -158,7 +172,20 @@ fun ArtworkNavScreen(
                distanceInM = distanceInM,
            )
         }
-
+        if (showEditPost && art.id.isNotBlank()) {
+            EditPostBottomSheet(
+                isCurrentUser = viewModel.isCurrentUser(art.userId),
+                modifier = Modifier.heightIn(min = 400.dp),
+                onDismissRequest = {
+                    showEditPost = false
+                },
+                onDelete = {
+                    viewModel.onDeleteClicked()
+                    navController.popBackStack()
+                },
+                onReport = viewModel::onReportClicked,
+            )
+        }
         Column(
             modifier =
             Modifier
@@ -169,9 +196,10 @@ fun ArtworkNavScreen(
                     columnScrollingEnabled,
                 ),
         ) {
-            ArtworkTitle(art, user) {
-                navController.navigateProfile(user.id)
-            }
+            ArtworkTitle(
+                art,
+                user,
+            ) { navController.navigateProfile(user.id) }
             ArtworkMap(
                 art = art,
                 userLocation = userLocation,
@@ -194,6 +222,8 @@ fun ArtworkNavScreen(
                         },
                     ),
                 columnScroll = columnScroll,
+                cameraPositionState = cameraPositionState,
+                mapProperties = mapProperties,
             )
 
             ArtworkInteract(
@@ -240,10 +270,10 @@ fun CommentBottomSheet(
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState(), true)
-                    .padding(bottom = 20.dp),
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState(), true)
+                .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.Top,
             content = {
                 OutlinedTextField(
@@ -262,9 +292,9 @@ fun CommentBottomSheet(
                         }
                     },
                     modifier =
-                        Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth(),
+                    Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth(),
                     enabled = atArtLocation(distanceInM),
                     supportingText = {
                         Text("You must be at the location to comment.")
@@ -330,6 +360,7 @@ fun ArtworkTitle(
                     .padding(
                         start = 10.dp,
                         bottom = 15.dp,
+                        end = 30.dp
                     ),
             ) {
                 Text(
@@ -354,39 +385,74 @@ fun ArtworkTitle(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArtworkTopBar(
-    artworkTitle: String,
-    navController: NavHostController,
+fun EditPostBottomSheet(
+    isCurrentUser: Boolean,
+    onDismissRequest: () -> Unit,
+    onDelete: () -> Unit,
+    onReport: () -> Unit,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(UnchangingAppColors.main_theme)) {
-        Column () {
-            IconButton(onClick = navController::popBackStack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIos,
-                    contentDescription = "ArrowBack",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(10.dp)
-                )
-            }
-        }
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
+    var showDeleteConfirmButton by remember { mutableStateOf(false)}
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        modifier = modifier,
+    ) {
+        Column(
             modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, end = 48.dp, bottom = 10.dp)) {
+                .verticalScroll(rememberScrollState(), true)
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
-                text = artworkTitle,
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
-                textAlign = TextAlign.Center
+                text = if (isCurrentUser) "Deleting this post?" else "Reporting this post?",
+                modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.titleLarge,
             )
+            Spacer(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height((0.5).dp)
+                    .background(MaterialTheme.colorScheme.onError)
+            )
+            Text(
+                text = if (isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
+                modifier = Modifier.padding(start = 10.dp, bottom = 16.dp)
+            )
+            if (isCurrentUser) {
+                if (showDeleteConfirmButton) {
+                    Button(
+                        onClick = {
+                            onDismissRequest()
+                            onDelete()
+                        }
+                    ) {
+                        Text(text = "Are you sure?")
+                    }
+                } else {
+                    Button(
+                        onClick = {
+                            showDeleteConfirmButton = true
+                        }
+                    ) {
+                        Text(text = "Delete Post")
+                    }
+                }
+            } else {
+                Button(onClick = {
+                    onDismissRequest()
+                    onReport()
+                } ) {
+                    Text(text = "Report Post")
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
@@ -397,6 +463,8 @@ fun ArtworkMap(
     userLocation: Location?,
     modifier: Modifier = Modifier,
     columnScroll: (Boolean) -> Unit,
+    cameraPositionState: CameraPositionState = rememberCameraPositionState(),
+    mapProperties: MapProperties = MapProperties(),
     googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
@@ -406,32 +474,19 @@ fun ArtworkMap(
         }
     }
 
-    if (userLocation == null) {
-        return
-    }
-
     val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
     val context = LocalContext.current
     var apiKey by remember { mutableStateOf<String?>(null) }
-    val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
-    val cameraPositionState =
-        rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(userLocation.toLatLng(), 15f)
-        }
 
     LaunchedEffect(Unit) {
-        context.packageManager
-            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-            .apply {
-                apiKey = metaData.getString("com.google.android.geo.API_KEY")
-            }
+        apiKey = context.getGoogleApiKey()
     }
 
-    LaunchedEffect(apiKey != null && art.location != null) {
+    LaunchedEffect(apiKey != null && art.location != null && userLocation != null) {
         if (apiKey != null && art.location != null) {
             googlePlacesViewModel.getDirection(
                 // Modify this to get the actual origin
-                origin = "${userLocation.latitude}, ${userLocation.longitude}",
+                origin = "${userLocation!!.latitude}, ${userLocation.longitude}",
                 // Use the marker's location as the destination
                 destination = "${art.location!!.latitude}, ${art.location!!.longitude}",
                 key = apiKey!!,
@@ -584,12 +639,12 @@ fun UserComment(
                 contentDescription = "profile",
                 contentScale = ContentScale.Crop,
                 modifier =
-                    Modifier
-                        .clip(CircleShape)
-                        .size(45.dp)
-                        .clickable {
-                            onUserClicked()
-                        },
+                Modifier
+                    .clip(CircleShape)
+                    .size(45.dp)
+                    .clickable {
+                        onUserClicked()
+                    },
             )
         }
         Column {

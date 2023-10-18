@@ -8,7 +8,6 @@ import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.FollowRepository
-import com.example.deco3801.data.repository.UserRepository
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.util.toGeoPoint
 import com.example.deco3801.util.toLatLng
@@ -21,6 +20,7 @@ import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -51,7 +51,12 @@ sealed class ArtFilterAction {
     data class Mine(val boolean: Boolean) : ArtFilterAction()
 }
 
-// https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes
+/**
+ * @reference
+ * R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," Kotlin, 11 August 2020. \[Online].
+ * Available: https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes.
+ * [Accessed 26 September 2023].
+ */
 object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
@@ -81,17 +86,14 @@ class HomeViewModel @Inject constructor(
     private val _filterState = MutableStateFlow(ArtFilterState())
     val filterState: StateFlow<ArtFilterState> = _filterState
 
-    private val _filterAction = MutableStateFlow<ArtFilterAction?>(null)
-    val filterAction: StateFlow<ArtFilterAction?> = _filterAction
+    private val _activeArt = MutableStateFlow<Map<String, Art>>(emptyMap())
+    val activeArt: StateFlow<Map<String, Art>> = _activeArt
 
-    private val _activeArt = MutableStateFlow<MutableMap<String, Art>>(HashMap())
-    val activeArt: StateFlow<MutableMap<String, Art>> = _activeArt
-
-    private var _inactiveArt: MutableMap<String, Art> = HashMap()
+    private var _inactiveArt = mutableMapOf<String, Art>()
 
     private var _geoQuery: GeoQuery? = null
 
-    private val STORE_ART_FILTER = "artFilter"
+    private var _filterLoading = false
 
     fun onArtUnselect() {
         _uiState.value = _uiState.value.copy(selectedArt = null, selectArtUser = null)
@@ -101,28 +103,36 @@ class HomeViewModel @Inject constructor(
         launchCatching {
             val selectedArt = _activeArt.value[artId] ?: return@launchCatching
             val selectedArtUser = artRepo.getArtist(selectedArt)
-            _uiState.value = _uiState.value.copy(selectedArt = selectedArt, selectArtUser =  selectedArtUser)
+            _uiState.value =
+                _uiState.value.copy(selectedArt = selectedArt, selectArtUser = selectedArtUser)
         }
 
     }
 
     fun readFilterStateFromStore(store: SharedPreferences) {
-        try {
+        launchCatching(
+            onFailure = { _filterState.value = ArtFilterState() },
+            showErrorMsg = false,
+        ) {
             _filterState.value = Json.decodeFromString(store.getString(STORE_ART_FILTER, "")!!)
-        } catch (e: Exception) {
-            Log.d("STORE", e.toString())
-            _filterState.value = ArtFilterState()
         }
     }
 
     fun updateFilterStateInStore(store: SharedPreferences) {
-        store.edit(commit = true) {
-            putString(STORE_ART_FILTER, Json.encodeToString(_filterState.value))
-            Log.d("STORE", Json.encodeToString(_filterState.value))
+        launchCatching {
+            store.edit(commit = true) {
+                putString(STORE_ART_FILTER, Json.encodeToString(_filterState.value))
+                Log.d("STORE", Json.encodeToString(_filterState.value))
+            }
         }
     }
 
     fun onFilterAction(action: ArtFilterAction?, store: SharedPreferences) {
+        if (_filterLoading) {
+            return
+        }
+
+        _filterLoading = true
         when (action) {
             is ArtFilterAction.DateCreated -> {
                 _filterState.value = _filterState.value.copy(dateCreated = action.date)
@@ -163,6 +173,7 @@ class HomeViewModel @Inject constructor(
 
             _inactiveArt = newInactiveArt
             _activeArt.value = newActiveArt
+            _filterLoading = false
         }
     }
 
@@ -197,26 +208,37 @@ class HomeViewModel @Inject constructor(
     }
 
     fun listenForArt() {
-        if (_uiState.value.currentLocation == null) {
-            Log.w("GEOQUERY", "No location")
-            return
+        launchCatching {
+            _uiState.first { it.currentLocation != null }.currentLocation
+
+            _geoQuery = GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
+                _uiState.value.currentLocation!!.toGeoPoint(),
+                _uiState.value.distanceInKm
+            )
+
+            _geoQuery?.addGeoQueryDataEventListener()
         }
+    }
 
-        _geoQuery = GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
-            _uiState.value.currentLocation!!.toGeoPoint(),
-            _uiState.value.distanceInKm
-        )
+    fun stopListen() {
+        _geoQuery?.removeAllListeners()
+    }
 
-        _geoQuery?.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
-            override fun onDocumentEntered(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+    private fun GeoQuery.addGeoQueryDataEventListener() {
+        return this.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
+            override fun onDocumentEntered(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
                         // add to inactive
-                        _inactiveArt.put(art.id, art)
+                        _inactiveArt[art.id] = art
                         return@launchCatching
                     }
-                    _activeArt.value = _activeArt.value.toMutableMap().apply { put(art.id, art) }
+                    _activeArt.value =
+                        _activeArt.value.toMutableMap().apply { put(art.id, art) }
                     Log.d("GEOQUERY", "ENTER $art")
                 }
 
@@ -230,7 +252,10 @@ class HomeViewModel @Inject constructor(
                 Log.d("GEOQUERY", "EXIT $art")
             }
 
-            override fun onDocumentMoved(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+            override fun onDocumentMoved(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -245,7 +270,10 @@ class HomeViewModel @Inject constructor(
 
             }
 
-            override fun onDocumentChanged(documentSnapshot: DocumentSnapshot, location: GeoPoint) {
+            override fun onDocumentChanged(
+                documentSnapshot: DocumentSnapshot,
+                location: GeoPoint
+            ) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 launchCatching {
                     if (!isArtInFilter(art)) {
@@ -269,7 +297,7 @@ class HomeViewModel @Inject constructor(
         })
     }
 
-    fun stopListen() {
-        _geoQuery?.removeAllListeners()
+    companion object {
+        private const val STORE_ART_FILTER = "artFilter"
     }
 }

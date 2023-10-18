@@ -3,12 +3,14 @@ package com.example.deco3801.directions.data.repository
 import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
 import com.example.deco3801.directions.util.Resource
-import com.example.jetmap.feature_google_places.data.remote.GooglePlacesApi
+import com.example.deco3801.directions.data.remote.GooglePlacesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 
+// Directions was created using below
+// Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
 class GooglePlacesInfoRepositoryImplementation(private val api: GooglePlacesApi):
     GooglePlacesInfoRepository {
     override fun getDirection(

@@ -1,5 +1,7 @@
 package com.example.deco3801.util
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -7,8 +9,16 @@ import java.util.Locale
 inline fun <T> Iterable<T>.forEachOrElse(
     orElse: () -> Unit = {},
     action: (T) -> Unit,
-): Unit {
+) {
     return if (this.none()) orElse() else this.forEach(action)
+}
+
+inline fun <T> Iterable<T>.forEachApply(
+    action: T.() -> Unit,
+) {
+    return this.forEach {
+        it.apply(action)
+    }
 }
 
 fun formatDistance(distanceInM: Double): String {
@@ -45,4 +55,13 @@ fun formatDate(date: Date?): String {
             }
         }
     }
+}
+
+fun Context.getGoogleApiKey(): String? {
+    return (
+        this.packageManager
+            .getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
+            .metaData
+            .getString("com.google.android.geo.API_KEY")
+        )
 }

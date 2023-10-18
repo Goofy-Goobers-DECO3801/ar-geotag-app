@@ -19,13 +19,17 @@ fun RequestPermissions(
     permissions: List<String>,
     title: String,
     description: String,
+    onRevoked: @Composable () -> Unit = {},
     onGranted: @Composable () -> Unit,
 ) {
     val openDialog = remember { mutableStateOf(true) }
     val permissionsState = rememberMultiplePermissionsState(permissions = permissions)
     if (permissionsState.allPermissionsGranted) {
         onGranted()
+    }else if (permissionsState.revokedPermissions.any {it.permission in permissions}) {
+        onRevoked()
     }
+
     if (openDialog.value && permissionsState.shouldShowRationale) {
         AlertDialog(onDismissRequest = { openDialog.value = false }, title = {
             Text(text = title)

@@ -10,6 +10,7 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toGeoPoint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
@@ -22,7 +23,7 @@ class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val auth: FirebaseAuth,
-    private val userRepo: UserRepository
+    private val userRepo: UserRepository,
 ) : Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
@@ -33,9 +34,10 @@ class ArtRepository @Inject constructor(
     ): Art {
         val uid = auth.uid!!
         var storageRef: StorageReference? = null
+        var storagePath = ""
 
         if (uri.scheme != "https" ) {
-            val storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+            storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
             storageRef = storage.reference.child(storagePath)
             storageRef.putFile(uri).addOnProgressListener {
                 val progress = it.bytesTransferred.toFloat() / it.totalByteCount
@@ -50,16 +52,31 @@ class ArtRepository @Inject constructor(
             geohash = GeoHash(location.toGeoLocation()).geoHashString,
             userId = uid,
             storageUri = storageRef?.downloadUrl?.await()?.toString() ?: uri.toString(),
+            storageRef = storagePath
         )
 
         Log.d(ART_COLLECTION, art.toString())
 
-        db.collection(ART_COLLECTION).add(art).addOnFailureListener {
+        getCollectionRef().add(art).addOnFailureListener {
             storageRef?.delete()
         }.addOnSuccessListener {
             art.id = it.id
         }.await()
         return art
+    }
+
+    suspend fun deleteArt(art: Art) {
+        getCollectionRef().document(art.id).delete().addOnSuccessListener {
+            if(art.storageRef.isNotBlank()) {
+                storage.reference.child(art.storageRef).delete()
+            }
+//            getCommentSubCollectionRef(art.id).delete()
+//            getLikeSubCollectionRef(art.id).delete()
+        }.await()
+    }
+
+    suspend fun reportArt(art: Art) {
+        getCollectionRef().document(art.id).update("reportCount", FieldValue.increment(1)).await()
     }
 
     fun attachListenerByUserId(userId: String, callback: (List<Art>) -> Unit) {
@@ -73,11 +90,21 @@ class ArtRepository @Inject constructor(
         return userRepo.getUser(art.userId)!!
     }
 
-    override fun getCollectionRef(id: String?): CollectionReference {
+    override fun getCollectionRef(docId: String?): CollectionReference {
         return db.collection(ART_COLLECTION)
+    }
+
+    fun getCommentSubCollectionRef(artId: String): CollectionReference {
+        return getCollectionRef().document(artId).collection(COMMENT_COLLECTION)
+    }
+
+    fun getLikeSubCollectionRef(artId: String): CollectionReference {
+        return getCollectionRef().document(artId).collection(LIKE_COLLECTION)
     }
 
     companion object {
         private const val ART_COLLECTION = "art"
+        private const val COMMENT_COLLECTION = "comments"
+        private const val LIKE_COLLECTION = "likes"
     }
 }

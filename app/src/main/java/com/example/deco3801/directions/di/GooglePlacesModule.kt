@@ -3,7 +3,7 @@ package com.example.deco3801.directions.di
 import com.example.deco3801.directions.data.repository.GooglePlacesInfoRepositoryImplementation
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
 import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
-import com.example.jetmap.feature_google_places.data.remote.GooglePlacesApi
+import com.example.deco3801.directions.data.remote.GooglePlacesApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +12,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+// Directions was created using below
+// Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
 @Module
 @InstallIn(SingletonComponent::class)
 object GooglePlacesModule {
@@ -30,7 +32,7 @@ object GooglePlacesModule {
 
     @Provides
     @Singleton
-    fun provideGooglePlacesApi(): GooglePlacesApi{
+    fun provideGooglePlacesApi(): GooglePlacesApi {
         return Retrofit.Builder()
             .baseUrl(GooglePlacesApi.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

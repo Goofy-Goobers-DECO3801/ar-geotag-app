@@ -6,6 +6,8 @@ import com.example.deco3801.data.model.User
 import com.example.deco3801.data.repository.ArtRepository
 import com.example.deco3801.data.repository.LikeRepository
 import com.example.deco3801.data.repository.UserRepository
+import com.example.deco3801.ui.components.SnackbarManager
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ class ArtworkNavViewModel @Inject constructor(
     private val userRepo: UserRepository,
     private val artRepo: ArtRepository,
     private val likeRepo: LikeRepository,
+    private val auth: FirebaseAuth,
 ) : AppViewModel() {
     private val _art = MutableStateFlow(Art())
     val art: StateFlow<Art> = _art
@@ -74,4 +77,20 @@ class ArtworkNavViewModel @Inject constructor(
     fun onUserChange(user: User) {
         _user.value = user
     }
+
+    fun onDeleteClicked() {
+        launchCatching {
+            artRepo.deleteArt(_art.value)
+            SnackbarManager.showMessage("Post deleted!")
+        }
+    }
+
+    fun onReportClicked() {
+        launchCatching {
+            artRepo.reportArt(_art.value)
+            SnackbarManager.showMessage("Thank you for reporting!")
+        }
+    }
+
+    fun isCurrentUser(userId: String) = userId == auth.uid
 }

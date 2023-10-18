@@ -59,7 +59,7 @@ import com.example.deco3801.ui.components.ExpandableAsyncImage
 import com.example.deco3801.ui.components.GetLocationName
 import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
-import com.example.deco3801.util.LocationUtil.getCurrentLocation
+import com.example.deco3801.util.getCurrentLocation
 import com.example.deco3801.viewmodel.CreateViewModel
 import com.example.deco3801.viewmodel.getFileName
 import java.io.File
@@ -85,7 +85,7 @@ fun CreateScreen(
 
 
     LaunchedEffect(Unit) {
-        viewModel.onLocationChange(getCurrentLocation(context))
+        viewModel.onLocationChange(context.getCurrentLocation())
     }
 
     GetLocationName(location = uiState.location, onLocationName = {locationName = it}, fullAddress = true)
@@ -134,11 +134,7 @@ fun CreateScreen(
 
     Scaffold(
         topBar = {
-            TopBar(
-                canNavigateBack = false,
-                showSettings = false,
-                navigateUp = {},
-            )
+            TopBar(navController)
         },
     ) { innerPadding ->
         if (showBottomSheet) {
