@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
@@ -29,6 +32,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -112,6 +117,7 @@ fun ArtworkNavScreen(
     val liked by viewModel.liked.collectAsState()
     var showComments by remember { mutableStateOf(false) }
     var showEditPost by remember { mutableStateOf(false) }
+    var showEditComment by remember { mutableStateOf(false) }
     var distanceInM by remember { mutableStateOf<Double?>(null) }
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     val columnScroll: (Boolean) -> Unit = {
@@ -160,6 +166,7 @@ fun ArtworkNavScreen(
                    showComments = false
                },
                distanceInM = distanceInM,
+               onEditCommentClicked = {showEditComment = true}
            )
         }
         if (showEditPost) {
@@ -169,6 +176,13 @@ fun ArtworkNavScreen(
                 modifier = Modifier.heightIn(min = 100.dp),
                 onDismissRequest = {
                     showEditPost = false
+                }
+            )
+        }
+        if (showEditComment) {
+            EditCommentPopUp(
+                onDismissRequest = {
+                    showEditComment = false
                 }
             )
         }
@@ -222,6 +236,7 @@ fun ArtworkNavScreen(
                 liked = liked,
                 onLikeClicked = viewModel::onLikeClicked,
                 onCommentClicked = { showComments = true },
+                //onEditCommentClicked = {showEditComment = true},
                 distanceInM = distanceInM,
             )
         }
@@ -234,6 +249,7 @@ fun CommentBottomSheet(
     artId: String,
     onUserClicked: (User) -> Unit,
     onDismissRequest: () -> Unit,
+    onEditCommentClicked: () -> Unit,
     distanceInM: Double?,
     modifier: Modifier = Modifier,
     viewModel: CommentViewModel = hiltViewModel(),
@@ -295,7 +311,7 @@ fun CommentBottomSheet(
                                 .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp))
                     },
                 ) {
-                    UserComment(user = it.user, comment = it.comment) {
+                    UserComment(user = it.user, comment = it.comment, onEditCommentClicked = onEditCommentClicked) {
                         onUserClicked(it.user)
                     }
                 }
@@ -401,7 +417,7 @@ fun EditPostBottomSheet(
     //viewModel: CommentViewModel = hiltViewModel(),
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    val isCurrentUser = true // TODO viewModel.isCurrentUser(userId)
+    val isCurrentUser = false // TODO viewModel.isCurrentUser(userId)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -439,7 +455,7 @@ fun EditPostBottomSheet(
                         Text(text = "Delete Post")
                     }
                 } else {
-                    Button(onClick = {} /*TODO*/) {
+                    Button(onClick = onDismissRequest/*TODO*/) {
                         Text(text = "Report Post")
                     }
                 }
@@ -617,6 +633,7 @@ fun ArtworkDescription(
     liked: Boolean?,
     onLikeClicked: () -> Unit,
     onCommentClicked: () -> Unit,
+    //onEditCommentClicked: () -> Unit,
     distanceInM: Double?,
 ) {
     Column(
@@ -667,6 +684,7 @@ fun ArtworkDescription(
 fun UserComment(
     user: User,
     comment: Comment,
+    onEditCommentClicked: () -> Unit,
     onUserClicked: () -> Unit = {},
 ) {
     Row(
@@ -705,11 +723,75 @@ fun UserComment(
                     text = formatDate(comment.timestamp),
                 )
             }
-
            Text(
                text = comment.text,
            )
+        }
+        Column (
+            modifier =
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.End
+        ) {
+            IconButton(onClick = onEditCommentClicked ) {
+                Icon(
+                    imageVector = Icons.Filled.MoreHoriz,
+                    contentDescription = "More",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(10.dp)
+                )
+            }
+        }
+    }
+}
 
+@Composable
+fun EditCommentPopUp(
+    onDismissRequest: () -> Unit
+) {
+    val isCurrentUser = true //TODO if it's their comment -> delete, otherwise report
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            shape = RoundedCornerShape(15.dp),
+        ) {
+            Text(
+                text = if (isCurrentUser) "Would you like to delete your comment?" else "Would you like to report this comment?",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(
+                    top = 20.dp,
+                    start = 20.dp,
+                    end = 20.dp
+                )
+            )
+            Row(
+                horizontalArrangement = Arrangement.End,
+                 modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isCurrentUser) {
+                    Button(
+                        onClick = onDismissRequest, //TODO -> delete the comment
+                        modifier = Modifier
+                            //.fillMaxWidth()
+                            .padding(15.dp)
+                    ) {
+                        Text(text = "Delete")
+                    }
+                }
+                else {
+                    Button(
+                        onClick = onDismissRequest, //TODO -> report the comment
+                        modifier = Modifier
+                            //.fillMaxWidth()
+                            .padding(15.dp)
+                    ) {
+                        Text(text = "Report")
+                    }
+                }
+
+            }
         }
     }
 }
