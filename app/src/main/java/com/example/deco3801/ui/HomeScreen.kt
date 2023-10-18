@@ -71,6 +71,7 @@ import org.imperiumlabs.geofirestore.util.GeoUtils
 @Composable
 fun HomeScreen(
     navController: NavHostController,
+    markerIcon: Bitmap,
     viewModel: HomeViewModel = hiltViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
@@ -181,7 +182,7 @@ fun HomeScreen(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,
                         snippet = it.description,
-                        icon = resizeBitmap(context, 60, 96),
+                        icon = BitmapDescriptorFactory.fromBitmap(markerIcon),
                         onClick = markerClick,
                     )
                 }
@@ -199,12 +200,12 @@ fun HomeScreen(
     }
 }
 
-fun resizeBitmap(context: Context, width: Int, height: Int): BitmapDescriptor {
+fun resizeBitmap(context: Context, width: Int, height: Int): Bitmap {
     val imageBitmap = BitmapFactory.decodeResource(
         context.resources,
         R.drawable.map_marker
     )
-    return BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(imageBitmap, width, height, false))
+    return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -261,8 +262,8 @@ fun ArtMarker(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    HomeScreen(rememberNavController())
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun HomeScreenPreview() {
+//    HomeScreen(rememberNavController(), Bit)
+//}

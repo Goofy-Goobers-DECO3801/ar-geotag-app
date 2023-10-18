@@ -1,5 +1,6 @@
 package com.example.deco3801.ui
 
+import android.graphics.Bitmap
 import android.location.Location
 import android.util.Log
 import android.view.MotionEvent
@@ -101,6 +102,7 @@ private const val DISTANCE_AWAY_MARGIN = 10.0
 fun ArtworkNavScreen(
     artId: String,
     navController: NavHostController,
+    markerIcon: Bitmap,
     viewModel: ArtworkNavViewModel = hiltViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     ) {
@@ -234,6 +236,7 @@ fun ArtworkNavScreen(
                 columnScroll = columnScroll,
                 cameraPositionState = cameraPositionState,
                 mapProperties = mapProperties,
+                markerIcon = markerIcon,
             )
 
             ArtworkInteract(
@@ -473,6 +476,7 @@ fun ArtworkMap(
     userLocation: Location?,
     modifier: Modifier = Modifier,
     columnScroll: (Boolean) -> Unit,
+    markerIcon: Bitmap,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     mapProperties: MapProperties = MapProperties(),
     googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
@@ -483,6 +487,7 @@ fun ArtworkMap(
             ProgressbarState.resetProgressbar()
         }
     }
+
 
     val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
     val context = LocalContext.current
@@ -523,7 +528,7 @@ fun ArtworkMap(
                 state = MarkerState(position = it.toLatLng()),
                 title = art.title,
                 snippet = art.description,
-                icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
+                icon = BitmapDescriptorFactory.fromBitmap(markerIcon),
             )
         }
 
@@ -686,11 +691,11 @@ private fun atArtLocation(distanceInM: Double?): Boolean {
     return distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN
 }
 
-@Preview
-@Composable
-private fun PreviewArtworkNavScreen() {
-    ArtworkNavScreen(
-        "1",
-        rememberNavController(),
-    )
-}
+//@Preview
+//@Composable
+//private fun PreviewArtworkNavScreen() {
+//    ArtworkNavScreen(
+//        "1",
+//        rememberNavController(),
+//    )
+//}
