@@ -483,10 +483,10 @@ fun ArtworkMap(
     }
 
     LaunchedEffect(apiKey != null && art.location != null && userLocation != null) {
-        if (apiKey != null && art.location != null) {
+        if (apiKey != null && art.location != null && userLocation != null) {
             googlePlacesViewModel.getDirection(
                 // Modify this to get the actual origin
-                origin = "${userLocation!!.latitude}, ${userLocation.longitude}",
+                origin = "${userLocation.latitude}, ${userLocation.longitude}",
                 // Use the marker's location as the destination
                 destination = "${art.location!!.latitude}, ${art.location!!.longitude}",
                 key = apiKey!!,
