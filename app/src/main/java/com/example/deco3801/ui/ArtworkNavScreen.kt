@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -83,6 +84,7 @@ import com.example.deco3801.viewmodel.ArtworkNavViewModel
 import com.example.deco3801.viewmodel.CommentViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -100,7 +102,9 @@ fun ArtworkNavScreen(
     artId: String,
     navController: NavHostController,
     viewModel: ArtworkNavViewModel = hiltViewModel(),
-) {
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    ) {
+    val context = LocalContext.current
     var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
     val user by viewModel.user.collectAsState()
@@ -113,7 +117,13 @@ fun ArtworkNavScreen(
         columnScrollingEnabled = it
     }
     val cameraPositionState = rememberCameraPositionState()
-    var mapProperties by remember { mutableStateOf(MapProperties()) }
+    var mapProperties by remember {
+        mutableStateOf(
+            MapProperties(
+                mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light),
+            )
+        )
+    }
 
 
     GetUserLocation(onChange = { userLocation = it })
