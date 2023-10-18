@@ -1,3 +1,8 @@
+/**
+ * This file contains the Firebase module for dependency injection.
+ *
+ * @author Jed Willick
+ */
 package com.example.deco3801.di
 
 import com.google.firebase.auth.FirebaseAuth
@@ -14,22 +19,46 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Firebase module that is installed in the SingletonComponent and injected with Hilt.
+ * This module provides all Firebase instances that are used in the app.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
 
+    /**
+     * Provides the Firebase Authentication instance as a singleton.
+     *
+     * @return The Firebase Authentication instance.
+     */
     @Singleton
     @Provides
     fun auth(): FirebaseAuth = Firebase.auth
 
+    /**
+     * Provides the Firestore database instance as a singleton.
+     *
+     * @return The Firestore database instance.
+     */
     @Singleton
     @Provides
     fun firestore(): FirebaseFirestore = Firebase.firestore
 
+    /**
+     * Provides the Firebase Storage instance as a singleton.
+     *
+     * @return The Firebase Storage instance.
+     */
     @Singleton
     @Provides
     fun storage(): FirebaseStorage = Firebase.storage
 
+    /**
+     * Provides the current user as a singleton.
+     *
+     * @return The current user or null if there is no authenticated user.
+     */
     @Singleton
     @Provides
     fun user(): FirebaseUser? = auth().currentUser
