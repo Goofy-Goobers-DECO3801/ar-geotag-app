@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,6 +13,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -33,6 +36,7 @@ import com.example.deco3801.ui.SettingsScreen
 import com.example.deco3801.ui.SignUpScreen
 import com.example.deco3801.ui.TandCScreen
 import com.example.deco3801.ui.components.NavBar
+import com.example.deco3801.ui.resizeBitmap
 import com.google.firebase.auth.FirebaseUser
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -42,8 +46,11 @@ import java.nio.charset.StandardCharsets
 fun AppFunctionality(
     artDisplayViewModel: ArtDisplayViewModel,
     authUser: FirebaseUser?,
+    markerIcon: Bitmap,
     appState: AppState = rememberAppState(),
 ) {
+    val context = LocalContext.current
+
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
     Log.d("AUTH", authUser.toString())
@@ -81,7 +88,7 @@ fun AppFunctionality(
                 SignUpScreen(appState.navController)
             }
             composable(route = ScreenNames.Home.name) {
-                HomeScreen(appState.navController)
+                HomeScreen(appState.navController, markerIcon)
             }
             composable(route = ScreenNames.Create.name) {
                 CreateScreen(appState.navController)
@@ -120,7 +127,7 @@ fun AppFunctionality(
             composable(route = "${ScreenNames.ArtworkNav.name}/{id}") {
                 val id = it.arguments?.getString("id")
                 if (id != null) {
-                    ArtworkNavScreen(id, appState.navController)
+                    ArtworkNavScreen(id, appState.navController, markerIcon)
                 }
             }
         }

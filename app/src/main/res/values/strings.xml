@@ -8,6 +8,6 @@
     </string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="map_marker_url">
-        <![CDATA[https://firebasestorage.googleapis.com/v0/b/goofy-goobers.appspot.com/o/map_marker.bmp?alt=media&token=43058b36-9378-4b0d-80ea-c81e9fa9d7ef&_gl=1*1hzzq10*_ga*MTkxODQ2MjI5Ny4xNjkxOTg4NzUz*_ga_CW55HF8NVT*MTY5NzM0OTg5NS45Mi4xLjE2OTczNDk5ODQuNTkuMC4w]]>
+https://firebasestorage.googleapis.com/v0/b/goofy-goobers.appspot.com/o/map_marker.bmp?alt=media&amp;token=a470b554-5119-4aea-9235-fc07f5ac1a49&amp;_gl=1*174ve2*_ga*ODMwMzIwNzY0LjE2OTE1NjA4ODM.*_ga_CW55HF8NVT*MTY5NzYxMzAxNi4xMy4xLjE2OTc2MTMyMzguNjAuMC4w
     </string>
 </resources>
