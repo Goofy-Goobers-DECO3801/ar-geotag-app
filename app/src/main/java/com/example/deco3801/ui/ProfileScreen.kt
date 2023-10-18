@@ -169,6 +169,7 @@ fun ProfileScreen(
                                     text = "@${user.username}",
                                     style = MaterialTheme.typography.titleMedium,
                                 )
+                                Spacer(modifier = Modifier.height(6.dp))
                                 if (isCurrentUser) {
                                     Button(
                                         onClick = {
@@ -176,11 +177,14 @@ fun ProfileScreen(
                                                 ScreenNames.EditProfile.name,
                                             )
                                         },
+                                        modifier = Modifier.size(120.dp,40.dp)
                                     ) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
-                                    Button(onClick = viewModel::follow) {
+                                    Button(
+                                        onClick = viewModel::follow,
+                                        modifier = Modifier.size(120.dp,40.dp)) {
                                         Text(text = if (isFollowing!!) "Unfollow" else "Follow")
                                     }
                                 }
