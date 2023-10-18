@@ -2,6 +2,7 @@ package com.example.deco3801.ui
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -436,36 +437,49 @@ fun ArtworkTile(
 fun StaticMap(
     geoPoint: GeoPoint?
 ) {
+
+    var model by remember { mutableStateOf<Any>(R.drawable.default_img)}
+
+    ConstructGoogleStaticMapQuery(geoPoint) { model = it }
+
+    Log.d("MODEL", model.toString())
+    AsyncImage(
+        model = model,
+        placeholder = painterResource(id = R.drawable.default_img),
+        contentDescription = "minimap",
+        modifier = Modifier.size(146.dp),
+    )
+}
+
+@Composable
+fun ConstructGoogleStaticMapQuery(geoPoint: GeoPoint?, onReady: (String) -> Unit) {
     var apiKey by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val markerIconUrl by remember {
-        mutableStateOf(
-            URLEncoder.encode(
-                context.getString(R.string.map_marker_url),
-                StandardCharsets.UTF_8.toString()
-            )
-        )
-    }
+    val markerIconUrl = remember { context.getString(R.string.map_marker_url) }
+    val isDark = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
         apiKey = context.getGoogleApiKey()
     }
 
-    val model =
-        if (apiKey != null && geoPoint != null) {
-            "https://maps.googleapis.com/maps/api/staticmap?size=146x146" +
-                "&markers=icon:${markerIconUrl}|${geoPoint.latitude},${geoPoint.longitude}" +
-                "&key=${apiKey!!}"
-        } else {
-            R.drawable.default_img
+    LaunchedEffect(apiKey != null && geoPoint != null) {
+        if (apiKey == null || geoPoint == null) {
+            return@LaunchedEffect
         }
 
-    Log.d("MODEL", model.toString())
-    AsyncImage(
-        model = model,
-        contentDescription = "minimap",
-        modifier = Modifier.size(146.dp),
-    )
+        val builder = StringBuilder()
+        builder.append("https://maps.googleapis.com/maps/api/staticmap?key=${apiKey}")
+        builder.append("&size=146x146&scale=2&zoom=15")
+        builder.append("&markers=icon:${markerIconUrl}|${geoPoint.latitude},${geoPoint.longitude}")
+        if (isDark) {
+            builder.append(
+                "&style=element:geometry%7Ccolor:0x242f3e&style=element:labels.text.fill%7Ccolor:0x746855&style=element:labels.text.stroke%7Ccolor:0x242f3e&style=feature:administrative.locality%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi.business%7Cvisibility:off&style=feature:poi.park%7Celement:geometry%7Ccolor:0x263c3f&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x6b9a76&style=feature:road%7Celement:geometry%7Ccolor:0x38414e&style=feature:road%7Celement:geometry.stroke%7Ccolor:0x212a37&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:road%7Celement:labels.text.fill%7Ccolor:0x9ca5b3&style=feature:road.highway%7Celement:geometry%7Ccolor:0x746855&style=feature:road.highway%7Celement:geometry.stroke%7Ccolor:0x1f2835&style=feature:road.highway%7Celement:labels.text.fill%7Ccolor:0xf3d19c&style=feature:transit%7Cvisibility:off&style=feature:transit%7Celement:geometry%7Ccolor:0x2f3948&style=feature:transit.station%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:water%7Celement:geometry%7Ccolor:0x17263c&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x515c6d&style=feature:water%7Celement:labels.text.stroke%7Ccolor:0x17263c"
+            )
+        } else {
+            builder.append("&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi.business%7Cvisibility:off&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:transit%7Cvisibility:off")
+        }
+        onReady(builder.toString())
+    }
 }
 
 @Composable
