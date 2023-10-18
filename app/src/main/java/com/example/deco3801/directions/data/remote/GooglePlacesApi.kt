@@ -6,6 +6,8 @@ import retrofit2.http.Query
 
 // Directions was created using below
 // Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
+
+// Records the Google API call
 interface GooglePlacesApi {
     @GET("/maps/api/directions/json")
     suspend fun getDirection(
