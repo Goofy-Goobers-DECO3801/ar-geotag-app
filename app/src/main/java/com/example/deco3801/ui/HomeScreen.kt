@@ -181,7 +181,7 @@ fun HomeScreen(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,
                         snippet = it.description,
-                        icon = resizeBitmap(context, 30, 48),
+                        icon = resizeBitmap(context, 60, 96),
                         onClick = markerClick,
                     )
                 }
