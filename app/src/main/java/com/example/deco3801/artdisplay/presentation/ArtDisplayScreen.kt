@@ -3,20 +3,15 @@ package com.example.deco3801.artdisplay.presentation
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,25 +25,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.example.deco3801.R
+import com.example.deco3801.ui.components.ProgressbarState
+import com.example.deco3801.ui.components.TopBar
+import com.google.ar.core.Config
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArModelNode
 import io.github.sceneview.ar.node.ArNode
-import com.example.deco3801.R
-import com.example.deco3801.ui.components.TopBar
-import com.google.ar.core.Config
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.math.Position
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // AR screen was modelled after below sample
 // Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
 
 /*
  * The AR screen composable
+ *
+ * This is implemented using a ViewModel for the AR display which itself utilises the ViewState
+ * data class to keep track of the state of the AR screen. A single instance of ArtDisplayViewModel
+ * defined in the main activity of the app controls the logic for the AR screens.
+ * Therefore, at each AR screen creation, the state of the ViewModel is reset.
+ *
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -72,6 +71,7 @@ fun ArtDisplayScreen(
 
     DisposableEffect(Unit) {
         onDispose {
+            ProgressbarState.resetProgressbar()
             onReturn(modelNode, viewState)
         }
     }
@@ -79,10 +79,10 @@ fun ArtDisplayScreen(
     when (uiAction) {
         is ArtDisplayUIAction.ShowModalPlaced -> {
             LaunchedEffect(Unit) {
-//                Toast.makeText(context, "Placed model!", Toast.LENGTH_SHORT).show()
                 artDisplayViewModel.onConsumedUiAction()
             }
         }
+
         null -> {}
     }
 
@@ -117,7 +117,6 @@ fun ArtDisplayScreen(
                     session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                     session.depthMode = Config.DepthMode.AUTOMATIC
                     session.instantPlacementEnabled = true
-                    artDisplayViewModel.resetStates()
 
                 },
                 onFrame = { arFrame ->
@@ -125,12 +124,13 @@ fun ArtDisplayScreen(
                     // WARNING: DO NOT PASS ARSceneView/ARFrame TO ViewModel to avoid memory leaks
                     artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
                 },
-                onTap = { hitResult ->
-                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = true))
+                onTap = {
                     // User tapped in the AR view
-                    sceneView?.let {
-                        modelNode = onUserTap(it, viewState, artDisplayMode, artDisplayViewModel)
+                    if (!viewState.modelPlaced) {
+                        sceneView?.let {
+                            modelNode = onUserTap(it, viewState, artDisplayMode)
 
+                        }
                     }
                 },
                 onTrackingFailureChanged = { trackingFailureReason ->
@@ -153,7 +153,6 @@ fun ArtDisplayScreen(
             } else {
                 if (!viewState.modelPlaced) {
                     if (viewState.readyToPlaceModel) {
-
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -179,7 +178,7 @@ fun ArtDisplayScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "Move your phone to place model",
+                                "Tap now for instant placement or scan the area with your camera for best placement!",
                                 modifier = Modifier.padding(16.dp),
                                 textAlign = TextAlign.Center,
                                 color = Color.White
@@ -197,8 +196,6 @@ fun ArtDisplayScreen(
                     }
                 }
                 if (viewState.modelPlaced && modelNode != null) {
-
-
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
@@ -245,10 +242,14 @@ private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
 /*
  * Return the AR model to be placed
  */
-fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplayMode: PlacementMode, artDisplayViewModel: ArtDisplayViewModel): ArModelNode {
+fun onUserTap(
+    sceneView: ArSceneView,
+    viewState: ArtDisplayViewState,
+    artDisplayMode: PlacementMode
+): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
-
-    val tmp =  ArModelNode(
+    ProgressbarState.showIndeterminateProgressbar()
+    val tmp = ArModelNode(
         sceneView.engine, artDisplayMode
     ).apply {
         viewState.modelAsset?.let {
@@ -258,12 +259,11 @@ fun onUserTap(sceneView: ArSceneView, viewState: ArtDisplayViewState, artDisplay
                 scaleToUnits = 1f,
                 centerOrigin = Position(-0.5f),
                 onLoaded = {
-                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = false))
-                }
+                    ProgressbarState.resetProgressbar()
+                },
             )
         }
     }
-    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.DownloadAsset(downloading = false))
     return tmp
 
 }
