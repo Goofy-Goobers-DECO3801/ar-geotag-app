@@ -1,7 +1,10 @@
 package com.example.deco3801.ui
 
 import android.Manifest
-import android.util.Log
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +27,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,9 +53,11 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -68,6 +72,7 @@ import org.imperiumlabs.geofirestore.util.GeoUtils
 fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
     Scaffold(
         topBar = {
@@ -85,7 +90,13 @@ fun HomeScreen(
         val uiState by viewModel.uiState.collectAsState()
         val art by viewModel.activeArt.collectAsState()
         val cameraPositionState = rememberCameraPositionState()
-        var mapProperties by remember { mutableStateOf(MapProperties()) }
+        var mapProperties by remember {
+            mutableStateOf(
+                MapProperties(
+                    mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light),
+                )
+            )
+        }
 
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
@@ -170,7 +181,7 @@ fun HomeScreen(
                         state = MarkerState(position = it.location!!.toLatLng()),
                         title = it.id,
                         snippet = it.description,
-                        icon = BitmapDescriptorFactory.fromResource(R.drawable.map_marker),
+                        icon = resizeBitmap(context, 30, 48),
                         onClick = markerClick,
                     )
                 }
@@ -186,6 +197,14 @@ fun HomeScreen(
             )
         }
     }
+}
+
+fun resizeBitmap(context: Context, width: Int, height: Int): BitmapDescriptor {
+    val imageBitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.map_marker
+    )
+    return BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(imageBitmap, width, height, false))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
