@@ -177,14 +177,14 @@ fun ProfileScreen(
                                                 ScreenNames.EditProfile.name,
                                             )
                                         },
-                                        modifier = Modifier.size(120.dp,40.dp)
+                                        modifier = Modifier.size(130.dp,40.dp)
                                     ) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
                                     Button(
                                         onClick = viewModel::follow,
-                                        modifier = Modifier.size(120.dp,40.dp)) {
+                                        modifier = Modifier.size(130.dp,40.dp)) {
                                         Text(text = if (isFollowing!!) "Unfollow" else "Follow")
                                     }
                                 }
