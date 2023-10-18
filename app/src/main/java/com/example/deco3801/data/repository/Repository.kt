@@ -1,6 +1,7 @@
 package com.example.deco3801.data.repository
 
 import android.util.Log
+import com.example.deco3801.util.forEachApply
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -63,5 +64,17 @@ abstract class Repository<T>(private val clazz: Class<T>) {
         listener = null
     }
 
-    abstract fun getCollectionRef(id: String? = null): CollectionReference
+    fun deleteCollection(docId: String? = null) {
+        return getCollectionRef(docId).delete()
+    }
+
+    abstract fun getCollectionRef(docId: String? = null): CollectionReference
+}
+
+fun CollectionReference.delete() {
+    this.get().addOnSuccessListener {
+        it.documents.forEachApply {
+            reference.delete()
+        }
+    }
 }

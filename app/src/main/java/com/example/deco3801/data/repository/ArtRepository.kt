@@ -23,7 +23,7 @@ class ArtRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val auth: FirebaseAuth,
-    private val userRepo: UserRepository
+    private val userRepo: UserRepository,
 ) : Repository<Art>(Art::class.java) {
     suspend fun createArt(
         title: String,
@@ -70,6 +70,8 @@ class ArtRepository @Inject constructor(
             if(art.storageRef.isNotBlank()) {
                 storage.reference.child(art.storageRef).delete()
             }
+//            getCommentSubCollectionRef(art.id).delete()
+//            getLikeSubCollectionRef(art.id).delete()
         }.await()
     }
 
@@ -88,11 +90,21 @@ class ArtRepository @Inject constructor(
         return userRepo.getUser(art.userId)!!
     }
 
-    override fun getCollectionRef(id: String?): CollectionReference {
+    override fun getCollectionRef(docId: String?): CollectionReference {
         return db.collection(ART_COLLECTION)
+    }
+
+    fun getCommentSubCollectionRef(artId: String): CollectionReference {
+        return getCollectionRef().document(artId).collection(COMMENT_COLLECTION)
+    }
+
+    fun getLikeSubCollectionRef(artId: String): CollectionReference {
+        return getCollectionRef().document(artId).collection(LIKE_COLLECTION)
     }
 
     companion object {
         private const val ART_COLLECTION = "art"
+        private const val COMMENT_COLLECTION = "comments"
+        private const val LIKE_COLLECTION = "likes"
     }
 }
