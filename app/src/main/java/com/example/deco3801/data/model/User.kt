@@ -1,8 +1,15 @@
+/**
+ * File containing the User model.
+ */
 package com.example.deco3801.data.model
 
 import com.google.firebase.firestore.DocumentId
 import kotlinx.serialization.Serializable
 
+/**
+ * User model representing the structure of the document in Firestore.
+ * Used for storing user-data and other information displayed on their profile page.
+ */
 @Serializable
 data class User(
     @DocumentId

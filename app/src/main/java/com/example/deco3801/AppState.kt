@@ -1,3 +1,6 @@
+/**
+ * App state data and functions
+ */
 package com.example.deco3801
 
 import androidx.compose.material3.SnackbarHostState
@@ -12,6 +15,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
+
+/**
+ * The global app state.
+ * This should not be used directly, instead use [rememberAppState].
+ *
+ * @see [rememberAppState]
+ */
 class AppState(
     val snackbarManager: SnackbarManager,
     val snackbarHostState: SnackbarHostState,
@@ -20,6 +30,7 @@ class AppState(
     val progressbarState: ProgressbarState,
 ) {
     init {
+        // Listens for snackbar messages and displays them.
         scope.launch {
             snackbarManager.messages.filterNotNull().collect {
                 snackbarHostState.showSnackbar(message = it.message, duration = it.duration, withDismissAction = true)
@@ -29,6 +40,17 @@ class AppState(
 
 }
 
+/**
+ * Remember the global app state.
+ *
+ * @param snackbarManager The [SnackbarManager] to use.
+ * @param snackbarHostState The [SnackbarHostState] to use.
+ * @param scope The [CoroutineScope] to use.
+ * @param navController The [NavHostController] to use.
+ * @param progressbarState The [ProgressbarState] to use.
+ *
+ * @return The [AppState].
+ */
 @Composable
 fun rememberAppState(
     snackbarManager: SnackbarManager = remember { SnackbarManager },

@@ -41,6 +41,14 @@ import com.google.firebase.auth.FirebaseUser
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+/**
+ * The main screen that sets up the app, navigation and global state.
+ *
+ * @param artDisplayViewModel The art display view model to use.
+ * @param authUser The authenticated user or null if not authenticated.
+ * @param markerIcon The resized marker icon to use in the maps
+ * @param appState The global [AppState] to use.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppFunctionality(
@@ -51,6 +59,7 @@ fun AppFunctionality(
 ) {
     val context = LocalContext.current
 
+    // Lock the screen orientation to portrait.
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
     Log.d("AUTH", authUser.toString())
@@ -134,19 +143,34 @@ fun AppFunctionality(
     }
 }
 
+/**
+ * Navigates to the AR screen with the given [uri].
+ * The [uri] is encoded then passed as a query parameter.
+ */
 fun NavHostController.navigateAR(uri: String) {
     val encondedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
     return this.navigate("${ScreenNames.ARscreen.name}?uri=$encondedUri")
 }
 
+/**
+ * Navigates to the artwork screen with the given [artId].
+ * The [artId] is used as part of the path.
+ */
 fun NavHostController.navigateArt(artId: String) {
     return this.navigate("${ScreenNames.ArtworkNav.name}/$artId")
 }
 
+/**
+ * Navigates to the profile screen with the given [userId].
+ * The [userId] is used as part of the path.
+ */
 fun NavHostController.navigateProfile(userId: String) {
     return this.navigate("${ScreenNames.Profile.name}/$userId")
 }
 
+/**
+ * Locks the screen orientation to the given [orientation].
+ */
 @Composable
 fun LockScreenOrientation(orientation: Int) {
     val context = LocalContext.current
@@ -156,6 +180,11 @@ fun LockScreenOrientation(orientation: Int) {
     }
 }
 
+/**
+ * Finds the activity from the context.
+ *
+ * @return The activity or null if not found.
+ */
 fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()

@@ -1,3 +1,6 @@
+/**
+ * Composable functions for displaying images.
+ */
 package com.example.deco3801.ui.components
 
 import androidx.compose.foundation.clickable
@@ -18,6 +21,11 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 
+/**
+ * Composable function for displaying an async image that can be clicked to expand.
+ *
+ * @see [AsyncImage] for parameters.
+ */
 @Composable
 fun ExpandableAsyncImage(
     // Either an ImageRequest or ImageRequest.data (passed to AsyncImage)

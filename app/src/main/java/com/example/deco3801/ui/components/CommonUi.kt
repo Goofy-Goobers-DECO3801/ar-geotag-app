@@ -1,3 +1,6 @@
+/**
+ * Contains common UI components used throughout the app.
+ */
 package com.example.deco3801.ui.components
 
 import androidx.compose.foundation.Image
@@ -63,6 +66,16 @@ import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
+/**
+ * A composable top bar that is used throughout the app.
+ *
+ * @param navController The navController used to navigate between screens.
+ * @param modifier The modifier to be applied to the top bar.
+ * @param title The title of the top bar.
+ * @param canNavigateBack Whether the top bar should have a back button.
+ * @param actions The actions to be displayed on the top bar.
+ * @see [TopAppBar]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
@@ -120,6 +133,9 @@ fun TopBar(
 }
 
 /**
+ * A composable text box that automatically resizes the text to fit the constrained width.
+ *
+ * @see [Text] for parameters.
  * @reference
  * B. Hoffmann, "android:autoSizeTextType in Jetpack Compose," Stackoverflow, 7 July 2021.
  * \[Online]. Available: https://stackoverflow.com/a/66090448. [Accessed 16 October 2023].
@@ -174,6 +190,14 @@ fun AutoSizeText(
     )
 }
 
+/**
+ * A composable button used on the bottom navigation bar.
+ *
+ * @param text The text to be displayed on the button.
+ * @param icon The icon to be displayed on the button.
+ * @param visitPage The function to be called when the button is clicked.
+ * @param isSelected Whether the button is selected.
+ */
 @Composable
 fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
     val backgroundColor = if (isSelected) {
@@ -212,6 +236,12 @@ fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected
     }
 }
 
+/**
+ * The bottom navigation bar for the app.
+ * The nav bar is used to navigate between the home, create and profile screens.
+ *
+ * @param navController The navController used to navigate between screens.
+ */
 @Composable
 fun NavBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -269,6 +299,6 @@ fun NavBar(navController: NavHostController) {
 
 @Preview
 @Composable
-fun PreviewNavBar() {
+private fun PreviewNavBar() {
     NavBar(rememberNavController())
 }

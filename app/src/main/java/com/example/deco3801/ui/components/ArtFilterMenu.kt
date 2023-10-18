@@ -1,3 +1,6 @@
+/**
+ * Contains components for the art filter.
+ */
 package com.example.deco3801.ui.components
 
 import android.util.Log
@@ -28,6 +31,14 @@ import androidx.preference.PreferenceManager
 import com.example.deco3801.viewmodel.ArtFilterAction
 import com.example.deco3801.viewmodel.HomeViewModel
 
+
+/**
+ * A Composable component for the art filter menu.
+ * Allowing users to change what art they are seeing based on the various filters, including
+ * following only and mine only.
+ *
+ * @param viewModel The HomeViewModel instance injected with Hilt.
+ */
 @Composable
 fun ArtFilterMenu(
     viewModel: HomeViewModel = hiltViewModel()

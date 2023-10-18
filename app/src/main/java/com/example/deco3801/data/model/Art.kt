@@ -1,3 +1,6 @@
+/**
+ * File containing the Art model.
+ */
 package com.example.deco3801.data.model
 
 import com.google.firebase.firestore.DocumentId
@@ -6,6 +9,10 @@ import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
+/**
+ * Art model representing the structure of the document in Firestore.
+ * Used for storing all information pertinent to a particular artwork.
+ */
 data class Art(
     @DocumentId
     var id: String = "",

@@ -1,3 +1,6 @@
+/**
+ * Composable components for the Artwork Navigation screen.
+ */
 package com.example.deco3801.ui
 
 import android.graphics.Bitmap
@@ -95,8 +98,21 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import org.imperiumlabs.geofirestore.util.GeoUtils
 
+/**
+ * Margin in meters to determine if the user is at the artwork location.
+ */
 private const val DISTANCE_AWAY_MARGIN = 50.0
 
+/**
+ * Displays the Artwork Navigation screen and all its components.
+ * This screen includes a map, the artwork title, description, and the ability to like and comment.
+ *
+ * @param artId The id of the artwork to display.
+ * @param navController The navigation controller.
+ * @param markerIcon The icon to use for the marker on the map.
+ * @param viewModel The Artwork Navigation view model injected by Hilt.
+ * @param useDarkTheme Whether to use the dark theme.
+ */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ArtworkNavScreen(
@@ -255,6 +271,19 @@ fun ArtworkNavScreen(
     }
 }
 
+/**
+ * Displays the comments for the artwork and allows the user to post a comment.
+ *
+ * @param artId The id of the artwork to display the comments for.
+ * @param onUserClicked Callback to run when the user's profile is clicked.
+ * @param onDismissRequest Callback to run when the bottom sheet is dismissed.
+ * @param distanceInM The distance in meters between the user and the artwork.
+ * @param modifier The modifier to apply to the bottom sheet.
+ * @param viewModel The comment view model injected by Hilt.
+ * @param sheetState The state of the bottom sheet.
+ *
+ * @see [ModalBottomSheet]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentBottomSheet(
@@ -331,6 +360,14 @@ fun CommentBottomSheet(
     }
 }
 
+/**
+ * Display the header information for an artwork.
+ * This includes the user's profile picture, username, and the timestamp of the artwork.
+ *
+ * @param art The artwork to display the header for.
+ * @param user The user who created the artwork.
+ * @param onUserClicked Callback to run when the user's profile is clicked.
+ */
 @Composable
 fun ArtworkTitle(
     art: Art,
@@ -396,6 +433,19 @@ fun ArtworkTitle(
     }
 }
 
+/**
+ * Display the edit post bottom sheet.
+ * This allows the user to delete or report their post.
+ *
+ * @param isCurrentUser Whether the current user is the owner of the post.
+ * @param onDismissRequest Callback to run when the bottom sheet is dismissed.
+ * @param onDelete Callback to run when the delete button is clicked.
+ * @param onReport Callback to run when the report button is clicked.
+ * @param modifier The modifier to apply to the bottom sheet.
+ * @param sheetState The state of the bottom sheet.
+ *
+ * @see [ModalBottomSheet]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPostBottomSheet(
@@ -470,6 +520,20 @@ fun EditPostBottomSheet(
     }
 }
 
+/**
+ * Display the Google map with a marker on the artwork, and a route to it.
+ *
+ * @param art The artwork to display the map for.
+ * @param userLocation The user's current location.
+ * @param modifier The modifier to apply to the map.
+ * @param columnScroll Callback to run when the user scrolls the column.
+ * @param markerIcon The icon to use for the marker on the map.
+ * @param cameraPositionState The camera position state of the map.
+ * @param mapProperties The properties of the map.
+ * @param googlePlacesViewModel The Google Places view model injected by Hilt.
+ *
+ * @see [GoogleMap]
+ */
 @Composable
 fun ArtworkMap(
     art: Art,
@@ -538,6 +602,13 @@ fun ArtworkMap(
     }
 }
 
+/**
+ * Display the interact section of the artwork navigation screen.
+ * This shows the user how far away they are from the artwork and view it in AR when they arrive.
+ *
+ * @param distanceInM The distance in meters between the user and the artwork.
+ * @param onArClicked Callback to run when the AR button is clicked.
+ */
 @Composable
 fun ArtworkInteract(
     distanceInM: Double?,
@@ -584,6 +655,15 @@ fun ArtworkInteract(
     }
 }
 
+/**
+ * Display the description of the artwork.
+ *
+ * @param art The artwork to display the description for.
+ * @param liked Whether the user has liked the artwork.
+ * @param onLikeClicked Callback to run when the like button is clicked.
+ * @param onCommentClicked Callback to run when the comment button is clicked.
+ * @param distanceInM The distance in meters between the user and the artwork.
+ */
 @Composable
 fun ArtworkDescription(
     art: Art,
@@ -636,6 +716,13 @@ fun ArtworkDescription(
     }
 }
 
+/**
+ * Display a user's comment.
+ *
+ * @param user The user who posted the comment.
+ * @param comment The comment to display.
+ * @param onUserClicked Callback to run when the user's profile is clicked.
+ */
 @Composable
 fun UserComment(
     user: User,
@@ -687,6 +774,9 @@ fun UserComment(
     }
 }
 
+/**
+ * Determines if the user is at the artwork location.
+ */
 private fun atArtLocation(distanceInM: Double?): Boolean {
     return distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN
 }

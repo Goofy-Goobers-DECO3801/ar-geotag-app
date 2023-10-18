@@ -1,3 +1,6 @@
+/**
+ * Composable functions for location services.
+ */
 package com.example.deco3801.ui.components
 
 import android.Manifest
@@ -31,12 +34,18 @@ import java.util.concurrent.TimeUnit
 private const val LOCATION_TAG = "LOCATION"
 
 /**
+ * A composable to track the users current location and run the callback with the latest location.
+ * This is achieved through the Fused Location Provider with google location services.
+ *
+ * @param onChange Callback to run when the user's location changes.
+ * @param delayInSeconds The delay between location updates.
+ *
  * @reference
  * The Android Open Source Project, "LocationUpdateScreen.kt," Android, 16 May 2023. \[Online].
  * Available: https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt.
  * [Accessed 10 September 2023].
  */
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission") // We check for this inside a function
 @Composable
 fun GetUserLocation(
     onChange: (Location?) -> Unit,
@@ -87,6 +96,14 @@ fun GetUserLocation(
 }
 
 /**
+ * A composable to get the given geo-point (location) as an address.
+ * This function has support for all API levels <= 34 (current max supported API level).
+ *
+ * @param location The user's current location.
+ * @param onLocationName Callback to run when the user's location changes.
+ * @param fullAddress Whether to return the full address or just the locality and admin area.
+ *
+ *
  * @reference
  * E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, 25 October 2022. \[Online].
  * Available: https://stackoverflow.com/a/74160903. [Accessed 11 October 2023].
@@ -136,6 +153,11 @@ fun GetLocationName(
     }
 }
 
+/**
+ * A composable to get the given location as an address.
+ *
+ * @see [GetLocationName] for documentation.
+ */
 @Composable
 fun GetLocationName(
     location: Location?,

@@ -17,6 +17,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import javax.inject.Provider
 
+/**
+ * The different screens that can be navigated to.
+ */
 enum class ScreenNames {
     Login,
     SignUp,
@@ -31,6 +34,9 @@ enum class ScreenNames {
     ArtworkNav,
 }
 
+/**
+ * Main activity for the app. This is where the app starts.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
