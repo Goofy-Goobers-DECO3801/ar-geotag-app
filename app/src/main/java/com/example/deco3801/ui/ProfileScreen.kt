@@ -406,19 +406,20 @@ fun ArtworkTile(
                             .padding(start = 12.dp)
                             .size(16.dp),
                 )
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${art.likeCount} likes",
+                    text = "${art.likeCount}",
                     style = MaterialTheme.typography.bodySmall,
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     imageVector = Icons.Outlined.Message,
                     contentDescription = "review",
                     Modifier.size(16.dp),
                 )
-
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${art.commentCount} comments",
+                    text = "${art.commentCount}",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
