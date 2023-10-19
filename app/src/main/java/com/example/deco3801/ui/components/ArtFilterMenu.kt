@@ -31,7 +31,6 @@ import androidx.preference.PreferenceManager
 import com.example.deco3801.viewmodel.ArtFilterAction
 import com.example.deco3801.viewmodel.HomeViewModel
 
-
 /**
  * A Composable component for the art filter menu.
  * Allowing users to change what art they are seeing based on the various filters, including
@@ -40,9 +39,7 @@ import com.example.deco3801.viewmodel.HomeViewModel
  * @param viewModel The HomeViewModel instance injected with Hilt.
  */
 @Composable
-fun ArtFilterMenu(
-    viewModel: HomeViewModel = hiltViewModel()
-) {
+fun ArtFilterMenu(viewModel: HomeViewModel = hiltViewModel()) {
     val context = LocalContext.current
 
     val filterState by viewModel.filterState.collectAsState()
@@ -59,34 +56,33 @@ fun ArtFilterMenu(
             imageVector = Icons.Outlined.FilterList,
             contentDescription = "Filter",
             tint = Color.White,
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(36.dp),
         )
     }
     DropdownMenu(
         expanded = expanded,
-        onDismissRequest = { expanded = false }
+        onDismissRequest = { expanded = false },
     ) {
-
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
         ) {
             Text(text = "Mine Only")
             Switch(
                 checked = filterState.mine,
                 onCheckedChange = {
                     viewModel.onFilterAction(ArtFilterAction.Mine(it), store)
-                }
+                },
             )
             Text(text = "Following Only")
             Switch(
                 checked = filterState.following,
                 onCheckedChange = {
                     viewModel.onFilterAction(ArtFilterAction.Following(it), store)
-                }
+                },
             )
-
         }
     }
 }

@@ -39,7 +39,6 @@ class ArtRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val userRepo: UserRepository,
 ) : Repository<Art>(Art::class.java) {
-
     /**
      * Create a new artwork on the Firestore database and upload the model to Storage.
      *
@@ -63,24 +62,25 @@ class ArtRepository @Inject constructor(
         var storageRef: StorageReference? = null
         var storagePath = ""
 
-        if (uri.scheme != "https" ) {
-            storagePath = "$uid/art/${System.currentTimeMillis()}-${filename}"
+        if (uri.scheme != "https") {
+            storagePath = "$uid/art/${System.currentTimeMillis()}-$filename"
             storageRef = storage.reference.child(storagePath)
             storageRef.putFile(uri).addOnProgressListener {
                 val progress = it.bytesTransferred.toFloat() / it.totalByteCount
                 ProgressbarState.updateProgressbar(progress)
             }.await()
         }
-        val art = Art(
-            title = title,
-            description = description,
-            location = location.toGeoPoint(),
-            altitude = location.altitude,
-            geohash = GeoHash(location.toGeoLocation()).geoHashString,
-            userId = uid,
-            storageUri = storageRef?.downloadUrl?.await()?.toString() ?: uri.toString(),
-            storageRef = storagePath
-        )
+        val art =
+            Art(
+                title = title,
+                description = description,
+                location = location.toGeoPoint(),
+                altitude = location.altitude,
+                geohash = GeoHash(location.toGeoLocation()).geoHashString,
+                userId = uid,
+                storageUri = storageRef?.downloadUrl?.await()?.toString() ?: uri.toString(),
+                storageRef = storagePath,
+            )
 
         Log.d(ART_COLLECTION, art.toString())
 
@@ -102,7 +102,7 @@ class ArtRepository @Inject constructor(
      */
     suspend fun deleteArt(art: Art) {
         getCollectionRef().document(art.id).delete().addOnSuccessListener {
-            if(art.storageRef.isNotBlank()) {
+            if (art.storageRef.isNotBlank()) {
                 storage.reference.child(art.storageRef).delete()
             }
 //            getCommentSubCollectionRef(art.id).delete()
@@ -127,7 +127,10 @@ class ArtRepository @Inject constructor(
      * @param userId the id of the user whose art is being listened to.
      * @param callback the callback function to be called when the data changes.
      */
-    fun attachListenerByUserId(userId: String, callback: (List<Art>) -> Unit) {
+    fun attachListenerByUserId(
+        userId: String,
+        callback: (List<Art>) -> Unit,
+    ) {
         attachListenerWithQuery(callback) { query ->
             query.whereEqualTo("userId", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)

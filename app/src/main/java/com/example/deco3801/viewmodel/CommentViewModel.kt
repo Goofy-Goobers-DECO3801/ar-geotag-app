@@ -54,7 +54,10 @@ class CommentViewModel @Inject constructor(
     /**
      * Post a comment with [text] on the art with [artId]
      */
-    fun onCommentPosted(artId: String, text: String) {
+    fun onCommentPosted(
+        artId: String,
+        text: String,
+    ) {
         launchCatching {
             commentRepo.commentOnArt(artId, text)
         }
@@ -71,6 +74,5 @@ class CommentViewModel @Inject constructor(
             }
             _comments.value = state
         }
-
     }
 }

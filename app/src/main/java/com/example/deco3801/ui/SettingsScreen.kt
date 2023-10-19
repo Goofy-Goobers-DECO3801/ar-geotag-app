@@ -55,7 +55,7 @@ import com.google.firebase.ktx.Firebase
 fun SettingsScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -65,12 +65,13 @@ fun SettingsScreen(
                 navController = navController,
                 canNavigateBack = true,
             )
-        }
+        },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
-                modifier = Modifier
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .padding(16.dp),
             ) {
                 val textModifier: Modifier = Modifier
                 val spacerModifier: Modifier = Modifier.height(10.dp)
@@ -79,7 +80,7 @@ fun SettingsScreen(
                         text = "Settings",
                         modifier = textModifier,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
                 item {
@@ -87,20 +88,22 @@ fun SettingsScreen(
                 }
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                                .padding(16.dp),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = modifier
-                                .fillMaxWidth()
+                            modifier =
+                                modifier
+                                    .fillMaxWidth(),
                         ) {
                             Text(text = "Private Account")
                             Switch(
                                 checked = uiState.isPrivate,
-                                onCheckedChange = viewModel::onPrivate
+                                onCheckedChange = viewModel::onPrivate,
                             )
                         }
                     }
@@ -110,10 +113,11 @@ fun SettingsScreen(
                 }
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                                .padding(16.dp),
                     ) {
                         Column {
                             Text(text = "Change Password")
@@ -122,19 +126,19 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 value = uiState.oldPassword,
                                 label = "Old Password",
-                                onValueChange = viewModel::onOldPasswordChange
+                                onValueChange = viewModel::onOldPasswordChange,
                             )
                             Spacer(modifier = spacerModifier)
                             PasswordField(
                                 modifier = Modifier.fillMaxWidth(),
                                 value = uiState.newPassword,
                                 label = "New Password",
-                                onValueChange = viewModel::onNewPasswordChange
+                                onValueChange = viewModel::onNewPasswordChange,
                             )
                             Spacer(modifier = spacerModifier)
                             Button(
                                 onClick = viewModel::updatePassword,
-                                enabled = viewModel.updatePasswordEnabled()
+                                enabled = viewModel.updatePasswordEnabled(),
                             ) {
                                 Text("Confirm")
                             }
@@ -146,24 +150,25 @@ fun SettingsScreen(
                 }
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                            .padding(16.dp)
-                            .clickable {
-                                navController.navigate(ScreenNames.PrivacyPolicy.name)
-                            }
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                                .padding(16.dp)
+                                .clickable {
+                                    navController.navigate(ScreenNames.PrivacyPolicy.name)
+                                },
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(text = "Review the Privacy Policy")
                             Icon(
                                 imageVector = Icons.Filled.ArrowForwardIos,
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(24.dp),
                             )
                         }
                     }
@@ -171,24 +176,25 @@ fun SettingsScreen(
                 item { Spacer(modifier = spacerModifier) }
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                            .padding(16.dp)
-                            .clickable {
-                                navController.navigate(ScreenNames.TermsAndConditions.name)
-                            }
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                                .padding(16.dp)
+                                .clickable {
+                                    navController.navigate(ScreenNames.TermsAndConditions.name)
+                                },
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(text = "Review the Terms & Conditions of Use")
                             Icon(
                                 imageVector = Icons.Filled.ArrowForwardIos,
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(24.dp),
                             )
                         }
                     }
@@ -196,9 +202,10 @@ fun SettingsScreen(
                 item {
                     Row(
                         horizontalArrangement = Arrangement.Center,
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(12.dp)
+                        modifier =
+                            modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
                     ) {
                         Button(onClick = {
                             Firebase.auth.signOut()
@@ -212,7 +219,6 @@ fun SettingsScreen(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

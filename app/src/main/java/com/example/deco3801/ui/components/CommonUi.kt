@@ -83,13 +83,13 @@ fun TopBar(
     modifier: Modifier = Modifier,
     title: String = "",
     canNavigateBack: Boolean = false,
-    actions:  @Composable() (RowScope.() -> Unit)= {},
+    actions: @Composable() (RowScope.() -> Unit) = {},
 ) {
     TopAppBar(
         title = {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 AutoSizeText(
                     text = title,
@@ -103,28 +103,28 @@ fun TopBar(
                 )
             }
         },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            titleContentColor = Color.White,
-            containerColor = UnchangingAppColors.main_theme
-        ),
+        colors =
+            TopAppBarDefaults.mediumTopAppBarColors(
+                titleContentColor = Color.White,
+                containerColor = UnchangingAppColors.main_theme,
+            ),
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = navController::popBackStack) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBackIos,
                         contentDescription = "ArrowBack",
-                        tint = Color.White
+                        tint = Color.White,
                     )
                 }
             } else {
-                IconButton(onClick = {navController.navigate(ScreenNames.Home.name) }) {
+                IconButton(onClick = { navController.navigate(ScreenNames.Home.name) }) {
                     Image(
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                 }
-
             }
         },
         actions = actions,
@@ -157,7 +157,7 @@ fun AutoSizeText(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
 ) {
     var textStyle by remember { mutableStateOf(style) }
     var readyToDraw by remember { mutableStateOf(false) }
@@ -177,16 +177,17 @@ fun AutoSizeText(
         maxLines = maxLines,
         minLines = minLines,
         style = textStyle,
-        modifier = modifier.drawWithContent {
-            if (readyToDraw) drawContent()
-        },
+        modifier =
+            modifier.drawWithContent {
+                if (readyToDraw) drawContent()
+            },
         onTextLayout = { textLayoutResult ->
             if (textLayoutResult.didOverflowWidth) {
                 textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
             } else {
                 readyToDraw = true
             }
-        }
+        },
     )
 }
 
@@ -199,36 +200,45 @@ fun AutoSizeText(
  * @param isSelected Whether the button is selected.
  */
 @Composable
-fun NavButton(text: String, icon: ImageVector, visitPage: () -> Unit, isSelected: Boolean) {
-    val backgroundColor = if (isSelected) {
-        UnchangingAppColors.lighter_main_theme
-    } else {
-        MaterialTheme.colorScheme.background
-    }
+fun NavButton(
+    text: String,
+    icon: ImageVector,
+    visitPage: () -> Unit,
+    isSelected: Boolean,
+) {
+    val backgroundColor =
+        if (isSelected) {
+            UnchangingAppColors.lighter_main_theme
+        } else {
+            MaterialTheme.colorScheme.background
+        }
 
-    val contentColor = if (isSelected) {
-        UnchangingAppColors.main_theme
-    } else {
-        MaterialTheme.colorScheme.onBackground
-    }
+    val contentColor =
+        if (isSelected) {
+            UnchangingAppColors.main_theme
+        } else {
+            MaterialTheme.colorScheme.onBackground
+        }
 
     Button(
         onClick = visitPage,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = backgroundColor,
-            contentColor = contentColor
-        ),
-        contentPadding = PaddingValues(top = 4.dp, bottom = 4.dp, start = 25.dp, end = 25.dp),
-        modifier = Modifier
-            .padding(
-                top = 7.dp,
-                bottom = 7.dp
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = backgroundColor,
+                contentColor = contentColor,
             ),
-        shape = RoundedCornerShape(5.dp)
+        contentPadding = PaddingValues(top = 4.dp, bottom = 4.dp, start = 25.dp, end = 25.dp),
+        modifier =
+            Modifier
+                .padding(
+                    top = 7.dp,
+                    bottom = 7.dp,
+                ),
+        shape = RoundedCornerShape(5.dp),
     ) {
         Column(
             modifier = Modifier.width(60.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(imageVector = icon, contentDescription = text)
             Text(text = text, style = MaterialTheme.typography.labelSmall)
@@ -254,44 +264,48 @@ fun NavBar(navController: NavHostController) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             } else {
                 LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(), progress = progressState.progress
+                    modifier = Modifier.fillMaxWidth(),
+                    progress = progressState.progress,
                 )
             }
         }
         Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height((0.5).dp)
-                .background(MaterialTheme.colorScheme.onError)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height((0.5).dp)
+                    .background(MaterialTheme.colorScheme.onError),
         )
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background),
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             NavButton(
                 text = "Home",
                 Icons.Default.Home,
                 { navController.navigate(ScreenNames.Home.name) },
-                isSelected = currentRoute == ScreenNames.Home.name
+                isSelected = currentRoute == ScreenNames.Home.name,
             )
             NavButton(
                 text = "Create",
                 Icons.Default.Create,
                 { navController.navigate(ScreenNames.Create.name) },
-                isSelected = currentRoute == ScreenNames.Create.name
+                isSelected = currentRoute == ScreenNames.Create.name,
             )
             NavButton(
                 text = "Profile",
                 Icons.Default.AccountCircle,
                 { navController.navigate("${ScreenNames.Profile.name}/${Firebase.auth.uid}") },
-                isSelected = if (currentRoute == "${ScreenNames.Profile.name}/{uid}") {
-                    val uId = navBackStackEntry?.arguments?.getString("uid")
-                    uId == Firebase.auth.uid
-                } else {
-                    false
-                }
+                isSelected =
+                    if (currentRoute == "${ScreenNames.Profile.name}/{uid}") {
+                        val uId = navBackStackEntry?.arguments?.getString("uid")
+                        uId == Firebase.auth.uid
+                    } else {
+                        false
+                    },
             )
         }
     }

@@ -30,7 +30,7 @@ val md_theme_light_tertiaryContainer = Color(0xFFFFDEA1)
 val md_theme_light_onTertiaryContainer = Color(0xFF261900)
 val md_theme_light_error = Color(0xFFBA1A1A)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
-val md_theme_light_onError = Color(0xFFE4DFE2)             // This is the color used in nav
+val md_theme_light_onError = Color(0xFFE4DFE2) // This is the color used in nav
 val md_theme_light_onErrorContainer = Color(0xFF410002)
 val md_theme_light_background = Color(0xFFFFFBFF)
 val md_theme_light_onBackground = Color(0xFF201A18)
@@ -62,7 +62,7 @@ val md_theme_dark_tertiaryContainer = Color(0xFF5C4200)
 val md_theme_dark_onTertiaryContainer = Color(0xFFFFDEA1)
 val md_theme_dark_error = Color(0xFFFFB4AB)
 val md_theme_dark_errorContainer = Color(0xFF93000A)
-val md_theme_dark_onError = Color(0xFF434142)           // This one too
+val md_theme_dark_onError = Color(0xFF434142) // This one too
 val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
 val md_theme_dark_background = Color(0xFF2B2B2B)
 val md_theme_dark_onBackground = Color(0xFFEDE0DC)
@@ -79,7 +79,4 @@ val md_theme_dark_surfaceTint = Color(0xFFFFB59E)
 val md_theme_dark_outlineVariant = Color(0xFF53433F)
 val md_theme_dark_scrim = Color(0xFF000000)
 
-
 val seed = Color(0xFFDD6841)
-
-

@@ -31,8 +31,7 @@ data class CreateUiState(
     var location: Location? = null,
     var uri: Uri? = null,
     var filename: String = "",
-    var imageBytes: ByteArray? = null
-
+    var imageBytes: ByteArray? = null,
 )
 
 /**
@@ -104,12 +103,16 @@ class CreateViewModel @Inject constructor(
     /**
      * Update the uri in the state to [uri] and the filename to [filename]
      */
-    fun onSelectFile(filename: String, uri: Uri) {
-        uiState = uiState.copy(
-            uri = uri,
-            filename = filename,
-            imageBytes = null,
-        )
+    fun onSelectFile(
+        filename: String,
+        uri: Uri,
+    ) {
+        uiState =
+            uiState.copy(
+                uri = uri,
+                filename = filename,
+                imageBytes = null,
+            )
     }
 
     /**
@@ -117,8 +120,10 @@ class CreateViewModel @Inject constructor(
      * The conversion happens by calling the python script to convert the 2d image byte stream into
      * a 3d model byte stream, which we then write to disk.
      */
-    fun onSelectImage(filename: String, inBytes: ByteArray) {
-
+    fun onSelectImage(
+        filename: String,
+        inBytes: ByteArray,
+    ) {
         val py = Python.getInstance()
         val module = py.getModule("jpeg_glb_template_converter")
         try {
@@ -130,16 +135,16 @@ class CreateViewModel @Inject constructor(
                 outputStream.write(outBytes)
             }
 
-            uiState = uiState.copy(
-                uri = tempFile.toUri(),
-                filename = tempFile.name,
-                imageBytes = inBytes,
-            )
+            uiState =
+                uiState.copy(
+                    uri = tempFile.toUri(),
+                    filename = tempFile.name,
+                    imageBytes = inBytes,
+                )
         } catch (e: PyException) {
             SnackbarManager.showError("Failed to convert image to 3d")
             Log.e("CREATE", e.stackTraceToString())
         }
-
     }
 
     /**
@@ -148,10 +153,10 @@ class CreateViewModel @Inject constructor(
      * @return True if the input is valid, false otherwise
      */
     fun isValid(): Boolean {
-        return uiState.title.isNotEmpty()
-                && uiState.description.isNotEmpty()
-                && uiState.location != null
-                && uiState.uri != null
+        return uiState.title.isNotEmpty() &&
+            uiState.description.isNotEmpty() &&
+            uiState.location != null &&
+            uiState.uri != null
     }
 
     /**

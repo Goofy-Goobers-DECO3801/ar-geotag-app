@@ -80,9 +80,6 @@ import com.example.deco3801.util.getGoogleApiKey
 import com.example.deco3801.viewmodel.FollowSheetState
 import com.example.deco3801.viewmodel.ProfileViewModel
 import com.google.firebase.firestore.GeoPoint
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
 
 /**
  * Displays the profile screen, allowing the user to view their profile and edit it and view their posts.
@@ -123,16 +120,15 @@ fun ProfileScreen(
                 canNavigateBack = !isCurrentUser,
             ) {
                 if (isCurrentUser) {
-                    IconButton(onClick = {navController.navigate(ScreenNames.Settings.name)}) {
+                    IconButton(onClick = { navController.navigate(ScreenNames.Settings.name) }) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = Color.White,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(36.dp),
                         )
                     }
                 }
-
             }
         },
     ) { innerPadding ->
@@ -154,7 +150,7 @@ fun ProfileScreen(
                             Modifier
                                 .fillMaxSize()
                                 .padding(top = 30.dp, bottom = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -191,14 +187,15 @@ fun ProfileScreen(
                                                 ScreenNames.EditProfile.name,
                                             )
                                         },
-                                        modifier = Modifier.size(130.dp,40.dp)
+                                        modifier = Modifier.size(130.dp, 40.dp),
                                     ) {
                                         Text(text = "Edit Profile")
                                     }
                                 } else if (isFollowing != null) {
                                     Button(
                                         onClick = viewModel::follow,
-                                        modifier = Modifier.size(130.dp,40.dp)) {
+                                        modifier = Modifier.size(130.dp, 40.dp),
+                                    ) {
                                         Text(text = if (isFollowing!!) "Unfollow" else "Follow")
                                     }
                                 }
@@ -277,16 +274,14 @@ fun FollowersBottomSheet(
     viewModel: ProfileViewModel = hiltViewModel(),
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-
     val followSheetState by viewModel.followSheetState.collectAsState()
     val follows by viewModel.follows.collectAsState()
 
     ModalBottomSheet(
         onDismissRequest = viewModel::hideFollowSheet,
         sheetState = sheetState,
-        modifier = modifier.heightIn(min=400.dp),
+        modifier = modifier.heightIn(min = 400.dp),
     ) {
-
         Text(
             text = if (followSheetState == FollowSheetState.FOLLOWING) "Following" else "Followers",
             modifier = Modifier.padding(start = 10.dp, bottom = 16.dp),
@@ -297,18 +292,18 @@ fun FollowersBottomSheet(
                 Modifier
                     .fillMaxWidth()
                     .height((0.5).dp)
-                    .background(MaterialTheme.colorScheme.onError)
+                    .background(MaterialTheme.colorScheme.onError),
         )
         LazyColumn {
             if (follows.isEmpty()) {
                 item {
                     Text(
                         text =
-                        if (followSheetState == FollowSheetState.FOLLOWING)  {
-                            "You are not following anyone!"
-                        } else {
-                            "No one is following you!"
-                        },
+                            if (followSheetState == FollowSheetState.FOLLOWING) {
+                                "You are not following anyone!"
+                            } else {
+                                "No one is following you!"
+                            },
                         modifier = Modifier.padding(10.dp),
                     )
                 }
@@ -317,7 +312,6 @@ fun FollowersBottomSheet(
                     FollowerBottomSheetSurface(user = user, onOpen = onOpen)
                 }
             }
-
         }
     }
 }
@@ -389,16 +383,17 @@ fun ArtworkTile(
     val spacerModifier: Modifier = Modifier.height(5.dp)
     var locationName by remember { mutableStateOf("") }
 
-    GetLocationName(location = art.location, onLocationName = {locationName = it})
+    GetLocationName(location = art.location, onLocationName = { locationName = it })
 
     Card(onClick = onClick) {
         Column {
             Spacer(modifier = Modifier.height(10.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 10.dp, end = 10.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 10.dp, end = 10.dp),
             ) {
                 StaticMap(art.location)
             }
@@ -408,14 +403,14 @@ fun ArtworkTile(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 12.dp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = formatDate(art.timestamp),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 15.dp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = spacerModifier)
             Row {
@@ -432,7 +427,7 @@ fun ArtworkTile(
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(end = 12.dp),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Spacer(modifier = spacerModifier)
@@ -473,11 +468,8 @@ fun ArtworkTile(
  * @param geoPoint The location of the artwork to put the marker.
  */
 @Composable
-fun StaticMap(
-    geoPoint: GeoPoint?
-) {
-
-    var model by remember { mutableStateOf<Any>(R.drawable.default_img)}
+fun StaticMap(geoPoint: GeoPoint?) {
+    var model by remember { mutableStateOf<Any>(R.drawable.default_img) }
 
     // Construct the query
     ConstructGoogleStaticMapQuery(geoPoint) { model = it }
@@ -498,7 +490,10 @@ fun StaticMap(
  * @param onReady The callback to run when the query is ready.
  */
 @Composable
-fun ConstructGoogleStaticMapQuery(geoPoint: GeoPoint?, onReady: (String) -> Unit) {
+fun ConstructGoogleStaticMapQuery(
+    geoPoint: GeoPoint?,
+    onReady: (String) -> Unit,
+) {
     var apiKey by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val markerIconUrl = remember { context.getString(R.string.map_marker_url) }
@@ -514,15 +509,17 @@ fun ConstructGoogleStaticMapQuery(geoPoint: GeoPoint?, onReady: (String) -> Unit
         }
 
         val builder = StringBuilder()
-        builder.append("https://maps.googleapis.com/maps/api/staticmap?key=${apiKey}")
+        builder.append("https://maps.googleapis.com/maps/api/staticmap?key=$apiKey")
         builder.append("&size=146x146&scale=2&zoom=15")
-        builder.append("&markers=icon:${markerIconUrl}|${geoPoint.latitude},${geoPoint.longitude}")
+        builder.append("&markers=icon:$markerIconUrl|${geoPoint.latitude},${geoPoint.longitude}")
         if (isDark) {
             builder.append(
-                "&style=element:geometry%7Ccolor:0x242f3e&style=element:labels.text.fill%7Ccolor:0x746855&style=element:labels.text.stroke%7Ccolor:0x242f3e&style=feature:administrative.locality%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi.business%7Cvisibility:off&style=feature:poi.park%7Celement:geometry%7Ccolor:0x263c3f&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x6b9a76&style=feature:road%7Celement:geometry%7Ccolor:0x38414e&style=feature:road%7Celement:geometry.stroke%7Ccolor:0x212a37&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:road%7Celement:labels.text.fill%7Ccolor:0x9ca5b3&style=feature:road.highway%7Celement:geometry%7Ccolor:0x746855&style=feature:road.highway%7Celement:geometry.stroke%7Ccolor:0x1f2835&style=feature:road.highway%7Celement:labels.text.fill%7Ccolor:0xf3d19c&style=feature:transit%7Cvisibility:off&style=feature:transit%7Celement:geometry%7Ccolor:0x2f3948&style=feature:transit.station%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:water%7Celement:geometry%7Ccolor:0x17263c&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x515c6d&style=feature:water%7Celement:labels.text.stroke%7Ccolor:0x17263c"
+                "&style=element:geometry%7Ccolor:0x242f3e&style=element:labels.text.fill%7Ccolor:0x746855&style=element:labels.text.stroke%7Ccolor:0x242f3e&style=feature:administrative.locality%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi.business%7Cvisibility:off&style=feature:poi.park%7Celement:geometry%7Ccolor:0x263c3f&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x6b9a76&style=feature:road%7Celement:geometry%7Ccolor:0x38414e&style=feature:road%7Celement:geometry.stroke%7Ccolor:0x212a37&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:road%7Celement:labels.text.fill%7Ccolor:0x9ca5b3&style=feature:road.highway%7Celement:geometry%7Ccolor:0x746855&style=feature:road.highway%7Celement:geometry.stroke%7Ccolor:0x1f2835&style=feature:road.highway%7Celement:labels.text.fill%7Ccolor:0xf3d19c&style=feature:transit%7Cvisibility:off&style=feature:transit%7Celement:geometry%7Ccolor:0x2f3948&style=feature:transit.station%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:water%7Celement:geometry%7Ccolor:0x17263c&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x515c6d&style=feature:water%7Celement:labels.text.stroke%7Ccolor:0x17263c",
             )
         } else {
-            builder.append("&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi.business%7Cvisibility:off&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:transit%7Cvisibility:off")
+            builder.append(
+                "&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi.business%7Cvisibility:off&style=feature:road%7Celement:labels.icon%7Cvisibility:off&style=feature:transit%7Cvisibility:off",
+            )
         }
         onReady(builder.toString())
     }

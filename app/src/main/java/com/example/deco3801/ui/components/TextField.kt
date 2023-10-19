@@ -22,7 +22,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
-
 /**
  * Composable function for a password text field.
  * The password is hidden by default, with an icon on the right to toggle visibility.
@@ -52,7 +51,7 @@ fun PasswordField(
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(
-                onClick = { isPasswordVisible = !isPasswordVisible }
+                onClick = { isPasswordVisible = !isPasswordVisible },
             ) {
                 val icon =
                     if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
@@ -78,7 +77,7 @@ fun PasswordField(
 fun EmailField(
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     TextField(
         modifier = modifier,
@@ -108,7 +107,7 @@ fun NameField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Username"
+    label: String = "Username",
 ) {
     TextField(
         label = { Text(label) },

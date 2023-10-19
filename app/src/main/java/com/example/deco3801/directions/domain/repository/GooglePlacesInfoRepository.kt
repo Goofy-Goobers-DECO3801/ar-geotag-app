@@ -9,5 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 // Provides an interface for accessing directions
 interface GooglePlacesInfoRepository {
-    fun getDirection(origin: String, destination: String, key: String): Flow<Resource<GooglePlacesInfo>>
+    fun getDirection(
+        origin: String,
+        destination: String,
+        key: String,
+    ): Flow<Resource<GooglePlacesInfo>>
 }

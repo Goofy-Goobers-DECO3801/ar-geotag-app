@@ -3,9 +3,7 @@
  */
 package com.example.deco3801.ui.components
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -18,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import com.example.deco3801.util.getCurrentLocation
 import com.example.deco3801.util.hasLocationPermissions
 import com.example.deco3801.util.toGeoPoint
@@ -124,9 +121,8 @@ fun GetLocationName(
                 address.getAddressLine(0)
             } else {
                 "${address.locality}, ${address.adminArea}"
-            }
+            },
         )
-
     }
 
     val context = LocalContext.current
@@ -145,7 +141,7 @@ fun GetLocationName(
         try {
             getLocationName(
                 gcd.getFromLocation(location.latitude, location.longitude, 1)
-                    ?.firstOrNull()
+                    ?.firstOrNull(),
             )
         } catch (e: Exception) {
             SnackbarManager.showError(e)

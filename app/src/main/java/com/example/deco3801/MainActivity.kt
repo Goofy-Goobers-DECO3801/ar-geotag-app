@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.example.deco3801.artdisplay.presentation.ArtDisplayViewModel
@@ -39,18 +37,15 @@ enum class ScreenNames {
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject
     lateinit var authUser: Provider<FirebaseUser?>
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         val artDisplayViewModel by viewModels<ArtDisplayViewModel>()
-        val markerIcon =  resizeBitmap(this, R.drawable.map_marker,60, 96)
+        val markerIcon = resizeBitmap(this, R.drawable.map_marker, 60, 96)
 
         if (!Python.isStarted()) {
-            Python.start(AndroidPlatform(this));
+            Python.start(AndroidPlatform(this))
         }
 
         super.onCreate(savedInstanceState)

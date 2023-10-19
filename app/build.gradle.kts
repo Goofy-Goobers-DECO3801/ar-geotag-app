@@ -129,8 +129,9 @@ val stopFirebaseEmulators by tasks.registering {
 }
 val configureFirebase by tasks.registering {
     doLast {
-        val projectId = properties["projectId"] as? String
-            ?: error("Please rerun with the project id, ./gradlew configureFirebase -PprojectId=yourProjectId")
+        val projectId =
+            properties["projectId"] as? String
+                ?: error("Please rerun with the project id, ./gradlew configureFirebase -PprojectId=yourProjectId")
 
         println("Installing NPM packages...")
         exec {
@@ -151,7 +152,6 @@ val configureFirebase by tasks.registering {
         }
     }
 }
-
 
 gradle.projectsEvaluated {
     tasks.getByName("preDebugAndroidTestBuild") {

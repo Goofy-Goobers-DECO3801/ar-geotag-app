@@ -8,12 +8,12 @@ import com.example.deco3801.directions.domain.model.Distance
 // Creates Distance transfer object
 data class DistanceDto(
     val text: String,
-    val value: Int
-){
-    fun toDistance(): Distance{
-        return  Distance(
+    val value: Int,
+) {
+    fun toDistance(): Distance  {
+        return Distance(
             text = text,
-            value = value
+            value = value,
         )
     }
 }

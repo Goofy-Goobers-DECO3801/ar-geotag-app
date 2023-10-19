@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
-
 /**
  * The global app state.
  * This should not be used directly, instead use [rememberAppState].
@@ -33,11 +32,14 @@ class AppState(
         // Listens for snackbar messages and displays them.
         scope.launch {
             snackbarManager.messages.filterNotNull().collect {
-                snackbarHostState.showSnackbar(message = it.message, duration = it.duration, withDismissAction = true)
+                snackbarHostState.showSnackbar(
+                    message = it.message,
+                    duration = it.duration,
+                    withDismissAction = true,
+                )
             }
         }
     }
-
 }
 
 /**
@@ -67,4 +69,3 @@ fun rememberAppState(
         progressbarState = progressbarState,
     )
 }
-

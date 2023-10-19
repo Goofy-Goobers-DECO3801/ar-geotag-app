@@ -22,9 +22,7 @@ data class SettingsUiState(
     val email: String = "",
     val oldPassword: String = "",
     val newPassword: String = "",
-
-    )
-
+)
 
 /**
  * Contains the logic and state for the settings screen
@@ -36,7 +34,6 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val userRepo: UserRepository,
 ) : AppViewModel() {
-
     private val _user = MutableStateFlow(User())
     val user: StateFlow<User> = _user
 
@@ -94,7 +91,5 @@ class SettingsViewModel @Inject constructor(
             userRepo.updateIsPrivate(value)
             _uiState.value = _uiState.value.copy(isPrivate = value)
         }
-
     }
-
 }

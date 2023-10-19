@@ -26,9 +26,8 @@ class CommentRepository @Inject constructor(
     private val artRepo: ArtRepository,
     private val userRepository: UserRepository,
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ) : Repository<Comment>(Comment::class.java) {
-
     /**
      * Creates a new comment on a specific art and updates the increments count on the art.
      *
@@ -37,13 +36,17 @@ class CommentRepository @Inject constructor(
      *
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when adding or updating a document.
      */
-    fun commentOnArt(artId: String, text: String) {
+    fun commentOnArt(
+        artId: String,
+        text: String,
+    ) {
         val uid = auth.uid!!
-        val comment = Comment(
-            artId = artId,
-            userId = uid,
-            text = text,
-        )
+        val comment =
+            Comment(
+                artId = artId,
+                userId = uid,
+                text = text,
+            )
 
         val commentRef = getCollectionRef(artId).document()
         val artRef = artRepo.getCollectionRef().document(artId)
@@ -72,12 +75,14 @@ class CommentRepository @Inject constructor(
      * @param artId The id of the art to attach the listener to.
      * @param callback The callback to be called when the listener is triggered.
      */
-    fun attachListenerByArt(artId: String, callback: (List<Comment>) -> Unit) {
+    fun attachListenerByArt(
+        artId: String,
+        callback: (List<Comment>) -> Unit,
+    ) {
         attachListenerWithQuery(callback, subCollectionId = artId) { query ->
             query.orderBy("timestamp", Query.Direction.DESCENDING)
         }
     }
-
 
     override fun getCollectionRef(docId: String?): CollectionReference {
         assert(docId != null)

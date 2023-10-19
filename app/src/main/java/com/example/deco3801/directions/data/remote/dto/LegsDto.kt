@@ -8,12 +8,12 @@ import com.example.deco3801.directions.domain.model.Legs
 // Creates Legs transfer object
 data class LegsDto(
     val distance: DistanceDto,
-    val duration: DurationDto
-){
+    val duration: DurationDto,
+) {
     fun toLegs(): Legs {
         return Legs(
             distance = distance.toDistance(),
-            duration = duration.toDuration()
+            duration = duration.toDuration(),
         )
     }
 }

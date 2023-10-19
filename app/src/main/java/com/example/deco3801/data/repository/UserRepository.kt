@@ -15,11 +15,11 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.storage.StorageException
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.tasks.await
 import java.io.Serializable
@@ -36,9 +36,8 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
 ) : Repository<User>(User::class.java) {
-
     /**
      * Creates and authenticates a new user with their [email] and [password] on Firebase Authentication
      * and creates a new user document on Firestore.
@@ -53,7 +52,11 @@ class UserRepository @Inject constructor(
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when adding a document.
      * @throws FirebaseAuthException FirebaseAuth exceptions that may occur when creating and authenticating a user.
      */
-    suspend fun createUser(username: String, email: String, password: String): User {
+    suspend fun createUser(
+        username: String,
+        email: String,
+        password: String,
+    ): User {
         val authUser = auth.createUserWithEmailAndPassword(email, password).await().user!!
         val id = authUser.uid
         val user = User(username = username, email = email)
@@ -62,7 +65,7 @@ class UserRepository @Inject constructor(
 
         // Ensure that the username is unique if its not delete the authUser
         val userRef = db.collection(USER_COLLECTION).document(id)
-        val indexRef = db.collection(INDEX_COLLECTION).document("$USERNAME_INDEX/${username}")
+        val indexRef = db.collection(INDEX_COLLECTION).document("$USERNAME_INDEX/$username")
         try {
             db.runBatch {
                 it.set(userRef, user)
@@ -72,7 +75,7 @@ class UserRepository @Inject constructor(
             when (e.code) {
                 FirebaseFirestoreException.Code.PERMISSION_DENIED -> throw Exception(
                     "Username is already taken!",
-                    e
+                    e,
                 )
 
                 else -> {
@@ -91,7 +94,10 @@ class UserRepository @Inject constructor(
      *
      * @throws FirebaseAuthException FirebaseAuth exceptions that may occur when re-authenticating or updating a user.
      */
-    suspend fun updatePassword(oldPassword: String, newPassword: String) {
+    suspend fun updatePassword(
+        oldPassword: String,
+        newPassword: String,
+    ) {
         val user = auth.currentUser!!
         user.reauthenticate(EmailAuthProvider.getCredential(user.email!!, oldPassword)).await()
         user.updatePassword(newPassword).await()
@@ -120,7 +126,10 @@ class UserRepository @Inject constructor(
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when updating a document.
      * @throws StorageException Storage exceptions that may occur when updating an object.
      */
-    suspend fun editUser(oldUser: User, newUser: User) {
+    suspend fun editUser(
+        oldUser: User,
+        newUser: User,
+    ) {
         val uid = auth.uid!!
         var storageRef: StorageReference? = null
         if (oldUser == newUser) {
@@ -163,7 +172,7 @@ class UserRepository @Inject constructor(
             when (e.code) {
                 FirebaseFirestoreException.Code.PERMISSION_DENIED -> throw Exception(
                     "Username is already taken!",
-                    e
+                    e,
                 )
 
                 else -> {
@@ -171,7 +180,6 @@ class UserRepository @Inject constructor(
                 }
             }
         }
-
     }
 
     /**
@@ -182,7 +190,10 @@ class UserRepository @Inject constructor(
      *
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when updating a document.
      */
-    private suspend fun updateUser(userId: String, fields: HashMap<String, Serializable?>) {
+    private suspend fun updateUser(
+        userId: String,
+        fields: HashMap<String, Serializable?>,
+    ) {
         getCollectionRef().document(userId)
             .set(fields, SetOptions.mergeFields(fields.keys.toList())).await()
     }
@@ -196,7 +207,6 @@ class UserRepository @Inject constructor(
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when reading a document.
      */
     suspend fun getUser(userId: String): User? {
-
         return getCollectionRef().document(userId).get().await().toObject()
     }
 
@@ -225,10 +235,12 @@ class UserRepository @Inject constructor(
      *
      * @throws FirebaseAuthException FirebaseAuth exceptions that may occur when logging in a user.
      */
-    suspend fun loginUser(email: String, password: String): AuthResult? {
+    suspend fun loginUser(
+        email: String,
+        password: String,
+    ): AuthResult? {
         return auth.signInWithEmailAndPassword(email, password).await()
     }
-
 
     override fun getCollectionRef(docId: String?): CollectionReference {
         return db.collection(USER_COLLECTION)
@@ -244,7 +256,6 @@ class UserRepository @Inject constructor(
         return getCollectionRef().document(userId).collection(FOLLOW_COLLECTION)
     }
 
-
     companion object {
         private const val USER_COLLECTION = "user"
         private const val INDEX_COLLECTION = "index"
@@ -252,4 +263,3 @@ class UserRepository @Inject constructor(
         private const val FOLLOW_COLLECTION = "following"
     }
 }
-

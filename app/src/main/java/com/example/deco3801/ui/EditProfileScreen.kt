@@ -5,7 +5,6 @@ package com.example.deco3801.ui
 
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -66,7 +65,6 @@ import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.EditProfileViewModel
 import java.io.File
 
-
 /**
  * Displays the edit profile screen, allowing users to change their profile picture, username,
  * full name and bio.
@@ -90,9 +88,10 @@ fun EditProfileScreen(
     val user by viewModel.newUser.collectAsState()
 
     // Activity to launch the image picker when the user clicks the choose from library button.
-    val imagePicker = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
-        uri?.let(viewModel::onPictureChange)
-    }
+    val imagePicker =
+        rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
+            uri?.let(viewModel::onPictureChange)
+        }
     // Activity to launch the camera when the user clicks the take photo button.
     val takePhoto =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
@@ -109,7 +108,7 @@ fun EditProfileScreen(
                 navController = navController,
                 canNavigateBack = true,
             )
-        }
+        },
     ) { innerPadding ->
         if (showBottomSheet) {
             // Bottom sheet for choosing options for changing the profile picture.
@@ -127,29 +126,31 @@ fun EditProfileScreen(
                         imagePicker.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
                     },
                     icon = Icons.Filled.Image,
-                    iconDescription = "image"
+                    iconDescription = "image",
                 )
                 BottomSheetSurface(
                     text = "Take photo",
                     onClick = {
                         showBottomSheet = false
-                        takePhotoFile = File.createTempFile(
-                            System.currentTimeMillis().toString(),
-                            ".jpg",
-                            File(
-                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                                "Camera"
+                        takePhotoFile =
+                            File.createTempFile(
+                                System.currentTimeMillis().toString(),
+                                ".jpg",
+                                File(
+                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                                    "Camera",
+                                ),
                             )
-                        )
-                        takePhotoUri = FileProvider.getUriForFile(
-                            context,
-                            context.applicationContext.packageName + ".provider",
-                            takePhotoFile!!
-                        )
+                        takePhotoUri =
+                            FileProvider.getUriForFile(
+                                context,
+                                context.applicationContext.packageName + ".provider",
+                                takePhotoFile!!,
+                            )
                         takePhoto.launch(takePhotoUri)
                     },
                     icon = Icons.Filled.PhotoCamera,
-                    iconDescription = "camera"
+                    iconDescription = "camera",
                 )
                 BottomSheetSurface(
                     text = "Remove current picture",
@@ -159,15 +160,16 @@ fun EditProfileScreen(
                     },
                     icon = Icons.Filled.Delete,
                     iconDescription = "delete",
-                    contentColor = Color.Red
+                    contentColor = Color.Red,
                 )
                 Spacer(Modifier.height(20.dp))
             }
         }
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(16.dp),
         ) {
             val textModifier: Modifier = Modifier
             val spacerModifier: Modifier = Modifier.height(10.dp)
@@ -176,38 +178,41 @@ fun EditProfileScreen(
                     text = "Edit Profile",
                     modifier = textModifier,
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
             }
             item {
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(20.dp),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = modifier.fillMaxWidth()
+                        modifier = modifier.fillMaxWidth(),
                     ) {
                         AsyncImage(
                             model = user.pictureUri.ifBlank { R.drawable.pfp },
                             placeholder = painterResource(id = R.drawable.pfp),
                             contentDescription = "profile",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(108.dp)
-                                .clickable {
-                                    showBottomSheet = true
-                                }
+                            modifier =
+                                Modifier
+                                    .clip(CircleShape)
+                                    .size(108.dp)
+                                    .clickable {
+                                        showBottomSheet = true
+                                    },
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         ClickableText(
                             text = AnnotatedString("Change profile picture"),
                             onClick = {
                                 showBottomSheet = true
-                            })
+                            },
+                        )
                     }
                 }
             }
@@ -216,10 +221,11 @@ fun EditProfileScreen(
             }
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                        .padding(16.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp),
                 ) {
                     Column {
                         Text(text = "Change Username")
@@ -228,8 +234,7 @@ fun EditProfileScreen(
                             modifier = modifier.fillMaxWidth(),
                             value = user.username,
                             label = "Username",
-                            onValueChange = viewModel::onUsernameChange
-
+                            onValueChange = viewModel::onUsernameChange,
                         )
                     }
                 }
@@ -239,10 +244,11 @@ fun EditProfileScreen(
             }
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                        .padding(16.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp),
                 ) {
                     Column {
                         Text(text = "Change Full Name")
@@ -251,7 +257,7 @@ fun EditProfileScreen(
                             modifier = modifier.fillMaxWidth(),
                             value = user.fullname,
                             label = "Full Name",
-                            onValueChange = viewModel::onFullnameChange
+                            onValueChange = viewModel::onFullnameChange,
                         )
                     }
                 }
@@ -261,10 +267,11 @@ fun EditProfileScreen(
             }
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                        .padding(16.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp),
                 ) {
                     Column {
                         Text(text = "Edit Bio")
@@ -272,8 +279,7 @@ fun EditProfileScreen(
                         BioField(
                             value = user.bio,
                             onValueChange = viewModel::onBioChange,
-                            modifier = modifier.fillMaxWidth()
-
+                            modifier = modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -284,9 +290,10 @@ fun EditProfileScreen(
             item {
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
+                    modifier =
+                        modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
                 ) {
                     Button(onClick = {
                         viewModel.onSave(navController::popBackStack)

@@ -61,70 +61,75 @@ fun SignUpScreen(
     var viewPrivacyPolicy by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = UnchangingAppColors.main_theme),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(color = UnchangingAppColors.main_theme),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo",
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(150.dp),
         )
 
         NameField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 30.dp,
-                    end = 30.dp,
-                    top = 30.dp,
-                    bottom = 10.dp
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 30.dp,
+                        end = 30.dp,
+                        top = 30.dp,
+                        bottom = 10.dp,
+                    ),
             value = uiState.username,
             onValueChange = viewModel::onUsernameChange,
         )
 
         EmailField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 30.dp,
-                    end = 30.dp,
-                    top = 10.dp,
-                    bottom = 10.dp
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 30.dp,
+                        end = 30.dp,
+                        top = 10.dp,
+                        bottom = 10.dp,
+                    ),
             value = uiState.email,
-            onValueChange = viewModel::onEmailChange
+            onValueChange = viewModel::onEmailChange,
         )
 
         PasswordField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 30.dp,
-                    end = 30.dp,
-                    top = 10.dp,
-                    bottom = 20.dp
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 30.dp,
+                        end = 30.dp,
+                        top = 10.dp,
+                        bottom = 20.dp,
+                    ),
             value = uiState.password,
-            onValueChange = viewModel::onPasswordChange
+            onValueChange = viewModel::onPasswordChange,
         )
 
         Row(
-            modifier = Modifier.padding(
-                start = 30.dp,
-                end = 30.dp,
-                top = 0.dp,
-                bottom = 20.dp
-            ),
+            modifier =
+                Modifier.padding(
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 0.dp,
+                    bottom = 20.dp,
+                ),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Checkbox(
                 checked = isChecked,
-                onCheckedChange = { isChecked = it }
+                onCheckedChange = { isChecked = it },
             )
             val agreementText = "I agree to Terms and Conditions and Privacy Policy"
             ClickableText(
@@ -140,7 +145,7 @@ fun SignUpScreen(
                         viewPrivacyPolicy = true
                     }
                 },
-                style = TextStyle(fontSize = 15.sp, color = Color.White)
+                style = TextStyle(fontSize = 15.sp, color = Color.White),
             )
         }
 
@@ -164,7 +169,7 @@ fun SignUpScreen(
 
         Button(
             onClick = { navController.navigate(ScreenNames.Login.name) },
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(10.dp),
         ) {
             Text("Already have an account? Log in")
         }

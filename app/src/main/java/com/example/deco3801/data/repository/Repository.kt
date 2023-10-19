@@ -6,8 +6,8 @@ package com.example.deco3801.data.repository
 import android.util.Log
 import com.example.deco3801.util.forEachApply
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 
@@ -46,7 +46,10 @@ abstract class Repository<T>(private val clazz: Class<T>) {
      *
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when reading a document.
      */
-    suspend fun getById(id: String, subCollectionId: String? = null): T? {
+    suspend fun getById(
+        id: String,
+        subCollectionId: String? = null,
+    ): T? {
         return getCollectionRef(subCollectionId)
             .document(id)
             .get()
@@ -61,23 +64,28 @@ abstract class Repository<T>(private val clazz: Class<T>) {
      * @param subCollectionId The document id where the sub-collection is located, if required.
      * @param callback The callback function to be called when the document changes.
      */
-    fun attachListenerById(id: String, subCollectionId: String? = null, callback: (T) -> Unit) {
+    fun attachListenerById(
+        id: String,
+        subCollectionId: String? = null,
+        callback: (T) -> Unit,
+    ) {
         if (listener != null) {
             detachListener()
         }
 
-        listener = getCollectionRef(subCollectionId).document(id).addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                Log.w("LISTENER", "Listen failed.", e)
-                return@addSnapshotListener
+        listener =
+            getCollectionRef(subCollectionId).document(id).addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("LISTENER", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+                val obj = snapshot!!.toObject(clazz)
+                if (obj == null) {
+                    Log.w("LISTENER", "Serilization failed.")
+                    return@addSnapshotListener
+                }
+                callback(obj)
             }
-            val obj = snapshot!!.toObject(clazz)
-            if (obj == null) {
-                Log.w("LISTENER", "Serilization failed.")
-                return@addSnapshotListener
-            }
-            callback(obj)
-        }
     }
 
     /**
@@ -87,20 +95,25 @@ abstract class Repository<T>(private val clazz: Class<T>) {
      * @param subCollectionId The document id where the sub-collection is located, if required.
      * @param queryBuilder The query builder function to be called when the query changes.
      */
-    fun attachListenerWithQuery(callback: (List<T>) -> Unit, subCollectionId: String? = null, queryBuilder: (Query) -> Query) {
+    fun attachListenerWithQuery(
+        callback: (List<T>) -> Unit,
+        subCollectionId: String? = null,
+        queryBuilder: (Query) -> Query,
+    ) {
         if (listener != null) {
             detachListener()
         }
         val ref = getCollectionRef(subCollectionId)
         val query = queryBuilder(ref)
 
-        listener = query.addSnapshotListener { querySnapshot, e ->
-            if (e != null) {
-                Log.w("LISTENER", "Listen failed.", e)
-                return@addSnapshotListener
+        listener =
+            query.addSnapshotListener { querySnapshot, e ->
+                if (e != null) {
+                    Log.w("LISTENER", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+                callback(querySnapshot!!.toObjects(clazz))
             }
-            callback(querySnapshot!!.toObjects(clazz))
-        }
     }
 
     /**

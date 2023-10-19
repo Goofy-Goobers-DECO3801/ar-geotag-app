@@ -25,9 +25,8 @@ import javax.inject.Inject
 class FollowRepository @Inject constructor(
     private val userRepo: UserRepository,
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ) : Repository<Follow>(Follow::class.java) {
-
     /**
      * Checks if the current user is following a specific user.
      *
@@ -89,10 +88,11 @@ class FollowRepository @Inject constructor(
      * @throws FirebaseFirestoreException Firestore exceptions that may occur when creating or updating a document.
      */
     fun followUser(user: User) {
-        val follow = Follow(
-            followerId = auth.uid!!,
-            followingId = user.id,
-        )
+        val follow =
+            Follow(
+                followerId = auth.uid!!,
+                followingId = user.id,
+            )
         val followingRef = getCollectionRef().document(user.id)
         val me = userRepo.getCollectionRef().document(auth.uid!!)
         val them = userRepo.getCollectionRef().document(user.id)
@@ -128,4 +128,3 @@ class FollowRepository @Inject constructor(
         return userRepo.getFollowSubCollectionRef(docId ?: auth.uid!!)
     }
 }
-

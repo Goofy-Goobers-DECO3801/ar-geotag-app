@@ -24,7 +24,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
-
     /**
      * Provides the Firebase Authentication instance as a singleton.
      *
@@ -60,5 +59,4 @@ object FirebaseModule {
     @Singleton
     @Provides
     fun user(): FirebaseUser? = auth().currentUser
-
 }

@@ -13,7 +13,7 @@ interface GooglePlacesApi {
     suspend fun getDirection(
         @Query("origin") origin: String,
         @Query("destination") destination: String,
-        @Query("key") key: String
+        @Query("key") key: String,
     ): GooglePlacesInfo
 
     companion object {

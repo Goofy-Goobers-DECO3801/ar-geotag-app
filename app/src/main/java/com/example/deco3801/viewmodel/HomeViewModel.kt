@@ -55,8 +55,11 @@ data class HomeUiState(
  */
 sealed class ArtFilterAction {
     data class Following(val boolean: Boolean) : ArtFilterAction()
+
     data class FollowingUser(val user: User?) : ArtFilterAction()
+
     data class DateCreated(val date: Date?) : ArtFilterAction()
+
     data class Mine(val boolean: Boolean) : ArtFilterAction()
 }
 
@@ -72,7 +75,11 @@ object DateAsLongSerializer : KSerializer<Date> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
 
-    override fun serialize(encoder: Encoder, value: Date) = encoder.encodeLong(value.time)
+    override fun serialize(
+        encoder: Encoder,
+        value: Date,
+    ) = encoder.encodeLong(value.time)
+
     override fun deserialize(decoder: Decoder): Date = Date(decoder.decodeLong())
 }
 
@@ -87,7 +94,6 @@ data class ArtFilterState(
     var followingUser: User? = null,
     var mine: Boolean = false,
 )
-
 
 /**
  * Viewmodel for the Home screen. Controls the main Google Map and the art around the user.
@@ -133,7 +139,6 @@ class HomeViewModel @Inject constructor(
             _uiState.value =
                 _uiState.value.copy(selectedArt = selectedArt, selectArtUser = selectedArtUser)
         }
-
     }
 
     /**
@@ -163,7 +168,10 @@ class HomeViewModel @Inject constructor(
     /**
      * Process the [action] on the art filter and update the [store]
      */
-    fun onFilterAction(action: ArtFilterAction?, store: SharedPreferences) {
+    fun onFilterAction(
+        action: ArtFilterAction?,
+        store: SharedPreferences,
+    ) {
         if (_filterLoading) {
             return
         }
@@ -179,10 +187,11 @@ class HomeViewModel @Inject constructor(
             }
 
             is ArtFilterAction.FollowingUser -> {
-                _filterState.value = _filterState.value.copy(
-                    following = action.user != null,
-                    followingUser = action.user
-                )
+                _filterState.value =
+                    _filterState.value.copy(
+                        following = action.user != null,
+                        followingUser = action.user,
+                    )
             }
 
             is ArtFilterAction.Mine -> {
@@ -199,10 +208,11 @@ class HomeViewModel @Inject constructor(
             val newInactiveArt: MutableMap<String, Art> = hashMapOf()
 
             suspend fun swapArt(art: Art) =
-                if (isArtInFilter(art))
+                if (isArtInFilter(art)) {
                     newActiveArt.put(art.id, art)
-                else
+                } else {
                     newInactiveArt.put(art.id, art)
+                }
 
             _activeArt.value.forEach { swapArt(it.value) }
             _inactiveArt.forEach { swapArt(it.value) }
@@ -262,10 +272,11 @@ class HomeViewModel @Inject constructor(
         launchCatching {
             _uiState.first { it.currentLocation != null }.currentLocation
 
-            _geoQuery = GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
-                _uiState.value.currentLocation!!.toGeoPoint(),
-                _uiState.value.distanceInKm
-            )
+            _geoQuery =
+                GeoFirestore(artRepo.getCollectionRef()).queryAtLocation(
+                    _uiState.value.currentLocation!!.toGeoPoint(),
+                    _uiState.value.distanceInKm,
+                )
 
             _geoQuery?.addGeoQueryDataEventListener()
         }
@@ -282,109 +293,108 @@ class HomeViewModel @Inject constructor(
      * Add a geoquery data event listener to the geoquery
      */
     private fun GeoQuery.addGeoQueryDataEventListener() {
-        return this.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
-
-            /**
-             * Triggers when a document enters the geoquery.
-             * If the art is in the filter, add it to the active art.
-             *
-             * @param documentSnapshot The document that entered the geoquery
-             * @param location The location of the document
-             */
-            override fun onDocumentEntered(
-                documentSnapshot: DocumentSnapshot,
-                location: GeoPoint
-            ) {
-                val art = documentSnapshot.toObject<Art>() ?: return
-                launchCatching {
-                    if (!isArtInFilter(art)) {
-                        // add to inactive
-                        _inactiveArt[art.id] = art
-                        return@launchCatching
+        return this.addGeoQueryDataEventListener(
+            object : GeoQueryDataEventListener {
+                /**
+                 * Triggers when a document enters the geoquery.
+                 * If the art is in the filter, add it to the active art.
+                 *
+                 * @param documentSnapshot The document that entered the geoquery
+                 * @param location The location of the document
+                 */
+                override fun onDocumentEntered(
+                    documentSnapshot: DocumentSnapshot,
+                    location: GeoPoint,
+                ) {
+                    val art = documentSnapshot.toObject<Art>() ?: return
+                    launchCatching {
+                        if (!isArtInFilter(art)) {
+                            // add to inactive
+                            _inactiveArt[art.id] = art
+                            return@launchCatching
+                        }
+                        _activeArt.value =
+                            _activeArt.value.toMutableMap().apply { put(art.id, art) }
+                        Log.d("GEOQUERY", "ENTER $art")
                     }
-                    _activeArt.value =
-                        _activeArt.value.toMutableMap().apply { put(art.id, art) }
-                    Log.d("GEOQUERY", "ENTER $art")
                 }
 
-            }
-
-            /**
-             * Triggers when a document exits the geoquery.
-             * Remove the art from both the active and inactive art.
-             *
-             * @param documentSnapshot The document that exited the geoquery
-             */
-            override fun onDocumentExited(documentSnapshot: DocumentSnapshot) {
-                val art = documentSnapshot.toObject<Art>() ?: return
-                // Remove from both inactive and active
-                _inactiveArt.remove(art.id)
-                _activeArt.value = _activeArt.value.toMutableMap().apply { remove(art.id) }
-                Log.d("GEOQUERY", "EXIT $art")
-            }
-
-            /**
-             * Triggers when a document moves within the geoquery.
-             * If the art is in the filter, add it to the active art.
-             *
-             * @param documentSnapshot The document that moved within the geoquery
-             * @param location The location of the document
-             */
-            override fun onDocumentMoved(
-                documentSnapshot: DocumentSnapshot,
-                location: GeoPoint
-            ) {
-                val art = documentSnapshot.toObject<Art>() ?: return
-                launchCatching {
-                    if (!isArtInFilter(art)) {
-                        // add to inactive
-                        _inactiveArt.replace(art.id, art)
-                        return@launchCatching
-                    }
-                    _activeArt.value =
-                        _activeArt.value.toMutableMap().apply { replace(art.id, art) }
-                    Log.d("GEOQUERY", "MOVED $art")
+                /**
+                 * Triggers when a document exits the geoquery.
+                 * Remove the art from both the active and inactive art.
+                 *
+                 * @param documentSnapshot The document that exited the geoquery
+                 */
+                override fun onDocumentExited(documentSnapshot: DocumentSnapshot) {
+                    val art = documentSnapshot.toObject<Art>() ?: return
+                    // Remove from both inactive and active
+                    _inactiveArt.remove(art.id)
+                    _activeArt.value = _activeArt.value.toMutableMap().apply { remove(art.id) }
+                    Log.d("GEOQUERY", "EXIT $art")
                 }
 
-            }
-
-            /**
-             * Triggers when a document changes within the geoquery.
-             *
-             * @param documentSnapshot The document that changed within the geoquery
-             * @param location The location of the document
-             */
-            override fun onDocumentChanged(
-                documentSnapshot: DocumentSnapshot,
-                location: GeoPoint
-            ) {
-                val art = documentSnapshot.toObject<Art>() ?: return
-                launchCatching {
-                    if (!isArtInFilter(art)) {
-                        // add to inactive
-                        _inactiveArt.replace(art.id, art)
-                        return@launchCatching
+                /**
+                 * Triggers when a document moves within the geoquery.
+                 * If the art is in the filter, add it to the active art.
+                 *
+                 * @param documentSnapshot The document that moved within the geoquery
+                 * @param location The location of the document
+                 */
+                override fun onDocumentMoved(
+                    documentSnapshot: DocumentSnapshot,
+                    location: GeoPoint,
+                ) {
+                    val art = documentSnapshot.toObject<Art>() ?: return
+                    launchCatching {
+                        if (!isArtInFilter(art)) {
+                            // add to inactive
+                            _inactiveArt.replace(art.id, art)
+                            return@launchCatching
+                        }
+                        _activeArt.value =
+                            _activeArt.value.toMutableMap().apply { replace(art.id, art) }
+                        Log.d("GEOQUERY", "MOVED $art")
                     }
-                    _activeArt.value =
-                        _activeArt.value.toMutableMap().apply { replace(art.id, art) }
-                    Log.d("GEOQUERY", "CHANGED $art")
                 }
-            }
 
-            /**
-             * Triggers when the geoquery is ready.
-             */
-            override fun onGeoQueryReady() {
-                _uiState.value = _uiState.value.copy(ready = true)
-            }
+                /**
+                 * Triggers when a document changes within the geoquery.
+                 *
+                 * @param documentSnapshot The document that changed within the geoquery
+                 * @param location The location of the document
+                 */
+                override fun onDocumentChanged(
+                    documentSnapshot: DocumentSnapshot,
+                    location: GeoPoint,
+                ) {
+                    val art = documentSnapshot.toObject<Art>() ?: return
+                    launchCatching {
+                        if (!isArtInFilter(art)) {
+                            // add to inactive
+                            _inactiveArt.replace(art.id, art)
+                            return@launchCatching
+                        }
+                        _activeArt.value =
+                            _activeArt.value.toMutableMap().apply { replace(art.id, art) }
+                        Log.d("GEOQUERY", "CHANGED $art")
+                    }
+                }
 
-            /**
-             * Triggers when there is an error with the geoquery.
-             */
-            override fun onGeoQueryError(exception: Exception) {
-                SnackbarManager.showError(exception)
-            }
-        })
+                /**
+                 * Triggers when the geoquery is ready.
+                 */
+                override fun onGeoQueryReady() {
+                    _uiState.value = _uiState.value.copy(ready = true)
+                }
+
+                /**
+                 * Triggers when there is an error with the geoquery.
+                 */
+                override fun onGeoQueryError(exception: Exception) {
+                    SnackbarManager.showError(exception)
+                }
+            },
+        )
     }
 
     companion object {

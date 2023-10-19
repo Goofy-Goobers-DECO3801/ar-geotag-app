@@ -21,7 +21,6 @@ data class AuthUiState(
     val password: String = "",
 )
 
-
 /**
  * Contains the logic and state for the auth screen
  *
@@ -41,7 +40,6 @@ class AuthViewModel @Inject constructor(
         get() = uiState.email
     private val password
         get() = uiState.password
-
 
     /**
      * Update the username in the state to [newValue]
