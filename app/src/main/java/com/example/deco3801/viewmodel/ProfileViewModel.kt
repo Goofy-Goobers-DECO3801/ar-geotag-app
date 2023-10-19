@@ -1,3 +1,6 @@
+/**
+ * The view model for the profile screen
+ */
 package com.example.deco3801.viewmodel
 
 import android.util.Log
@@ -12,6 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+/**
+ * The state of the follower sheet screen
+ */
 enum class FollowSheetState {
     HIDDEN,
     FOLLOWERS,
@@ -19,6 +25,15 @@ enum class FollowSheetState {
 }
 
 
+/**
+ * Contains the logic and state for the profile screen
+ *
+ * @constructor Create a Profile view model with dependency injection
+ * @property userRepo The user repository to use, injected by Hilt
+ * @property artRepo The art repository to use, injected by Hilt
+ * @property followRepo The follow repository to use, injected by Hilt
+ * @property auth The firebase auth instance to use, injected by Hilt
+ */
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepo: UserRepository,
@@ -41,33 +56,46 @@ class ProfileViewModel @Inject constructor(
     private val _follows = MutableStateFlow<List<User>>(emptyList())
     val follows: StateFlow<List<User>> = _follows
 
+    /**
+     * Check if the current user is the user with [userId]
+     */
     fun isCurrentUser(userId: String) = userId == auth.uid
 
+    /**
+     * Hide the follower sheet
+     */
     fun hideFollowSheet() {
         _followSheetState.value = FollowSheetState.HIDDEN
     }
 
+    /**
+     * Get the users followers and show the follower sheet
+     */
     fun onFollowersClick() {
         launchCatching {
             val followers = followRepo.getFollowers(_user.value)
             val users = userRepo.getUsers(followers.map { it.followerId })
-//            _follows.value = followers.zip(users)
             _follows.value = users
             _followSheetState.value = FollowSheetState.FOLLOWERS
         }
 
     }
 
+    /**
+     * Get the users following and show the follower sheet
+     */
     fun onFollowingClick() {
         launchCatching {
             val following = followRepo.getFollowing(_user.value)
             val users = userRepo.getUsers(following.map { it.followingId })
-//            _follows.value = following.zip(users)
             _follows.value = users
             _followSheetState.value = FollowSheetState.FOLLOWING
         }
     }
 
+    /**
+     * Check if the current user is following the user with [userId]
+     */
     fun isFollowing(userId: String) {
         if (!isCurrentUser(userId)) {
             launchCatching {
@@ -76,6 +104,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Follow or unfollow the user
+     */
     fun follow() {
         if (_isFollowing.value == null) {
             return
@@ -95,6 +126,9 @@ class ProfileViewModel @Inject constructor(
 
     }
 
+    /**
+     * Attach listeners to the user with [userid] and their art
+     */
     fun attachListener(userid: String) {
         userRepo.attachListenerById(userid) {
             onUserChange(it)
@@ -106,6 +140,9 @@ class ProfileViewModel @Inject constructor(
         Log.d("PROFILE", "attaching listeners")
     }
 
+    /**
+     * Detach listeners from the user and their art
+     */
     fun detachListener() {
         userRepo.detachListener()
         artRepo.detachListener()
@@ -113,10 +150,16 @@ class ProfileViewModel @Inject constructor(
     }
 
 
+    /**
+     * Update the user state to [user]
+     */
     fun onUserChange(user: User) {
         _user.value = user
     }
 
+    /**
+     * Update the art state to [art]
+     */
     fun onArtChange(art: List<Art>) {
         _art.value = art
     }

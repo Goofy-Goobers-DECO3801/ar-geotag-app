@@ -1,3 +1,6 @@
+/**
+ * ViewModel for the EditProfileScreen.
+ */
 package com.example.deco3801.viewmodel
 
 import android.net.Uri
@@ -11,6 +14,9 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 
+/**
+ * Contains the logic and state for the EditProfileScreen
+ */
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepo: UserRepository,
@@ -32,6 +38,9 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Save the user and [open] a new screen
+     */
     fun onSave(open: () -> Unit) {
         if (_loading) {
             return
@@ -47,22 +56,37 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Remove the user's profile picture
+     */
     fun onPictureRemove() {
         _newUser.value = _newUser.value.copy(pictureUri = "")
     }
 
+    /**
+     * Update the user's profile picture to [value]
+     */
     fun onPictureChange(value: Uri) {
         _newUser.value = _newUser.value.copy(pictureUri = value.toString())
     }
 
+    /**
+     * Update the user's username to [value]
+     */
     fun onUsernameChange(value: String) {
         _newUser.value = _newUser.value.copy(username = value)
     }
 
+    /**
+     * Update the user's fullname to [value]
+     */
     fun onFullnameChange(value: String) {
         _newUser.value = _newUser.value.copy(fullname = value)
     }
 
+    /**
+     * Update the user's bio to [value]
+     */
     fun onBioChange(value: String) {
         _newUser.value = _newUser.value.copy(bio = value)
     }

@@ -1,3 +1,6 @@
+/**
+ * Settings view model
+ */
 package com.example.deco3801.viewmodel
 
 import com.example.deco3801.data.model.User
@@ -11,6 +14,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+/**
+ * The state of the settings screen
+ */
 data class SettingsUiState(
     var isPrivate: Boolean = false,
     val email: String = "",
@@ -20,6 +26,12 @@ data class SettingsUiState(
     )
 
 
+/**
+ * Contains the logic and state for the settings screen
+ *
+ * @constructor Create a Settings view model with dependency injection
+ * @property userRepo The user repository to use, injected by Hilt
+ */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userRepo: UserRepository,
@@ -38,9 +50,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Checks if the update password button should be enabled
+     */
     fun updatePasswordEnabled() =
         _uiState.value.oldPassword.isNotBlank() && _uiState.value.newPassword.isNotBlank()
 
+    /**
+     * Update the user's password
+     */
     fun updatePassword() {
         if (!updatePasswordEnabled()) {
             SnackbarManager.showError("Old password or new password is blank!")
@@ -54,14 +72,23 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Change the state of the old password to [newValue]
+     */
     fun onOldPasswordChange(newValue: String) {
         _uiState.value = _uiState.value.copy(oldPassword = newValue)
     }
 
+    /**
+     * Change the state of the new password to [newValue]
+     */
     fun onNewPasswordChange(newValue: String) {
         _uiState.value = _uiState.value.copy(newPassword = newValue)
     }
 
+    /**
+     * Change the users privacy setting to [value]
+     */
     fun onPrivate(value: Boolean) {
         launchCatching {
             userRepo.updateIsPrivate(value)

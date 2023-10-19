@@ -1,3 +1,6 @@
+/**
+ * Viewmodel for the Home screen
+ */
 package com.example.deco3801.viewmodel
 
 import android.content.SharedPreferences
@@ -36,6 +39,9 @@ import org.imperiumlabs.geofirestore.listeners.GeoQueryDataEventListener
 import java.util.Date
 import javax.inject.Inject
 
+/**
+ * The state of the home screen
+ */
 data class HomeUiState(
     val currentLocation: LatLng? = null,
     val distanceInKm: Double = 100_000.0, // XXX
@@ -44,6 +50,9 @@ data class HomeUiState(
     val selectArtUser: User? = null,
 )
 
+/**
+ * Actions that can be performed on the art filter
+ */
 sealed class ArtFilterAction {
     data class Following(val boolean: Boolean) : ArtFilterAction()
     data class FollowingUser(val user: User?) : ArtFilterAction()
@@ -52,6 +61,8 @@ sealed class ArtFilterAction {
 }
 
 /**
+ * Serializer for [Date] as a [Long]
+ *
  * @reference
  * R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," Kotlin, 11 August 2020. \[Online].
  * Available: https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes.
@@ -65,6 +76,9 @@ object DateAsLongSerializer : KSerializer<Date> {
     override fun deserialize(decoder: Decoder): Date = Date(decoder.decodeLong())
 }
 
+/**
+ * Serializable art filter state. This gets written to the shared preferences.
+ */
 @Serializable
 data class ArtFilterState(
     var following: Boolean = false,
@@ -75,6 +89,13 @@ data class ArtFilterState(
 )
 
 
+/**
+ * Viewmodel for the Home screen. Controls the main Google Map and the art around the user.
+ *
+ * @constructor Create a Home view model with dependency injection
+ * @property artRepo The art repository to use, injected by Hilt
+ * @property followRepo The follow repository to use, injected by Hilt
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val artRepo: ArtRepository,
@@ -95,10 +116,16 @@ class HomeViewModel @Inject constructor(
 
     private var _filterLoading = false
 
+    /**
+     * Unselect the art
+     */
     fun onArtUnselect() {
         _uiState.value = _uiState.value.copy(selectedArt = null, selectArtUser = null)
     }
 
+    /**
+     * Select the art with [artId]
+     */
     fun onArtSelect(artId: String) {
         launchCatching {
             val selectedArt = _activeArt.value[artId] ?: return@launchCatching
@@ -109,6 +136,9 @@ class HomeViewModel @Inject constructor(
 
     }
 
+    /**
+     * Read the art filter state from the shared preferences [store]
+     */
     fun readFilterStateFromStore(store: SharedPreferences) {
         launchCatching(
             onFailure = { _filterState.value = ArtFilterState() },
@@ -118,6 +148,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update the art filter state in the shared preferences [store]
+     */
     fun updateFilterStateInStore(store: SharedPreferences) {
         launchCatching {
             store.edit(commit = true) {
@@ -127,6 +160,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Process the [action] on the art filter and update the [store]
+     */
     fun onFilterAction(action: ArtFilterAction?, store: SharedPreferences) {
         if (_filterLoading) {
             return
@@ -177,22 +213,34 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update the current location to [newValue]
+     */
     fun onLocationChange(newValue: Location?) {
         if (newValue != null) {
             return onLocationChange(newValue.toLatLng())
         }
     }
 
+    /**
+     * Update the current location to [newValue]
+     */
     fun onLocationChange(newValue: LatLng) {
         _uiState.value = _uiState.value.copy(currentLocation = newValue)
         _geoQuery?.center = newValue.toGeoPoint()
     }
 
+    /**
+     * Update the distance in the state to [newValue]
+     */
     fun onDistanceChange(newValue: Double) {
         _uiState.value = _uiState.value.copy(distanceInKm = newValue)
         _geoQuery?.radius = newValue
     }
 
+    /**
+     * Check if the [art] is in the filter
+     */
     suspend fun isArtInFilter(art: Art): Boolean {
         // No filter
         if (_filterState.value == ArtFilterState()) {
@@ -207,6 +255,9 @@ class HomeViewModel @Inject constructor(
         return isFollowing || isMine
     }
 
+    /**
+     * Listen for art around the user by creating a realtime geoquery
+     */
     fun listenForArt() {
         launchCatching {
             _uiState.first { it.currentLocation != null }.currentLocation
@@ -220,12 +271,26 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Stop the geoquery
+     */
     fun stopListen() {
         _geoQuery?.removeAllListeners()
     }
 
+    /**
+     * Add a geoquery data event listener to the geoquery
+     */
     private fun GeoQuery.addGeoQueryDataEventListener() {
         return this.addGeoQueryDataEventListener(object : GeoQueryDataEventListener {
+
+            /**
+             * Triggers when a document enters the geoquery.
+             * If the art is in the filter, add it to the active art.
+             *
+             * @param documentSnapshot The document that entered the geoquery
+             * @param location The location of the document
+             */
             override fun onDocumentEntered(
                 documentSnapshot: DocumentSnapshot,
                 location: GeoPoint
@@ -244,6 +309,12 @@ class HomeViewModel @Inject constructor(
 
             }
 
+            /**
+             * Triggers when a document exits the geoquery.
+             * Remove the art from both the active and inactive art.
+             *
+             * @param documentSnapshot The document that exited the geoquery
+             */
             override fun onDocumentExited(documentSnapshot: DocumentSnapshot) {
                 val art = documentSnapshot.toObject<Art>() ?: return
                 // Remove from both inactive and active
@@ -252,6 +323,13 @@ class HomeViewModel @Inject constructor(
                 Log.d("GEOQUERY", "EXIT $art")
             }
 
+            /**
+             * Triggers when a document moves within the geoquery.
+             * If the art is in the filter, add it to the active art.
+             *
+             * @param documentSnapshot The document that moved within the geoquery
+             * @param location The location of the document
+             */
             override fun onDocumentMoved(
                 documentSnapshot: DocumentSnapshot,
                 location: GeoPoint
@@ -270,6 +348,12 @@ class HomeViewModel @Inject constructor(
 
             }
 
+            /**
+             * Triggers when a document changes within the geoquery.
+             *
+             * @param documentSnapshot The document that changed within the geoquery
+             * @param location The location of the document
+             */
             override fun onDocumentChanged(
                 documentSnapshot: DocumentSnapshot,
                 location: GeoPoint
@@ -287,10 +371,16 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
+            /**
+             * Triggers when the geoquery is ready.
+             */
             override fun onGeoQueryReady() {
                 _uiState.value = _uiState.value.copy(ready = true)
             }
 
+            /**
+             * Triggers when there is an error with the geoquery.
+             */
             override fun onGeoQueryError(exception: Exception) {
                 SnackbarManager.showError(exception)
             }
