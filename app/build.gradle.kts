@@ -15,17 +15,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.deco3801"
+    namespace = "com.goofygoobers.geoart"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.deco3801"
+        applicationId = "com.goofygoobers.geoart"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.example.deco3801.HiltTestRunner"
+        testInstrumentationRunner = "com.goofygoobers.geoart.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }

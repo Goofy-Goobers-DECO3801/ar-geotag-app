@@ -1,15 +1,16 @@
 {
   "project_info": {
     "project_number": "364103767910",
+    "firebase_url": "https://goofy-goobers-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "goofy-goobers",
     "storage_bucket": "goofy-goobers.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:364103767910:android:dd7a6b493a5b228280daa7",
+        "mobilesdk_app_id": "1:364103767910:android:1562888fbbe54ed880daa7",
         "android_client_info": {
-          "package_name": "com.example.deco3801"
+          "package_name": "com.goofygoobers.geoart"
         }
       },
       "oauth_client": [
