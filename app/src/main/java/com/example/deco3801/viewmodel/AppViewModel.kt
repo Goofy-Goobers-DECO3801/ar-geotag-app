@@ -35,10 +35,9 @@ open class AppViewModel : ViewModel() {
             block()
         } catch (e: Exception) {
             Log.e("ERROR", e.toString())
-            if (showErrorMsg)
-                {
-                    SnackbarManager.showError(e)
-                }
+            if (showErrorMsg) {
+                SnackbarManager.showError(e)
+            }
             onFailure()
         } finally {
             ProgressbarState.resetProgressbar()

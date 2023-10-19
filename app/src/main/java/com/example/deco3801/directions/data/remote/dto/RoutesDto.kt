@@ -11,7 +11,7 @@ data class RoutesDto(
     val overview_polyline: OverviewPolylineDto,
     val legs: List<LegsDto>,
 ) {
-    fun toRoutes(): Routes  {
+    fun toRoutes(): Routes {
         return Routes(
             summary = summary,
             overview_polyline = overview_polyline.toOverviewPolyline(),

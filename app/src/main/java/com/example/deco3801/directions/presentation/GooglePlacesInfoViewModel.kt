@@ -39,7 +39,7 @@ class GooglePlacesInfoViewModel @Inject constructor(
         origin: String,
         destination: String,
         key: String,
-    )  {
+    ) {
         viewModelScope.launch {
             getDirectionInfo(origin = origin, destination = destination, key = key).onEach { res ->
                 when (res) {
@@ -91,7 +91,7 @@ class GooglePlacesInfoViewModel @Inject constructor(
     }
 
     // Function for decoding polyline points.
-    private fun decoPoints(points: String): List<LatLng>  {
+    private fun decoPoints(points: String): List<LatLng> {
         _polyLinesPoints.value = decodePoly(points)
         return decodePoly(points)
     }

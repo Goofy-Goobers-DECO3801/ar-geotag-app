@@ -9,7 +9,7 @@ import com.example.deco3801.directions.domain.model.OverviewPolyline
 data class OverviewPolylineDto(
     val points: String,
 ) {
-    fun toOverviewPolyline(): OverviewPolyline  {
+    fun toOverviewPolyline(): OverviewPolyline {
         return OverviewPolyline(
             points = points,
         )

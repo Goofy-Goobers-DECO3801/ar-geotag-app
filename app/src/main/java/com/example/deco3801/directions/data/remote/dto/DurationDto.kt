@@ -10,7 +10,7 @@ data class DurationDto(
     val text: String,
     val value: Int,
 ) {
-    fun toDuration(): Duration  {
+    fun toDuration(): Duration {
         return Duration(
             text = text,
             value = value,

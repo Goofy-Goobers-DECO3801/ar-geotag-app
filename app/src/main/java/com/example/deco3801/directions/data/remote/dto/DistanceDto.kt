@@ -10,7 +10,7 @@ data class DistanceDto(
     val text: String,
     val value: Int,
 ) {
-    fun toDistance(): Distance  {
+    fun toDistance(): Distance {
         return Distance(
             text = text,
             value = value,

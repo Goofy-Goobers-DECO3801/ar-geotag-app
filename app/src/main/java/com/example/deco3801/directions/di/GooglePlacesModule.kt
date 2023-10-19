@@ -21,13 +21,13 @@ import javax.inject.Singleton
 object GooglePlacesModule {
     @Provides
     @Singleton
-    fun provideGetDirectionInfo(repository: GooglePlacesInfoRepository): GetDirectionInfo  {
+    fun provideGetDirectionInfo(repository: GooglePlacesInfoRepository): GetDirectionInfo {
         return GetDirectionInfo(repository = repository)
     }
 
     @Provides
     @Singleton
-    fun provideDirectionInfoRepository(api: GooglePlacesApi): GooglePlacesInfoRepository  {
+    fun provideDirectionInfoRepository(api: GooglePlacesApi): GooglePlacesInfoRepository {
         return GooglePlacesInfoRepositoryImplementation(api = api)
     }
 
