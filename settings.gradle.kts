@@ -15,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DECO3801"
+rootProject.name = "geoart"
 include(":app")
