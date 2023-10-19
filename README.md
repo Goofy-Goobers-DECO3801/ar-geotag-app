@@ -218,6 +218,9 @@ the code:
 - [Github Copilot](https://github.com/features/copilot) - Aided in writing the comments for code documentation.
 - [ChatGPT](https://chat.openai.com/) - Aided in creating the terms and conditions and privacy policy.
   Please see the appendix of the report for the full disclosure with prompts.
+- [JUnit 4](https://github.com/junit-team/junit4) - Unit testing framework.
+- [AndroidX Test](https://github.com/android/android-test) - Android testing framework.
+- [Google Truth](https://github.com/google/truth) - Assertion library used in tests.
 
 ## Code References
 
