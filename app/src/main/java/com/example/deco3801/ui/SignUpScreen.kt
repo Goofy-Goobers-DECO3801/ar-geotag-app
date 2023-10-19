@@ -1,3 +1,6 @@
+/**
+ * Compose UI for the sign up screen.
+ */
 package com.example.deco3801.ui
 
 import androidx.compose.foundation.Image
@@ -38,6 +41,12 @@ import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.AuthViewModel
 
+/**
+ * Displays the sign up screen, allowing the user to sign up to the app and create an account.
+ *
+ * @param navController The navigation controller to use.
+ * @param viewModel The auth view model to use, injected by Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(

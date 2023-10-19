@@ -1,3 +1,6 @@
+/**
+ * Component for the Settings Screen.
+ */
 package com.example.deco3801.ui
 
 import androidx.compose.foundation.border
@@ -40,6 +43,13 @@ import com.example.deco3801.viewmodel.SettingsViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
+/**
+ * Displays the settings screen, allowing the user to change their password, view the privacy policy
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ * @param modifier The modifier to apply to this layout node.
+ * @param viewModel The settings view model to use, injected by Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -206,6 +216,6 @@ fun SettingsScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsScreenPreview() {
+private fun SettingsScreenPreview() {
     SettingsScreen(navController = rememberNavController())
 }

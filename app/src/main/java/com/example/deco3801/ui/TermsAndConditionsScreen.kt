@@ -1,3 +1,6 @@
+/**
+ * Terms and Conditions Screen
+ */
 package com.example.deco3801.ui
 
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,6 +24,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.ui.components.TopBar
 
+/**
+ * Displays the terms and conditions screen, allowing the user to view the terms and conditions.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TermsAndConditionsScreen (navController: NavHostController) {
@@ -55,6 +63,11 @@ fun TermsAndConditionsScreen (navController: NavHostController) {
     }
 }
 
+/**
+ * Displays the terms and conditions dialog, allowing the user to view the terms and conditions.
+ *
+ * @param onDismissRequest The callback to be invoked when the user dismisses the dialog.
+ */
 @Composable
 fun TermsAndConditionsDialog(
     onDismissRequest: () -> Unit
@@ -101,6 +114,10 @@ fun TermsAndConditionsDialog(
 }
 
 /**
+ * Generates the terms and conditions text.
+ *
+ * @return A list of text components.
+ *
  * @reference
  * OpenAI, "ChatGPT," 2023. \[Online]. Available: https://chat.openai.com/. [Accessed 15 October 2023].
  */

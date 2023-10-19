@@ -261,6 +261,14 @@ fun ProfileScreen(
     }
 }
 
+/**
+ * Displays the list of followers or following in a bottom sheet.
+ *
+ * @param onOpen The callback to run when a user is clicked.
+ * @param modifier The modifier to apply to the bottom sheet.
+ * @param viewModel The profile view model to use, injected by Hilt.
+ * @param sheetState The sheet state to use.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FollowersBottomSheet(
@@ -314,6 +322,13 @@ fun FollowersBottomSheet(
     }
 }
 
+/**
+ * The clickable surface that displays a follower or following in the bottom sheet.
+ *
+ * @param user The user to display.
+ * @param onOpen The callback to run when the user is clicked.
+ * @param modifier The modifier to apply to the surface.
+ */
 @Composable
 fun FollowerBottomSheetSurface(
     user: User,
@@ -359,6 +374,12 @@ fun FollowerBottomSheetSurface(
     }
 }
 
+/**
+ * Displays a tile for an artwork.
+ *
+ * @param art The art to display.
+ * @param onClick The callback to run when the tile is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtworkTile(
@@ -446,6 +467,11 @@ fun ArtworkTile(
     }
 }
 
+/**
+ * Displays a static Google Map of the location of the artwork.
+ *
+ * @param geoPoint The location of the artwork to put the marker.
+ */
 @Composable
 fun StaticMap(
     geoPoint: GeoPoint?
@@ -453,6 +479,7 @@ fun StaticMap(
 
     var model by remember { mutableStateOf<Any>(R.drawable.default_img)}
 
+    // Construct the query
     ConstructGoogleStaticMapQuery(geoPoint) { model = it }
 
     Log.d("MODEL", model.toString())
@@ -464,6 +491,12 @@ fun StaticMap(
     )
 }
 
+/**
+ * Constructs the query for the Google Static Maps API.
+ *
+ * @param geoPoint The location of the artwork to put the marker.
+ * @param onReady The callback to run when the query is ready.
+ */
 @Composable
 fun ConstructGoogleStaticMapQuery(geoPoint: GeoPoint?, onReady: (String) -> Unit) {
     var apiKey by remember { mutableStateOf<String?>(null) }
@@ -499,17 +532,3 @@ fun ConstructGoogleStaticMapQuery(geoPoint: GeoPoint?, onReady: (String) -> Unit
 private fun ProfileScreenPreview() {
     ProfileScreen("", navController = rememberNavController())
 }
-
-// @Composable
-// fun ProfileGrid (modifier: Modifier = Modifier) {
-//    LazyVerticalGrid(
-//        columns = GridCells.Fixed(2),
-//        verticalArrangement = Arrangement.spacedBy(12.dp),
-//        horizontalArrangement = Arrangement.spacedBy(12.dp),
-//        modifier = modifier
-//    ) {
-//        items(DataSource.profiles) { topic ->
-//            ArtworkTile(topic)
-//        }
-//    }
-// }
