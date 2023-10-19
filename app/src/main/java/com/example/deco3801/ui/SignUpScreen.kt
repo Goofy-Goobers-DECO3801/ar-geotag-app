@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -54,9 +53,7 @@ fun SignUpScreen(
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState
-    val context = LocalContext.current
     var isChecked by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var viewTandC by remember { mutableStateOf(false) }
     var viewPrivacyPolicy by remember { mutableStateOf(false) }
 

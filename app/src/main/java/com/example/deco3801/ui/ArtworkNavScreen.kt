@@ -539,9 +539,9 @@ fun EditPostBottomSheet(
  *
  * @param art The artwork to display the map for.
  * @param userLocation The user's current location.
- * @param modifier The modifier to apply to the map.
  * @param columnScroll Callback to run when the user scrolls the column.
  * @param markerIcon The icon to use for the marker on the map.
+ * @param modifier The modifier to apply to the map.
  * @param cameraPositionState The camera position state of the map.
  * @param mapProperties The properties of the map.
  * @param googlePlacesViewModel The Google Places view model injected by Hilt.
@@ -552,9 +552,9 @@ fun EditPostBottomSheet(
 fun ArtworkMap(
     art: Art,
     userLocation: Location?,
-    modifier: Modifier = Modifier,
     columnScroll: (Boolean) -> Unit,
     markerIcon: Bitmap,
+    modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     mapProperties: MapProperties = MapProperties(),
     googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),

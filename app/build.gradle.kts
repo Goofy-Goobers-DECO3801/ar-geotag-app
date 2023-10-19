@@ -230,8 +230,6 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    ktlintRuleset("io.nlopez.compose.rules:ktlint:0.3.0")
 }
 
 ktlint {
