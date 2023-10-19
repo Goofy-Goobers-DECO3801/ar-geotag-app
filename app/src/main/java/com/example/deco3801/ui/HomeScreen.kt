@@ -153,13 +153,12 @@ fun HomeScreen(
         This gets run way to much and lags the map since everytime it triggers it the
         onDocumentChanged callback gets triggered. (idk how to fix this so just hard coding our
         geoquery to 100,000km)
-         */
-//       if (cameraPositionState.isMoving) {
-//           viewModel.onLocationChange(cameraPositionState.position.target)
-//           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
-//       }
 
-        //
+          if (cameraPositionState.isMoving) {
+            viewModel.onLocationChange(cameraPositionState.position.target)
+             viewModel.onDistanceChange(cameraPositionState.position.toRadius())
+         }
+         */
 
         // Add custom interaction to the markers
         val markerClick: (Marker) -> Boolean = { marker ->
