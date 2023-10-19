@@ -42,7 +42,6 @@ The project is architected using the the Model-View-ViewModel (MVVM) architectur
     - `di/` contains the dependency injection modules for the app.
     - `util/` contains utility functions for the app.
   - `src/main/res` directory contains the resources for the app.
-  - `src/main/assets` directory contains the assets for the app.
   - `src/main/python` directory contains the Python script for the app that is used to convert 2D images into 3D models.
   - `src/androidTest/kotlin/com/goofygoobers/geoart` directory contains the Android tests for
     the app.
