@@ -6,7 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
+import com.example.deco3801.directions.domain.usecase.GetDirectionInfo
 import com.example.deco3801.directions.util.Resource
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel

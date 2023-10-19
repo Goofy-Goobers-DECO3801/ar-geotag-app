@@ -3,7 +3,7 @@ package com.example.deco3801.directions.di
 import com.example.deco3801.directions.data.remote.GooglePlacesApi
 import com.example.deco3801.directions.data.repository.GooglePlacesInfoRepositoryImplementation
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
-import com.example.deco3801.directions.domain.use_case.GetDirectionInfo
+import com.example.deco3801.directions.domain.usecase.GetDirectionInfo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

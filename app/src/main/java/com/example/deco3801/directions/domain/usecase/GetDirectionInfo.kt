@@ -1,4 +1,4 @@
-package com.example.deco3801.directions.domain.use_case
+package com.example.deco3801.directions.domain.usecase
 
 import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 import com.example.deco3801.directions.domain.repository.GooglePlacesInfoRepository
