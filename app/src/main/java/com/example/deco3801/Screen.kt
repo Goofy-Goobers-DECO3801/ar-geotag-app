@@ -13,8 +13,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -34,9 +32,8 @@ import com.example.deco3801.ui.PrivacyPolicyScreen
 import com.example.deco3801.ui.ProfileScreen
 import com.example.deco3801.ui.SettingsScreen
 import com.example.deco3801.ui.SignUpScreen
-import com.example.deco3801.ui.TandCScreen
+import com.example.deco3801.ui.TermsAndConditionsScreen
 import com.example.deco3801.ui.components.NavBar
-import com.example.deco3801.ui.resizeBitmap
 import com.google.firebase.auth.FirebaseUser
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -57,8 +54,6 @@ fun AppFunctionality(
     markerIcon: Bitmap,
     appState: AppState = rememberAppState(),
 ) {
-    val context = LocalContext.current
-
     // Lock the screen orientation to portrait.
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
@@ -125,7 +120,7 @@ fun AppFunctionality(
                 SettingsScreen(appState.navController)
             }
             composable(route = ScreenNames.TermsAndConditions.name) {
-                TandCScreen(appState.navController)
+                TermsAndConditionsScreen(appState.navController)
             }
             composable(route = ScreenNames.PrivacyPolicy.name) {
                 PrivacyPolicyScreen(appState.navController)

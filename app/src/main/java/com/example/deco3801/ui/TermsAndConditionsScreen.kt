@@ -1,11 +1,8 @@
 package com.example.deco3801.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,22 +12,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TandCScreen (navController: NavHostController) {
+fun TermsAndConditionsScreen (navController: NavHostController) {
     Scaffold (
         topBar = {
             TopBar(
@@ -56,14 +49,14 @@ fun TandCScreen (navController: NavHostController) {
                 )
             }
             item {
-                TandCText()
+                termsAndConditionsText()
             }
         }
     }
 }
 
 @Composable
-fun TandCDialog(
+fun TermsAndConditionsDialog(
     onDismissRequest: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
@@ -90,7 +83,7 @@ fun TandCDialog(
                     )
                 }
                 item {
-                    TandCText()
+                    termsAndConditionsText()
                 }
             }
             Button(
@@ -107,21 +100,19 @@ fun TandCDialog(
     }
 }
 
-@Preview
+/**
+ * @reference
+ * OpenAI, "ChatGPT," 2023. \[Online]. Available: https://chat.openai.com/. [Accessed 15 October 2023].
+ */
 @Composable
-fun PreviewTandCScreen() {
-    TandCScreen(navController = rememberNavController())
-}
-
-@Composable
-fun TandCText(): MutableList<Unit> {
+fun termsAndConditionsText(): MutableList<Unit> {
     val textModifier: Modifier = Modifier.padding(
         top = 10.dp,
         start = 25.dp,
         end = 25.dp,
         bottom = 15.dp
     )
-    var textList = mutableListOf<Unit>()
+    val textList = mutableListOf<Unit>()
     textList.add(
         Text(
             "Welcome to geoARt. By using this App, you agree to comply with and be bound by the following Terms and Conditions. Please read these Terms carefully before using the App.",
@@ -274,3 +265,10 @@ fun TandCText(): MutableList<Unit> {
     )
     return textList
 }
+
+@Preview
+@Composable
+private fun PreviewTermsAndConditionsScreen() {
+    TermsAndConditionsScreen(navController = rememberNavController())
+}
+

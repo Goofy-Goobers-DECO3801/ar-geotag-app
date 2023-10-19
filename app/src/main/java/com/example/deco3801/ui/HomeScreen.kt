@@ -1,3 +1,6 @@
+/**
+ * Home screen with main main.
+ */
 package com.example.deco3801.ui
 
 import android.Manifest
@@ -33,11 +36,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.deco3801.R
 import com.example.deco3801.data.model.Art
 import com.example.deco3801.data.model.User
@@ -53,7 +54,6 @@ import com.example.deco3801.util.toGeoLocation
 import com.example.deco3801.util.toLatLng
 import com.example.deco3801.viewmodel.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -67,6 +67,16 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 import org.imperiumlabs.geofirestore.util.GeoUtils
 
+/**
+ * Displays the home screen, showing the map and the art markers.
+ * The map is displayed using the Google Maps API and updated in real time using event listeners
+ * on the geo-query to the database.
+ *
+ * @param navController The navigation controller to use.
+ * @param markerIcon The resized marker icon to use in the maps
+ * @param viewModel The home view model to use, injected by Hilt.
+ * @param useDarkTheme Whether to use the dark theme or not.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -99,13 +109,17 @@ fun HomeScreen(
             )
         }
 
+        // Setup the real time geo-query and callback to stop listening when the screen is disposed
         DisposableEffect(Unit) {
             ProgressbarState.showIndeterminateProgressbar()
+            viewModel.listenForArt()
             onDispose {
+                viewModel.stopListen()
                 ProgressbarState.resetProgressbar()
             }
         }
-        // Location Permissions
+
+        // Request location Permissions
         RequestPermissions(
             permissions =
                 listOf(
@@ -143,13 +157,9 @@ fun HomeScreen(
 //           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
 //       }
 
-        DisposableEffect(Unit) {
-            viewModel.listenForArt()
-            onDispose {
-                viewModel.stopListen()
-            }
-        }
+        //
 
+        // Add custom interaction to the markers
         val markerClick: (Marker) -> Boolean = { marker ->
             marker.title?.let { viewModel.onArtSelect(it) }
 
@@ -190,7 +200,8 @@ fun HomeScreen(
         }
 
         if (uiState.selectedArt != null && uiState.selectArtUser != null) {
-            ArtMarker(
+            // Displays the art marker info when the marker is clicked.
+            ArtMarkerInfo(
                 art = uiState.selectedArt!!,
                 artist = uiState.selectArtUser!!,
                 onDismissRequest = viewModel::onArtUnselect,
@@ -200,17 +211,19 @@ fun HomeScreen(
     }
 }
 
-fun resizeBitmap(context: Context, width: Int, height: Int): Bitmap {
-    val imageBitmap = BitmapFactory.decodeResource(
-        context.resources,
-        R.drawable.map_marker
-    )
-    return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
-}
 
+/**
+ * Displays the art marker info when the marker is clicked.
+ *
+ * @param art The art to display.
+ * @param artist The artist of the art.
+ * @param onDismissRequest The callback to run when the info is dismissed.
+ * @param onSelect The callback to run when the art is selected.
+ * @param modifier The modifier to apply to the info.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArtMarker(
+fun ArtMarkerInfo(
     art: Art,
     artist: User,
     onDismissRequest: () -> Unit,
@@ -261,9 +274,3 @@ fun ArtMarker(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//private fun HomeScreenPreview() {
-//    HomeScreen(rememberNavController(), Bit)
-//}
