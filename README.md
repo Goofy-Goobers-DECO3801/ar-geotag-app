@@ -6,12 +6,24 @@ to their location. Other users can then view these posts at the location in augm
 in likes and comments. Users have full control over their privacy and personal details through geoARt’s user profile
 management, managing who can see their posts and authentication.
 
+## Our Vision
+
+Our vision is to create a vibrant community of artists and art lovers who can connect with each other
+and share their passion for art through geoARt, without disrupting the natural beauty of the world around.
+
+[Vision Video](https://deco3801-goofygoobers.uqcloud.net/assets/videos/kickstarter.mp4)
+
 ## Installing the app onto your Android Phone
 
-The built APK to be installed on android phones can be downloaded from
-our [website](https://deco3801-goofygoobers.uqcloud.net/).
+Due to the current hardware requirements for AR, the app can only be installed on ARCore supported Android devices.
+Please refer to the official [ARCore supported devices list](https://developers.google.com/ar/devices#google_play).
 
-The website provides detailed instructions on how to install an APK onto an android phone.
+The built APK, along with detailed instructions on how to install it to your android phone can be
+found on our [deco3801-goofygoobers.uqcloud.net](https://deco3801-goofygoobers.uqcloud.net/).
+
+A walkthrough of how to get started with the app can also be found on our website or visiting the demo link below
+
+[Demo Video](https://deco3801-goofygoobers.uqcloud.net/assets/videos/demo.mp4).
 
 ## Project Structure
 
@@ -220,5 +232,5 @@ the code:
 - [9] GitHub, OpenAI, "Github Copilot," 2023. [Online]. Available: <https://github.com/features/copilot>. [Accessed 18 October 2023].
 - [10] OpenAI, "ChatGPT," 2023. [Online]. Available: <https://chat.openai.com/>. [Accessed 15 October 2023].
 - [11] Sceneview, "Assets," 2023. [Online]. Available: <https://sceneview.github.io/assets/>. [Accessed 10 October 2023].
-- [12] Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. [Online]. Available: https://stackoverflow.com/a/28893299. [Accessed 18 October 2023].
-- [13] J. Sambells, "Decoding polylines from google maps directions api with java," 27 May 2010. [Online]. Available: https://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java. [Accessed 2 October 2023].
+- [12] Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. [Online]. Available: <https://stackoverflow.com/a/28893299>. [Accessed 18 October 2023].
+- [13] J. Sambells, "Decoding polylines from google maps directions api with java," 27 May 2010. [Online]. Available: <https://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java>. [Accessed 2 October 2023].
