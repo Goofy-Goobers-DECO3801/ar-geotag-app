@@ -1,7 +1,8 @@
+/**
+ * Composable components for the privacy policy screen.
+ */
 package com.example.deco3801.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,20 +15,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.TopBar
-import org.w3c.dom.Text
 
+/**
+ * Displays the privacy policy screen, allowing the user to view the privacy policy.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyPolicyScreen (navController: NavHostController) {
@@ -56,12 +57,17 @@ fun PrivacyPolicyScreen (navController: NavHostController) {
                 )
             }
             item {
-                PrivacyPolicyText()
+                privacyPolicyText()
             }
         }
     }
 }
 
+/**
+ * Displays the privacy policy as a dialog, allowing the user to view the privacy policy.
+ *
+ * @param onDismissRequest The callback to run when the dialog is dismissed.
+ */
 @Composable
 fun PrivacyPolicyDialog(
     onDismissRequest: () -> Unit
@@ -90,7 +96,7 @@ fun PrivacyPolicyDialog(
                     )
                 }
                 item {
-                    PrivacyPolicyText()
+                    privacyPolicyText()
                 }
             }
             Button(
@@ -107,21 +113,23 @@ fun PrivacyPolicyDialog(
     }
 }
 
-@Preview
+/**
+ * Generates the text for the privacy policy.
+ *
+ * @return A list of composable text components that make up the privacy policy.
+ *
+ * @reference
+ * OpenAI, "ChatGPT," 2023. \[Online]. Available: https://chat.openai.com/. [Accessed 15 October 2023].
+ */
 @Composable
-fun PreviewPrivacyPolicyScreen() {
-    TandCScreen(navController = rememberNavController())
-}
-
-@Composable
-fun PrivacyPolicyText(): MutableList<Unit> {
+fun privacyPolicyText(): MutableList<Unit> {
     val textModifier : Modifier = Modifier.padding(
         top = 10.dp,
         start = 25.dp,
         end = 25.dp,
         bottom = 15.dp
     )
-    var textList = mutableListOf<Unit>()
+    val textList = mutableListOf<Unit>()
     textList.add(Text(
         "At geoARt, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information. By using the geoARt app, you consent to the practices described in this policy.",
         modifier = textModifier
@@ -224,4 +232,11 @@ fun PrivacyPolicyText(): MutableList<Unit> {
     ))
     return textList
 }
+
+@Preview
+@Composable
+private fun PreviewPrivacyPolicyScreen() {
+    TermsAndConditionsScreen(navController = rememberNavController())
+}
+
 

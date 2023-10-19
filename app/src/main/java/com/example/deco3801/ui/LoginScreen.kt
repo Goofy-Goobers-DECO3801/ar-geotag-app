@@ -1,3 +1,6 @@
+/**
+ * Composable components for the login screen.
+ */
 package com.example.deco3801.ui
 
 import androidx.compose.foundation.Image
@@ -30,13 +33,18 @@ import com.example.deco3801.ui.components.PasswordField
 import com.example.deco3801.ui.theme.UnchangingAppColors
 import com.example.deco3801.viewmodel.AuthViewModel
 
+/**
+ * Displays the login screen, allowing the user to login to the app and authenticate themselves.
+ *
+ * @param navController The navigation controller to use.
+ * @param viewModel The auth view model to use, injected by Hilt.
+ */
 @Composable
 fun LoginScreen(
     navController: NavHostController,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -99,6 +107,6 @@ fun LoginScreen(
 
 @Preview
 @Composable
-fun PreviewLoginScreen() {
+private fun PreviewLoginScreen() {
     LoginScreen(navController = rememberNavController())
 }

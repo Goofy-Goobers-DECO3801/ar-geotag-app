@@ -1,3 +1,6 @@
+/**
+ * Composable components for the profile screen.
+ */
 package com.example.deco3801.ui
 
 import android.util.Log
@@ -81,6 +84,15 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 
+/**
+ * Displays the profile screen, allowing the user to view their profile and edit it and view their posts.
+ * This screen is also used to view other users profiles.
+ * The profile is updated in real time using event listeners on the database.
+ *
+ * @param userId The user id of the user to display the profile of.
+ * @param navController The navigation controller to use.
+ * @param viewModel The profile view model to use, injected by Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -95,6 +107,7 @@ fun ProfileScreen(
     val followSheetState by viewModel.followSheetState.collectAsState()
     val isCurrentUser = viewModel.isCurrentUser(userId)
 
+    // Attach listeners and setup callback to detach listeners
     DisposableEffect(userId) {
         viewModel.attachListener(userId)
         viewModel.isFollowing(userId)

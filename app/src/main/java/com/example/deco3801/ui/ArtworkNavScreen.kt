@@ -780,12 +780,3 @@ fun UserComment(
 private fun atArtLocation(distanceInM: Double?): Boolean {
     return distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN
 }
-
-//@Preview
-//@Composable
-//private fun PreviewArtworkNavScreen() {
-//    ArtworkNavScreen(
-//        "1",
-//        rememberNavController(),
-//    )
-//}

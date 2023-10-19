@@ -6,12 +6,35 @@ of making these environments interesting, stimulating, and exciting areas. It fo
 on the role of urban art in livening communal areas, and the varying societal perspectives
 surrounding its use.
 
-## Installation
+## Installing the app
 
 The built APK to be installed on android phones can be downloaded from
 our [website](https://deco3801-goofygoobers.uqcloud.net/).
 
 The website provides detailed instructions on how to install an APK onto an android phone.
+
+## Project Structure
+
+The project is architected using the the Model-View-ViewModel (MVVM) architecture pattern and is structured as follows:
+
+- `firebase/` directory contains the Firebase security rules and indexes.
+- `app/` directory contains the main source code for the app.
+  - `src/main/kotlin/com/goofygoobers/geoart/` directory contains the Kotlin source code for the
+    app.
+    - `viewmodel/` contains the view models for the app that are used to store and manage the state of
+      the UI.
+    - `ui/` contains the UI screens and components for the app.
+    - `data/` contains the database data models and repositories for the app.
+    - `directions/` contains all code related to querying the Google Directions API to get the directions to an artwork.
+    - `artdisplay/` contains all code related to the previewing and displaying of art in AR.
+    - `di/` contains the dependency injection modules for the app.
+    - `util/` contains utility functions for the app.
+  - `src/main/res` directory contains the resources for the app.
+  - `src/main/assets` directory contains the assets for the app.
+  - `src/main/python` directory contains the Python script for the app that is used to convert 2D images into 3D models.
+  - `src/androidTest/kotlin/com/goofygoobers/geoart` directory contains the Android tests for
+    the app.
+  - `src/test/kotlin/com/goofygoobers/geoart` directory contains the unit tests for the app.
 
 ## Building from source
 
@@ -142,6 +165,7 @@ The following Android Studio configurations can be run to test the app:
 
 - The Android tests can be run with the `Android Tests` configuration.
 - The Unit tests can be run by running the `Unit Tests` configuration.
+- The Android Studio linter can be run with the `Lint` configuration.
 
 ### Style
 
@@ -153,7 +177,6 @@ and [Android Kotlin Style Guide](https://android.github.io/kotlin-guides/style.h
 The following Android Studio configurations can be run to perform various style checks and format
 the code:
 
-- The Android Studio linter can be run with the `Lint` configuration.
 - The code style can be checked by `ktlint` with the `Style` configuration.
 - The code can be formatted by `ktlint` with the `Format` configuration.
 
@@ -166,7 +189,7 @@ the code:
   (Firestore, storage, and authentication).
 - [AR Core](https://github.com/google-ar/arcore-android-sdk) - Provides AR capabilities.
 - [SceneView](https://github.com/SceneView/sceneview-android) - Integrates AR Core with Jetpack
-  Compose.
+  Compose and provides open source sample assets for demo purposes.
 - [Google Play Services](https://developers.google.com/android/guides/overview) - Used for Google
   Maps, and location services.
 - [Google Maps Compose](https://github.com/googlemaps/android-maps-compose) - Integrates Google Maps
@@ -180,14 +203,21 @@ the code:
 - [pygltflib](https://gitlab.com/dodgyville/pygltflib) - Python package used to convert 2D images to
   3D models.
 - [ktlint](https://pinterest.github.io/ktlint/1.0.0/) - Code style checker and formatter.
+- [Github Copilot](https://github.com/features/copilot) - Aided in writing the comments for code documentation.
+- [ChatGPT](https://chat.openai.com/) - Aided in creating the terms and conditions and privacy policy.
+  Please see the appendix of the report for the full disclosure with prompts.
 
 ## Code References
 
-- [1] R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," Kotlin, 11 August 2020. [Online]. Available: https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes. [Accessed 26 September 2023].
-- [2] "Retrieving File Information," Android Developers, 27 October 2021. [Online]. Available: https://developer.android.com/training/secure-file-sharing/retrieve-info. [Accessed 15 September 2023].
-- [3] The Android Open Source Project, "LocationUpdateScreen.kt," Android, 16 May 2023. [Online]. Available: https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt. [Accessed 10 September 2023].
-- [4] E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, 25 October 2022. [Online]. Available: https://stackoverflow.com/a/74160903. [Accessed 11 October 2023].
-- [5] G. Mayani and sergiuteaca, "What ratio scales do Google Maps zoom levels correspond to?," Geographic Information Systems Stack Exchange, 19 August 2020. [Online]. Available: https://gis.stackexchange.com/a/127949. [Accessed 10 September 2023].
-- [6] B. Hoffmann, "android:autoSizeTextType in Jetpack Compose," Stackoverflow, 7 July 2021. [Online]. Available: https://stackoverflow.com/a/66090448. [Accessed 16 October 2023].
-- [7] Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
-- [8] Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
+- [1] R. Elizarov and V. Tolstopyatov, "Serializing 3rd Party Classes," Kotlin, 11 August 2020. [Online]. Available: <https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#serializing-3rd-party-classes>. [Accessed 26 September 2023].
+- [2] "Retrieving File Information," Android Developers, 27 October 2021. [Online]. Available: <https://developer.android.com/training/secure-file-sharing/retrieve-info>. [Accessed 15 September 2023].
+- [3] The Android Open Source Project, "LocationUpdateScreen.kt," Android, 16 May 2023. [Online]. Available: <https://github.com/android/platform-samples/blob/main/samples/location/src/main/java/com/example/platform/location/locationupdates/LocationUpdatesScreen.kt>. [Accessed 10 September 2023].
+- [4] E. Yulianto, "Geocoder - getFromLocation() Deprecated," Stackoverflow, 25 October 2022. [Online]. Available: <https://stackoverflow.com/a/74160903>. [Accessed 11 October 2023].
+- [5] G. Mayani and sergiuteaca, "What ratio scales do Google Maps zoom levels correspond to?," Geographic Information Systems Stack Exchange, 19 August 2020. [Online]. Available: <https://gis.stackexchange.com/a/127949>. [Accessed 10 September 2023].
+- [6] B. Hoffmann, "android:autoSizeTextType in Jetpack Compose," Stackoverflow, 7 July 2021. [Online]. Available: <https://stackoverflow.com/a/66090448>. [Accessed 16 October 2023].
+- [7] Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: <https://github.com/kahdichienja/JetMapCompose>
+- [8] Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: <https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app>.
+- [9] GitHub, OpenAI, "Github Copilot," 2023. [Online]. Available: <https://github.com/features/copilot>. [Accessed 18 October 2023].
+- [10] OpenAI, "ChatGPT," 2023. [Online]. Available: <https://chat.openai.com/>. [Accessed 15 October 2023].
+- [11] Sceneview, "Assets," 2023. [Online]. Available: <https://sceneview.github.io/assets/>. [Accessed 10 October 2023].
+- [12] Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. [Online]. Available: https://stackoverflow.com/a/28893299. [Accessed 18 October 2023].

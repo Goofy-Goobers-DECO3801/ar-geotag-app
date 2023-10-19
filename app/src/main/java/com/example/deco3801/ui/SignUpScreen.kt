@@ -136,7 +136,7 @@ fun SignUpScreen(
         }
 
         if (viewTandC) {
-            TandCDialog { viewTandC = false }
+            TermsAndConditionsDialog { viewTandC = false }
         }
 
         if (viewPrivacyPolicy) {

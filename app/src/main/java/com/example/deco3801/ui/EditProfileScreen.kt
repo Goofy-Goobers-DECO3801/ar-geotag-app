@@ -1,3 +1,6 @@
+/**
+ * Screen for editing the user's profile.
+ */
 package com.example.deco3801.ui
 
 import android.net.Uri
@@ -56,15 +59,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
-import com.example.deco3801.ScreenNames
 import com.example.deco3801.ui.components.BioField
 import com.example.deco3801.ui.components.NameField
+import com.example.deco3801.ui.components.SnackbarManager
 import com.example.deco3801.ui.components.TopBar
 import com.example.deco3801.viewmodel.EditProfileViewModel
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import java.io.File
 
+
+/**
+ * Displays the edit profile screen, allowing users to change their profile picture, username,
+ * full name and bio.
+ *
+ * @param navController The navigation controller to use.
+ * @param modifier The modifier to apply to this layout node.
+ * @param viewModel The edit profile view model, injected by Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
@@ -78,13 +88,16 @@ fun EditProfileScreen(
     var takePhotoFile by remember { mutableStateOf<File?>(null) }
     var takePhotoUri by remember { mutableStateOf<Uri?>(null) }
     val user by viewModel.newUser.collectAsState()
+
+    // Activity to launch the image picker when the user clicks the choose from library button.
     val imagePicker = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
         uri?.let(viewModel::onPictureChange)
     }
+    // Activity to launch the camera when the user clicks the take photo button.
     val takePhoto =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
             if (!bool || takePhotoUri == null || takePhotoFile == null) {
-                Log.e("CREATE", "Failed to take photo")
+                SnackbarManager.showError("Failed to take photo, please try again!")
                 return@rememberLauncherForActivityResult
             }
             viewModel.onPictureChange(takePhotoUri!!)
@@ -99,6 +112,7 @@ fun EditProfileScreen(
         }
     ) { innerPadding ->
         if (showBottomSheet) {
+            // Bottom sheet for choosing options for changing the profile picture.
             ModalBottomSheet(
                 onDismissRequest = {
                     showBottomSheet = false
@@ -287,6 +301,6 @@ fun EditProfileScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun EditProfileScreenPreview() {
+private fun EditProfileScreenPreview() {
     EditProfileScreen(rememberNavController())
 }

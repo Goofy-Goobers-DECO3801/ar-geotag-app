@@ -99,8 +99,10 @@ fun CreateScreen(
         viewModel.onLocationChange(context.getCurrentLocation())
     }
 
+    // Decode the latitude and longitude to an address.
     GetLocationName(location = uiState.location, onLocationName = {locationName = it}, fullAddress = true)
 
+    // Activity to launch the image picker when the user clicks the select image button.
     val imagePicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             uri ?: return@rememberLauncherForActivityResult
@@ -116,16 +118,18 @@ fun CreateScreen(
             }
         }
 
+    // Activity to launch the file picker when the user clicks the select 3D model button.
     val filePicker =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri ?: return@rememberLauncherForActivityResult
             viewModel.onSelectFile(uri.getFileName(context), uri)
         }
 
+    // Activity to launch the camera when the user clicks the take photo button.
     val takePhoto =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { bool ->
             if (!bool || takePhotoUri == null || takePhotoFile == null) {
-                Log.e("CREATE", "Failed to take photo")
+                SnackbarManager.showError("Failed to take photo, please try again!")
                 return@rememberLauncherForActivityResult
             }
             try {
@@ -406,13 +410,12 @@ fun BottomSheetSurface(
 }
 
 /**
- * Display a list of sample 3D models.
+ * Display a list of sample 3D models for demo and prototyping purposes.
  *
  * @param onDismissRequest The callback to run when the sheet is dismissed.
  * @param onSelect The callback to run when a model is selected.
  *
  * @see [ModalBottomSheet]
- * @reference "Assets," Sceneview, \[Online]. Available: https://sceneview.github.io/assets/. [Accessed 10 October 2023].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -424,6 +427,10 @@ fun SampleModelList(
     val samples by remember {
         mutableStateOf(
             listOf(
+                /**
+                 * @reference Sceneview, "Assets," 2023. \[Online].
+                 * Available: https://sceneview.github.io/assets/. [Accessed 10 October 2023].
+                 */
                 "https://sceneview.github.io/assets/models/Halloween.glb",
                 "https://sceneview.github.io/assets/models/DamagedHelmet.glb",
                 "https://sceneview.github.io/assets/models/GameBoy.glb",

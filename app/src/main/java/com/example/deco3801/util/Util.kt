@@ -5,7 +5,10 @@ package com.example.deco3801.util
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
+import com.example.deco3801.R
 import java.util.Date
 import java.util.Locale
 
@@ -49,6 +52,9 @@ fun formatDistance(distanceInM: Double): String {
 
 /**
  * Formats a [date] to a human readable format.
+ *
+ * The format closely follows the format used by popular social media apps like Instagram and Twitter,
+ * that uses relative time for recent dates, and absolute time for older dates.
  */
 fun formatDate(date: Date?): String {
     date ?: return ""
@@ -87,4 +93,26 @@ fun Context.getGoogleApiKey(): String? {
             .metaData
             .getString("com.google.android.geo.API_KEY")
         )
+}
+
+/**
+ * Resizes the given resource with [resId] to the given [width] and [height].
+ *
+ * @param context The context.
+ * @param resId The resource ID of the original bitmap.
+ * @param width The new width.
+ * @param height The new height.
+ *
+ * @see [BitmapFactory.decodeResource]
+ * @see [Bitmap.createScaledBitmap]
+ * @reference
+ * Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. \[Online].
+ * Available: https://stackoverflow.com/a/28893299. [Accessed 18 October 2023].
+ */
+fun resizeBitmap(context: Context, resId: Int, width: Int, height: Int): Bitmap {
+    val imageBitmap = BitmapFactory.decodeResource(
+        context.resources,
+        resId
+    )
+    return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
 }
