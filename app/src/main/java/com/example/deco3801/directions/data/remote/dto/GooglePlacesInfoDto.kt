@@ -6,6 +6,8 @@ import com.example.deco3801.directions.domain.model.GooglePlacesInfo
 // Kadhi Chienja, "JetMapCompose", 16 October 2023. [Online]. Available: https://github.com/kahdichienja/JetMapCompose
 
 // Creates Waypoint transfer object
+// These variable names need to match the JSON response from the Google Directions API,
+// which is why they don't follow the usual naming conventions.
 data class GooglePlacesInfoDto(
     val geocoded_waypoints: List<GeocodedWaypointsDto>,
     val routes: List<RoutesDto>,
