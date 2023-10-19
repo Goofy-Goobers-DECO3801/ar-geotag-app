@@ -98,7 +98,9 @@ class GooglePlacesInfoViewModel @Inject constructor(
 
     /**
      * Method to decode polyline points
-     * Courtesy : https://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java
+     * J. Sambells, "Decoding polylines from google maps directions api with java," 27 May 2010. \[Online].
+     * Available: https://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java.
+     * [Accessed 2 October 2023].
      */
     private fun decodePoly(encoded: String): List<LatLng> {
         val poly = ArrayList<LatLng>()
