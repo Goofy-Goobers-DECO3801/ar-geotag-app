@@ -4,9 +4,7 @@
 package com.example.deco3801.ui
 
 import android.Manifest
-import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,7 +86,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopBar(
-                navController = navController
+                navController = navController,
             ) {
                 ArtFilterMenu()
             }
@@ -104,8 +102,12 @@ fun HomeScreen(
         var mapProperties by remember {
             mutableStateOf(
                 MapProperties(
-                    mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light),
-                )
+                    mapStyleOptions =
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light,
+                        ),
+                ),
             )
         }
 
@@ -135,7 +137,7 @@ fun HomeScreen(
                 val currentLocation = LatLng(-27.4975, 153.0137)
                 viewModel.onLocationChange(currentLocation)
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLocation, 10f)
-            }
+            },
         ) {
             LaunchedEffect(Unit) {
                 val currentLocation = context.getCurrentLocation()
@@ -151,13 +153,12 @@ fun HomeScreen(
         This gets run way to much and lags the map since everytime it triggers it the
         onDocumentChanged callback gets triggered. (idk how to fix this so just hard coding our
         geoquery to 100,000km)
-         */
-//       if (cameraPositionState.isMoving) {
-//           viewModel.onLocationChange(cameraPositionState.position.target)
-//           viewModel.onDistanceChange(cameraPositionState.position.toRadius())
-//       }
 
-        //
+          if (cameraPositionState.isMoving) {
+            viewModel.onLocationChange(cameraPositionState.position.target)
+             viewModel.onDistanceChange(cameraPositionState.position.toRadius())
+         }
+         */
 
         // Add custom interaction to the markers
         val markerClick: (Marker) -> Boolean = { marker ->
@@ -210,7 +211,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 /**
  * Displays the art marker info when the marker is clicked.

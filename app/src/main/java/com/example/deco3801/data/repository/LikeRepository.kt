@@ -22,9 +22,8 @@ import javax.inject.Inject
 class LikeRepository @Inject constructor(
     private val artRepo: ArtRepository,
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ) : Repository<Like>(Like::class.java) {
-
     /**
      * Checks if the current user has liked a specific art.
      *
@@ -47,10 +46,11 @@ class LikeRepository @Inject constructor(
     fun likeArt(artId: String) {
         val uid = auth.uid!!
 
-        val like = Like(
-            artId = artId,
-            userId = uid,
-        )
+        val like =
+            Like(
+                artId = artId,
+                userId = uid,
+            )
         val likeRef = getCollectionRef(artId).document(uid)
         val artRef = artRepo.getCollectionRef().document(artId)
 
@@ -83,4 +83,3 @@ class LikeRepository @Inject constructor(
         return artRepo.getLikeSubCollectionRef(docId!!)
     }
 }
-

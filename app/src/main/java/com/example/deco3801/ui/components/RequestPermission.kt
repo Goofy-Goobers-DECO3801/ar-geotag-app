@@ -36,7 +36,7 @@ fun RequestPermissions(
     val permissionsState = rememberMultiplePermissionsState(permissions = permissions)
     if (permissionsState.allPermissionsGranted) {
         onGranted()
-    }else if (permissionsState.revokedPermissions.any {it.permission in permissions}) {
+    } else if (permissionsState.revokedPermissions.any { it.permission in permissions }) {
         onRevoked()
     }
 

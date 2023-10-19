@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
-import com.example.deco3801.R
 import java.util.Date
 import java.util.Locale
 
@@ -24,15 +23,12 @@ inline fun <T> Iterable<T>.forEachOrElse(
     return if (this.none()) orElse() else this.forEach(action)
 }
 
-
 /**
  * Applies the [action] function to each element in the iterable.
  *
  * @see [forEach]
  */
-inline fun <T> Iterable<T>.forEachApply(
-    action: T.() -> Unit,
-) {
+inline fun <T> Iterable<T>.forEachApply(action: T.() -> Unit) {
     return this.forEach {
         it.apply(action)
     }
@@ -92,7 +88,7 @@ fun Context.getGoogleApiKey(): String? {
             .getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
             .metaData
             .getString("com.google.android.geo.API_KEY")
-        )
+    )
 }
 
 /**
@@ -109,10 +105,16 @@ fun Context.getGoogleApiKey(): String? {
  * Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. \[Online].
  * Available: https://stackoverflow.com/a/28893299. [Accessed 18 October 2023].
  */
-fun resizeBitmap(context: Context, resId: Int, width: Int, height: Int): Bitmap {
-    val imageBitmap = BitmapFactory.decodeResource(
-        context.resources,
-        resId
-    )
+fun resizeBitmap(
+    context: Context,
+    resId: Int,
+    width: Int,
+    height: Int,
+): Bitmap {
+    val imageBitmap =
+        BitmapFactory.decodeResource(
+            context.resources,
+            resId,
+        )
     return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
 }

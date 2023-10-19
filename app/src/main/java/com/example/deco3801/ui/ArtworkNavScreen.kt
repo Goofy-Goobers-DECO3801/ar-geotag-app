@@ -60,11 +60,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.deco3801.R
 import com.example.deco3801.data.model.Art
@@ -121,7 +119,7 @@ fun ArtworkNavScreen(
     markerIcon: Bitmap,
     viewModel: ArtworkNavViewModel = hiltViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    ) {
+) {
     val context = LocalContext.current
     var userLocation by remember { mutableStateOf<Location?>(null) }
     val art by viewModel.art.collectAsState()
@@ -138,11 +136,14 @@ fun ArtworkNavScreen(
     var mapProperties by remember {
         mutableStateOf(
             MapProperties(
-                mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light),
-            )
+                mapStyleOptions =
+                    MapStyleOptions.loadRawResourceStyle(
+                        context,
+                        if (useDarkTheme) R.raw.map_style_dark else R.raw.map_style_light,
+                    ),
+            ),
         )
     }
-
 
     GetUserLocation(onChange = { userLocation = it })
     LaunchedEffect(userLocation != null) {
@@ -172,33 +173,33 @@ fun ArtworkNavScreen(
 
     Scaffold(
         topBar = {
-             TopBar(
-                 title = art.title,
-                 navController = navController,
-                 canNavigateBack = true
-             ) {
-                 IconButton(onClick = { showEditPost = true }) {
-                     Icon(
-                         imageVector = Icons.Filled.MoreHoriz,
-                         contentDescription = "More",
-                         tint = Color.White,
-                     )
-                 }
-             }
+            TopBar(
+                title = art.title,
+                navController = navController,
+                canNavigateBack = true,
+            ) {
+                IconButton(onClick = { showEditPost = true }) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreHoriz,
+                        contentDescription = "More",
+                        tint = Color.White,
+                    )
+                }
+            }
         },
     ) { innerPadding ->
         if (showComments) {
-           CommentBottomSheet(
-               artId = artId,
-               modifier = Modifier.heightIn(min = 400.dp),
-               onUserClicked = {
-                   navController.navigateProfile(it.id)
-               },
-               onDismissRequest = {
-                   showComments = false
-               },
-               distanceInM = distanceInM,
-           )
+            CommentBottomSheet(
+                artId = artId,
+                modifier = Modifier.heightIn(min = 400.dp),
+                onUserClicked = {
+                    navController.navigateProfile(it.id)
+                },
+                onDismissRequest = {
+                    showComments = false
+                },
+                distanceInM = distanceInM,
+            )
         }
         if (showEditPost && art.id.isNotBlank()) {
             EditPostBottomSheet(
@@ -216,13 +217,13 @@ fun ArtworkNavScreen(
         }
         Column(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(
-                    rememberScrollState(),
-                    columnScrollingEnabled,
-                ),
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(
+                        rememberScrollState(),
+                        columnScrollingEnabled,
+                    ),
         ) {
             ArtworkTitle(
                 art,
@@ -232,23 +233,23 @@ fun ArtworkNavScreen(
                 art = art,
                 userLocation = userLocation,
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .pointerInteropFilter(
-                        onTouchEvent = {
-                            when (it.action) {
-                                MotionEvent.ACTION_DOWN -> {
-                                    columnScroll(false)
-                                    false
-                                }
+                    Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                        .pointerInteropFilter(
+                            onTouchEvent = {
+                                when (it.action) {
+                                    MotionEvent.ACTION_DOWN -> {
+                                        columnScroll(false)
+                                        false
+                                    }
 
-                                else -> {
-                                    true
+                                    else -> {
+                                        true
+                                    }
                                 }
-                            }
-                        },
-                    ),
+                            },
+                        ),
                 columnScroll = columnScroll,
                 cameraPositionState = cameraPositionState,
                 mapProperties = mapProperties,
@@ -312,31 +313,31 @@ fun CommentBottomSheet(
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState(), true)
-                .padding(bottom = 20.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState(), true)
+                    .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.Top,
             content = {
                 OutlinedTextField(
                     value = comment,
                     onValueChange = { comment = it },
-                    label = {Text("Comment")},
+                    label = { Text("Comment") },
                     trailingIcon = {
                         IconButton(
                             enabled = atArtLocation(distanceInM) && comment.isNotBlank(),
                             onClick = {
                                 viewModel.onCommentPosted(artId, comment)
                                 comment = ""
-                            }
+                            },
                         ) {
                             Icon(imageVector = Icons.Filled.Send, contentDescription = null)
                         }
                     },
                     modifier =
-                    Modifier
-                        .padding(15.dp)
-                        .fillMaxWidth(),
+                        Modifier
+                            .padding(15.dp)
+                            .fillMaxWidth(),
                     enabled = atArtLocation(distanceInM),
                     supportingText = {
                         Text("You must be at the location to comment.")
@@ -346,16 +347,23 @@ fun CommentBottomSheet(
                     orElse = {
                         Text(
                             "Be the first to comment!",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp))
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp,
+                                    ),
+                        )
                     },
                 ) {
                     UserComment(user = it.user, comment = it.comment) {
                         onUserClicked(it.user)
                     }
                 }
-            }
+            },
         )
     }
 }
@@ -379,9 +387,9 @@ fun ArtworkTitle(
     ) {
         Row(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(UnchangingAppColors.main_theme),
+                Modifier
+                    .fillMaxWidth()
+                    .background(UnchangingAppColors.main_theme),
         ) {
             Column(
                 modifier =
@@ -395,23 +403,23 @@ fun ArtworkTitle(
                     contentDescription = "profile",
                     contentScale = ContentScale.Crop,
                     modifier =
-                    Modifier
-                        .clip(CircleShape)
-                        .size(45.dp)
-                        .clickable {
-                            onUserClicked()
-                        },
+                        Modifier
+                            .clip(CircleShape)
+                            .size(45.dp)
+                            .clickable {
+                                onUserClicked()
+                            },
                 )
             }
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 10.dp,
-                        bottom = 15.dp,
-                        end = 30.dp
-                    ),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 10.dp,
+                            bottom = 15.dp,
+                            end = 30.dp,
+                        ),
             ) {
                 Text(
                     text = "@${user.username}",
@@ -456,7 +464,7 @@ fun EditPostBottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    var showDeleteConfirmButton by remember { mutableStateOf(false)}
+    var showDeleteConfirmButton by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -465,10 +473,10 @@ fun EditPostBottomSheet(
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState(), true)
-                .padding(bottom = 20.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState(), true)
+                    .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -479,14 +487,20 @@ fun EditPostBottomSheet(
             )
             Spacer(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height((0.5).dp)
-                    .background(MaterialTheme.colorScheme.onError)
+                    Modifier
+                        .fillMaxWidth()
+                        .height((0.5).dp)
+                        .background(MaterialTheme.colorScheme.onError),
             )
             Text(
                 text = if (isCurrentUser) "If you delete this post, it will be permanently deleted and other users will no longer be able to discover your artwork." else "We take the misuse of this app seriously and are committed to upholding our Terms and Conditions. Please help us maintain a positive community by reporting any posts that violate our guidelines.",
-                modifier = Modifier.padding(top = 16.dp, start = 25.dp, end = 25.dp, bottom = 16.dp, )
+                modifier =
+                    Modifier.padding(
+                        top = 16.dp,
+                        start = 25.dp,
+                        end = 25.dp,
+                        bottom = 16.dp,
+                    ),
             )
             if (isCurrentUser) {
                 if (showDeleteConfirmButton) {
@@ -494,7 +508,7 @@ fun EditPostBottomSheet(
                         onClick = {
                             onDismissRequest()
                             onDelete()
-                        }
+                        },
                     ) {
                         Text(text = "Are you sure?")
                     }
@@ -502,7 +516,7 @@ fun EditPostBottomSheet(
                     Button(
                         onClick = {
                             showDeleteConfirmButton = true
-                        }
+                        },
                     ) {
                         Text(text = "Delete Post")
                     }
@@ -511,7 +525,7 @@ fun EditPostBottomSheet(
                 Button(onClick = {
                     onDismissRequest()
                     onReport()
-                } ) {
+                }) {
                     Text(text = "Report Post")
                 }
             }
@@ -525,9 +539,9 @@ fun EditPostBottomSheet(
  *
  * @param art The artwork to display the map for.
  * @param userLocation The user's current location.
- * @param modifier The modifier to apply to the map.
  * @param columnScroll Callback to run when the user scrolls the column.
  * @param markerIcon The icon to use for the marker on the map.
+ * @param modifier The modifier to apply to the map.
  * @param cameraPositionState The camera position state of the map.
  * @param mapProperties The properties of the map.
  * @param googlePlacesViewModel The Google Places view model injected by Hilt.
@@ -538,9 +552,9 @@ fun EditPostBottomSheet(
 fun ArtworkMap(
     art: Art,
     userLocation: Location?,
-    modifier: Modifier = Modifier,
     columnScroll: (Boolean) -> Unit,
     markerIcon: Bitmap,
+    modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     mapProperties: MapProperties = MapProperties(),
     googlePlacesViewModel: GooglePlacesInfoViewModel = hiltViewModel(),
@@ -551,7 +565,6 @@ fun ArtworkMap(
             ProgressbarState.resetProgressbar()
         }
     }
-
 
     val routePoints by googlePlacesViewModel.polyLinesPoints.collectAsState()
     val context = LocalContext.current
@@ -616,9 +629,9 @@ fun ArtworkInteract(
 ) {
     Column(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .background(UnchangingAppColors.main_theme),
+            Modifier
+                .fillMaxWidth()
+                .background(UnchangingAppColors.main_theme),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (distanceInM != null && distanceInM <= DISTANCE_AWAY_MARGIN) {
@@ -674,9 +687,9 @@ fun ArtworkDescription(
 ) {
     Column(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .padding(20.dp, 5.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(20.dp, 5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
@@ -730,23 +743,24 @@ fun UserComment(
     onUserClicked: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
-    ){
-        Column (Modifier.padding(top = 5.dp, end = 15.dp)) {
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
+    ) {
+        Column(Modifier.padding(top = 5.dp, end = 15.dp)) {
             AsyncImage(
                 model = user.pictureUri.ifBlank { R.drawable.pfp },
                 placeholder = painterResource(id = R.drawable.pfp),
                 contentDescription = "profile",
                 contentScale = ContentScale.Crop,
                 modifier =
-                Modifier
-                    .clip(CircleShape)
-                    .size(45.dp)
-                    .clickable {
-                        onUserClicked()
-                    },
+                    Modifier
+                        .clip(CircleShape)
+                        .size(45.dp)
+                        .clickable {
+                            onUserClicked()
+                        },
             )
         }
         Column {
@@ -766,10 +780,9 @@ fun UserComment(
                 )
             }
 
-           Text(
-               text = comment.text,
-           )
-
+            Text(
+                text = comment.text,
+            )
         }
     }
 }

@@ -94,13 +94,14 @@ fun CreateScreen(
     val uiState = viewModel.uiState
     var locationName by remember { mutableStateOf("") }
 
-
     LaunchedEffect(Unit) {
         viewModel.onLocationChange(context.getCurrentLocation())
     }
 
     // Decode the latitude and longitude to an address.
-    GetLocationName(location = uiState.location, onLocationName = {locationName = it}, fullAddress = true)
+    GetLocationName(location = uiState.location, onLocationName = {
+        locationName = it
+    }, fullAddress = true)
 
     // Activity to launch the image picker when the user clicks the select image button.
     val imagePicker =
@@ -212,10 +213,9 @@ fun CreateScreen(
                     onClick = {
                         showBottomSheet = false
                         showSampleList = true
-
                     },
                     icon = Icons.Filled.Animation,
-                    iconDescription = "sample"
+                    iconDescription = "sample",
                 )
                 Spacer(Modifier.height(20.dp))
             }
@@ -225,7 +225,7 @@ fun CreateScreen(
                 onDismissRequest = {
                     showSampleList = false
                 },
-                onSelect = viewModel::onSelectFile
+                onSelect = viewModel::onSelectFile,
             )
         }
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -273,7 +273,7 @@ fun CreateScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(start = 50.dp, end = 50.dp)
+                                .padding(start = 50.dp, end = 50.dp),
                     ) {
                         Icon(Icons.Filled.Upload, contentDescription = "upload")
                         Spacer(modifier = Modifier.width(10.dp))
@@ -282,12 +282,12 @@ fun CreateScreen(
                     Button(
                         onClick = {
                             navController.navigateAR(uiState.uri.toString())
-
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 50.dp, end = 50.dp),
-                        enabled = uiState.uri != null
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 50.dp, end = 50.dp),
+                        enabled = uiState.uri != null,
                     ) {
                         Icon(Icons.Filled.ViewInAr, contentDescription = "preview")
                         Spacer(modifier = Modifier.width(10.dp))
@@ -440,8 +440,8 @@ fun SampleModelList(
                 "https://sceneview.github.io/assets/models/Spoons.glb",
                 "https://sceneview.github.io/assets/models/FiatPunto.glb",
                 "https://sceneview.github.io/assets/models/ClearCoat.glb",
-                "https://sceneview.github.io/assets/models/MaterialSuite.glb"
-            )
+                "https://sceneview.github.io/assets/models/MaterialSuite.glb",
+            ),
         )
     }
 

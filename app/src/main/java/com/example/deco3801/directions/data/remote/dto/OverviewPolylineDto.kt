@@ -7,11 +7,11 @@ import com.example.deco3801.directions.domain.model.OverviewPolyline
 
 // Creates String of points as transfer object
 data class OverviewPolylineDto(
-    val points: String
-){
-    fun toOverviewPolyline(): OverviewPolyline{
+    val points: String,
+) {
+    fun toOverviewPolyline(): OverviewPolyline {
         return OverviewPolyline(
-            points = points
+            points = points,
         )
     }
 }

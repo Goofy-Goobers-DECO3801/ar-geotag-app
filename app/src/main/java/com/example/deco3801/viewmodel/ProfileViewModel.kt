@@ -24,7 +24,6 @@ enum class FollowSheetState {
     FOLLOWING,
 }
 
-
 /**
  * Contains the logic and state for the profile screen
  *
@@ -78,7 +77,6 @@ class ProfileViewModel @Inject constructor(
             _follows.value = users
             _followSheetState.value = FollowSheetState.FOLLOWERS
         }
-
     }
 
     /**
@@ -123,7 +121,6 @@ class ProfileViewModel @Inject constructor(
                 _isFollowing.value = true
             }
         }
-
     }
 
     /**
@@ -148,7 +145,6 @@ class ProfileViewModel @Inject constructor(
         artRepo.detachListener()
         Log.d("PROFILE", "detaching listeners")
     }
-
 
     /**
      * Update the user state to [user]

@@ -33,14 +33,14 @@ suspend fun Context.getCurrentLocation(): Location? {
 /**
  * Checks if the app has location permissions.
  */
-fun Context.hasLocationPermissions() = ActivityCompat.checkSelfPermission(
-    this,
-    Manifest.permission.ACCESS_FINE_LOCATION,
-) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-    this,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
-) == PackageManager.PERMISSION_GRANTED
-
+fun Context.hasLocationPermissions() =
+    ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED
 
 /**
  * Convert a [CameraPosition] to a radius in meters.

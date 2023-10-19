@@ -50,10 +50,11 @@ fun ExpandableAsyncImage(
         model = model,
         contentDescription = contentDescription,
         placeholder = placeholder,
-        modifier = modifier
-            .clickable {
-                expandImage = true
-            },
+        modifier =
+            modifier
+                .clickable {
+                    expandImage = true
+                },
         fallback = fallback,
         onLoading = onLoading,
         onSuccess = onSuccess,
@@ -62,12 +63,12 @@ fun ExpandableAsyncImage(
         contentScale = contentScale,
         alpha = alpha,
         colorFilter = colorFilter,
-        filterQuality = filterQuality
+        filterQuality = filterQuality,
     )
 
     if (expandImage) {
         Dialog(
-            onDismissRequest = { expandImage = false }
+            onDismissRequest = { expandImage = false },
         ) {
             // Content of the enlarged image here
             AsyncImage(
@@ -82,7 +83,7 @@ fun ExpandableAsyncImage(
                 contentScale = ContentScale.Fit,
                 alpha = alpha,
                 colorFilter = colorFilter,
-                filterQuality = filterQuality
+                filterQuality = filterQuality,
             )
         }
     }

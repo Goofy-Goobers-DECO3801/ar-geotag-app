@@ -1,6 +1,5 @@
 package com.example.deco3801.artdisplay.presentation
 
-
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
@@ -16,12 +15,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,7 +61,7 @@ fun ArtDisplayScreen(
     navigator: NavHostController,
     artAddress: String,
     artDisplayViewModel: ArtDisplayViewModel,
-    artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE
+    artDisplayMode: PlacementMode = PlacementMode.BEST_AVAILABLE,
 ) {
     val nodes = remember { mutableStateListOf<ArNode>() }
 
@@ -63,7 +69,6 @@ fun ArtDisplayScreen(
         artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.FetchAsset(artAddress))
     }
 
-    val context = LocalContext.current
     var sceneView by remember { mutableStateOf<ArSceneView?>(null) }
     val viewState by artDisplayViewModel.state.collectAsState()
     val uiAction by artDisplayViewModel.uiAction.collectAsState()
@@ -90,18 +95,18 @@ fun ArtDisplayScreen(
         topBar = {
             TopBar(
                 navController = navigator,
-                canNavigateBack = true
+                canNavigateBack = true,
             ) {
                 IconButton(onClick = { onRefresh(modelNode, viewState) }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = "Refresh",
                         tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(36.dp),
                     )
                 }
             }
-        }
+        },
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             ARScene(
@@ -117,36 +122,24 @@ fun ArtDisplayScreen(
                     session.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                     session.depthMode = Config.DepthMode.AUTOMATIC
                     session.instantPlacementEnabled = true
-
                 },
                 onFrame = { arFrame ->
                     // Update planes state to determine whether or not to UI message
                     // WARNING: DO NOT PASS ARSceneView/ARFrame TO ViewModel to avoid memory leaks
-                    artDisplayViewModel.dispatchEvent(ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes))
+                    artDisplayViewModel.dispatchEvent(
+                        ArtDisplayUIEvent.OnPlanesUpdated(arFrame.updatedPlanes),
+                    )
                 },
                 onTap = {
                     // User tapped in the AR view
                     if (!viewState.modelPlaced) {
                         sceneView?.let {
                             modelNode = onUserTap(it, viewState, artDisplayMode)
-
                         }
                     }
                 },
-                onTrackingFailureChanged = { trackingFailureReason ->
-                    """
-                 You can also show a tracking failure message if needed
-
-                 virtualTryOnViewModel.dispatchEvent(
-                      VirtualTryOnUIEvent.OnTrackingFailure(
-                            trackingFailureReason
-                    )
-                 )
-                """
-                }
+                onTrackingFailureChanged = {},
             )
-
-
 
             if (viewState.downloadingAsset) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -154,34 +147,36 @@ fun ArtDisplayScreen(
                 if (!viewState.modelPlaced) {
                     if (viewState.readyToPlaceModel) {
                         Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp, bottom = 100.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(colorResource(id = R.color.translucent)),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(16.dp, bottom = 100.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(colorResource(id = R.color.translucent)),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 "Ready to place model!",
                                 modifier = Modifier.padding(16.dp),
                                 textAlign = TextAlign.Center,
-                                color = Color.White
+                                color = Color.White,
                             )
                         }
                     } else {
                         Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp, bottom = 100.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(colorResource(id = R.color.translucent)),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(16.dp, bottom = 100.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(colorResource(id = R.color.translucent)),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 "Tap now for instant placement or scan the area with your camera for best placement!",
                                 modifier = Modifier.padding(16.dp),
                                 textAlign = TextAlign.Center,
-                                color = Color.White
+                                color = Color.White,
                             )
                         }
                     }
@@ -197,33 +192,34 @@ fun ArtDisplayScreen(
                 }
                 if (viewState.modelPlaced && modelNode != null) {
                     Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp, bottom = 100.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(colorResource(id = R.color.translucent)),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(16.dp, bottom = 100.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(colorResource(id = R.color.translucent)),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             "Use one finger to move and two fingers to rotate the model!",
                             modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center,
-                            color = Color.White
+                            color = Color.White,
                         )
                     }
                 }
-
-
             }
         }
-
     }
 }
 
 /*
  * Removes and destroys any placed model and resets the state for replacing
  */
-private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
+private fun onRefresh(
+    modelNode: ArModelNode?,
+    viewState: ArtDisplayViewState?,
+) {
     modelNode?.destroy()
     viewState?.modelPlaced = false
     viewState?.downloadingAsset = false
@@ -232,12 +228,14 @@ private fun onRefresh(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) 
 /*
  * Updates the state of view model and returns to previous screen
  */
-private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
+private fun onReturn(
+    modelNode: ArModelNode?,
+    viewState: ArtDisplayViewState?,
+) {
     onRefresh(modelNode, viewState)
     viewState?.readyToPlaceModel = false
     viewState?.modelAsset = null
 }
-
 
 /*
  * Return the AR model to be placed
@@ -245,25 +243,26 @@ private fun onReturn(modelNode: ArModelNode?, viewState: ArtDisplayViewState?) {
 fun onUserTap(
     sceneView: ArSceneView,
     viewState: ArtDisplayViewState,
-    artDisplayMode: PlacementMode
+    artDisplayMode: PlacementMode,
 ): ArModelNode {
     // Try to avoid placing 3d models in ViewModel to avoid memory leaks since ARNodes contains context
     ProgressbarState.showIndeterminateProgressbar()
-    val tmp = ArModelNode(
-        sceneView.engine, artDisplayMode
-    ).apply {
-        viewState.modelAsset?.let {
-            Log.d("ARMODEL", it)
-            loadModelGlbAsync(
-                glbFileLocation = it,
-                scaleToUnits = 1f,
-                centerOrigin = Position(-0.5f),
-                onLoaded = {
-                    ProgressbarState.resetProgressbar()
-                },
-            )
+    val tmp =
+        ArModelNode(
+            sceneView.engine,
+            artDisplayMode,
+        ).apply {
+            viewState.modelAsset?.let {
+                Log.d("ARMODEL", it)
+                loadModelGlbAsync(
+                    glbFileLocation = it,
+                    scaleToUnits = 1f,
+                    centerOrigin = Position(-0.5f),
+                    onLoaded = {
+                        ProgressbarState.resetProgressbar()
+                    },
+                )
+            }
         }
-    }
     return tmp
-
 }

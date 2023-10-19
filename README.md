@@ -1,12 +1,12 @@
 # geoARt
 
-This product focuses on solving issues identified within the problem space encompassing the
-disconnect between the community and their public spaces, and creating respectful, non-invasive ways
-of making these environments interesting, stimulating, and exciting areas. It focuses specifically
-on the role of urban art in livening communal areas, and the varying societal perspectives
-surrounding its use.
+GeoARt facilitates augmented reality geotagged art and user connectivity through a social-media style mobile app.
+Users can upload any form of artwork they wish, from phone images to 3D models, and make a post that is geotagged
+to their location. Other users can then view these posts at the location in augmented reality and leave their thoughts
+in likes and comments. Users have full control over their privacy and personal details through geoARt’s user profile
+management, managing who can see their posts and authentication.
 
-## Installing the app
+## Installing the app onto your Android Phone
 
 The built APK to be installed on android phones can be downloaded from
 our [website](https://deco3801-goofygoobers.uqcloud.net/).
@@ -221,3 +221,4 @@ the code:
 - [10] OpenAI, "ChatGPT," 2023. [Online]. Available: <https://chat.openai.com/>. [Accessed 15 October 2023].
 - [11] Sceneview, "Assets," 2023. [Online]. Available: <https://sceneview.github.io/assets/>. [Accessed 10 October 2023].
 - [12] Taochok, "How to Resize a Bitmap in Android?," Stackoverflow, 6 March 2015. [Online]. Available: https://stackoverflow.com/a/28893299. [Accessed 18 October 2023].
+- [13] J. Sambells, "Decoding polylines from google maps directions api with java," 27 May 2010. [Online]. Available: https://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java. [Accessed 2 October 2023].

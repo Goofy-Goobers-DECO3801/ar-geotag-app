@@ -8,11 +8,9 @@ import com.google.ar.core.Plane
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 
 // AR screen was modelled after below sample
 // Blizl, “Blizl/sceneview-android,” 21 September 2023. [Online]. Available: https://github.com/Blizl/sceneview-android/tree/blizl/ecommerce-compose-mvvm-app.
-
 
 /*
  * Class representing Art display view model
@@ -22,9 +20,10 @@ class ArtDisplayViewModel : ViewModel() {
         MutableStateFlow(ArtDisplayViewState())
     val state: StateFlow<ArtDisplayViewState> = _state
 
-    private val _uiAction: MutableStateFlow<ArtDisplayUIAction?> = MutableStateFlow(
-        null
-    )
+    private val _uiAction: MutableStateFlow<ArtDisplayUIAction?> =
+        MutableStateFlow(
+            null,
+        )
     val uiAction: StateFlow<ArtDisplayUIAction?> = _uiAction
 
     private var remoteAsset: String? = null
@@ -71,7 +70,7 @@ class ArtDisplayViewModel : ViewModel() {
         if (!state.value.readyToPlaceModel && updatedPlanes.isNotEmpty()) {
             // Only update once so that user sees that the model can be placed
             setState(
-                state.value.copy(readyToPlaceModel = updatedPlanes.isNotEmpty())
+                state.value.copy(readyToPlaceModel = updatedPlanes.isNotEmpty()),
             )
         }
     }
@@ -81,12 +80,11 @@ class ArtDisplayViewModel : ViewModel() {
         setState(
             state.value.copy(
                 modelPlaced = true,
-            )
+            ),
         )
 
         setUiAction(ArtDisplayUIAction.ShowModalPlaced)
     }
-
 
     /*
      * Set state attribute to [newState]
@@ -106,11 +104,9 @@ class ArtDisplayViewModel : ViewModel() {
                 modelPlaced = false,
                 readyToPlaceModel = false,
                 downloadingAsset = false,
-                modelAsset = null
-            )
+                modelAsset = null,
+            ),
         )
-
-
     }
 
     /*
@@ -130,5 +126,4 @@ class ArtDisplayViewModel : ViewModel() {
             _uiAction.emit(null)
         }
     }
-
 }

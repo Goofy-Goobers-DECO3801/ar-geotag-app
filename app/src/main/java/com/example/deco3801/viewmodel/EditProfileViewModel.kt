@@ -13,23 +13,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-
 /**
  * Contains the logic and state for the EditProfileScreen
  */
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepo: UserRepository,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ) : AppViewModel() {
-
     private var _loading = false
 
     private val _newUser = MutableStateFlow(User())
     val newUser: StateFlow<User> = _newUser
 
     private val _oldUser = MutableStateFlow(User())
-
 
     init {
         launchCatching {
@@ -48,7 +45,7 @@ class EditProfileViewModel @Inject constructor(
 
         _loading = true
         launchCatching(
-            onFailure = { _loading = false }
+            onFailure = { _loading = false },
         ) {
             userRepo.editUser(_oldUser.value, _newUser.value)
             SnackbarManager.showMessage("Updated profile!")
@@ -90,5 +87,4 @@ class EditProfileViewModel @Inject constructor(
     fun onBioChange(value: String) {
         _newUser.value = _newUser.value.copy(bio = value)
     }
-
 }
